@@ -128,7 +128,12 @@
 
 % *** SPECIALIZED LIST PACKAGES ***
 %
-%\usepackage{algorithmic}
+\usepackage[longend,linesnumbered]{algorithm2e}
+\usepackage{algorithmic}
+
+\newcommand{\code}[1]{\lstset{basicstyle=\small\tt}\lstinline£#1£\lstset
+{basicstyle=\footnotesize\tt}}
+
 % algorithmic.sty was written by Peter Williams and Rogerio Brito.
 % This package provides an algorithmic environment fo describing algorithms.
 % You can use the algorithmic environment in-text or within a figure
@@ -287,7 +292,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{A Model-Driven Optimization Approach\\to Solving Partial Differential Equations}
+\title{Domain-Driven Code Transformation\\for Solving Partial Differential Equations}
 
 
 \author{\IEEEauthorblockN{Fabio Luporini}
@@ -378,6 +383,8 @@ An unstructured mesh represents a discretization of the equation domain into two
 
 In this paper, we describe a model-driven optimization strategy for a class of kernels used in Finite Element computations. The working set of these kernels is usually small enough to fit the L1 cache, and definitely fits the L2 cache when high-order methods are employed to improve the accuracy of the solution. However, the latter case is not considered in our work. This implies that main actors of our study will be register allocation and instruction-level parallelism, especially in the form of SIMD vectorisation. 
 
+
+
 %the focus of optimization should be on managing registers, exploiting ILP in its various forms, and reducing loop overhead
 
 
@@ -396,12 +403,76 @@ In this paper, we describe a model-driven optimization strategy for a class of k
 
 %Here we discuss about the computational characteristics of computational science kernels. Briefly cite op2 kernels. Emphasis on Finite Element Assembly. Generalization and formalization of a Finite Element Assembly kernel using quadrature representation.
 
-\section{A Model-driven Approach to Code Optimization}
+\section{A Domain-Driven Approach to Code Optimization}
 %All the work done in the polyhedral model should be useful, but our kernels fit L1, so they need special attention for what concerns key aspects like managing registers, exploiting ILP in its various forms, and reducing loop overhead. 
 %Follows a description of code transformations using our compiler-driven approach. 
 
+\clearpage
+
 \section{The PyOP2 Compiler}
 %Design and structure of the PyOP2 Compiler. Show the steps through which the IR is transformed (need to cite Firedrake here). Briefly describe a simple cost model that allows us to prune the space of code transformations.
+
+The compiler structure
+
+\begin{algorithm}[h]
+\caption{The PyOP2 compiler.}
+\label{algo:PyOP2Compiler}
+  \textbf{The PyOP2 Compiler}\\
+  \KwIn{ast, wrapper, isa}
+  \KwOut{code}
+// Analyze ast and build optimization plan \\
+it\_space = analyze(ast) \\
+\If{\KwSty{not} it\_space}{
+  ast.apply\_inter\_kernel\_vectorization(wrapper)
+  \Return{ast.from\_ast\_to\_c()}
+}
+plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs) \\
+~~\\
+// Optimize ast based on plan \\
+ast.apply\_licm() \\
+\If{plan.sz\_split}{
+  ast.split(plan.sz\_split)
+}
+\If{plan.uaj\_factor}{
+  ast.vr\_tile(plan.uaj\_factor)
+}
+ast.padding() \\
+ast.data\_align() \\
+\Return{ast.from\_ast\_to\_c()}
+\end{algorithm}
+
+
+The compiler cost model. Used to find out tile size and split size.
+
+\begin{algorithm}[h]
+\caption{Procedure to estimate the most suitable unroll-and-jam factor and/or split size.}
+\label{algo:applyCostModel}
+  \textbf{Algorithm: ApplyCostModel}\\
+  \KwIn{n\_inner\_arrays, n\_regs}
+  \KwOut{uaj\_factor, sz\_split}
+
+%// roundup(A, B) is a function that rounds A up to the nearest multiple of B \\ 
+
+sz\_split = 0 \\
+// Compute spltting factor \\
+\While{n\_inner\_arrays $>$ n\_regs}{
+  n\_inner\_arrays = n\_inner\_arrays / 2 \\
+  sz\_split = sz\_split + 1 
+}
+
+n\_inner\_regs = n\_regs / 2 \\
+\If{n\_inner\_arrays $>$ n\_inner\_regs \KwSty{or} sz\_split $>$ 0}{
+  // Rely on autovectorization, as there might be not enough registers to improve performance by tiling \\
+  \Return{$<$sz\_split, 0$>$}
+}
+
+// Compute unroll-and-jam factor for vector-register tiling \\
+n\_regs\_avail = n\_regs - n\_inner\_arrays \\
+uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
+\Return{$<$sz\_split, uaj\_factor$>$}
+\end{algorithm}
+
+\clearpage
 
 \section{Performance Evaluation}
 %Performance evaluation. We show all of the results got so far and we explain them. We demonstrate the claim that a compiler-driven approach is necessary to obtain maximum performance. Also, our results prove that current vendor compilers still have notable limitations, despite optimizing loop nests that are 1) affine, 2) have no stencil, and 3) ?
