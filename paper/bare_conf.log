@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  13 FEB 2014 18:16
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  14 FEB 2014 17:40
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -166,24 +166,33 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 
 LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 382.
 
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 386.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 386.
+
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 388.
+
+
+LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 390.
+
+
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
+] [2
+
 ]
-Underfull \hbox (badness 10000) detected at line 442
+Underfull \hbox (badness 10000) detected at line 452
 [][]
  []
 
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 461.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 461.
 
-Underfull \hbox (badness 10000) detected at line 473
+Underfull \hbox (badness 10000) detected at line 483
 [][]
  []
 
-[2
+[3
 
 
 ] (./bare_conf.bbl)
@@ -198,7 +207,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[3
+[4
 
 
 ] (./bare_conf.aux)
@@ -207,23 +216,24 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2101 strings out of 495000
- 30836 string characters out of 1180492
- 111262 words of memory out of 3000000
- 5339 multiletter control sequences out of 15000+50000
+ 2103 strings out of 495000
+ 30863 string characters out of 1180492
+ 114262 words of memory out of 3000000
+ 5341 multiletter control sequences out of 15000+50000
  36872 words of font info for 67 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
- 26i,12n,25p,1391b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 26i,12n,25p,1095b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/ty
-pe1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/urw/cou
-rier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></us
-r/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texli
-ve/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/t
-imes/utmri8a.pfb>
-Output written on bare_conf.pdf (3 pages, 84590 bytes).
+pe1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/a
+msfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.
+pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texm
+f-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/typ
+e1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a
+.pfb>
+Output written on bare_conf.pdf (4 pages, 99742 bytes).
 PDF statistics:
- 41 PDF objects out of 1000 (max. 8388607)
+ 48 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
