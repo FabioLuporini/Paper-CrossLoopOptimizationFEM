@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  14 FEB 2014 17:40
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  17 FEB 2014 18:38
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -93,9 +93,34 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \@IEEEtmpitemindent=\dimen116
 \c@IEEEbiography=\count90
 \@IEEEtranrubishbin=\box26
-) (/usr/share/texmf-texlive/tex/latex/algorithm2e/algorithm2e.sty
+) (/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
+\Gread@gobject=\count91
+))
+\Gin@req@height=\dimen117
+\Gin@req@width=\dimen118
+)
+(/usr/share/texmf-texlive/tex/latex/algorithm2e/algorithm2e.sty
 Package: algorithm2e 2005/10/04 v3.9 algorithms environments
-\c@AlgoLine=\count91
+\c@AlgoLine=\count92
 
 (/usr/share/texmf-texlive/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
@@ -117,32 +142,35 @@ subscribe by emailing sympa@lirmm.fr with 'subscribe <list> <firstname name>'
 \skiplength=\skip48
 \algomargin=\skip49
 \skipalgocfslide=\skip50
-\algowidth=\dimen117
-\inoutsize=\dimen118
-\inoutline=\dimen119
+\algowidth=\dimen119
+\inoutsize=\dimen120
+\inoutline=\dimen121
 \algocf@inoutbox=\box27
 \algocf@inputbox=\box28
 \AlCapSkip=\skip51
 \AlCapHSkip=\skip52
 \algocf@capbox=\box29
-\c@algocfline=\count92
-\c@algocf=\count93
+\c@algocfline=\count93
+\c@algocf=\count94
 \algocf@algoframe=\box30
 \algocf@algobox=\box31
 ) (/usr/share/texmf-texlive/tex/latex/algorithms/algorithmic.sty
 Package: algorithmic 2009/08/24 v0.1 Document Style `algorithmic'
-
-(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
-Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
-\KV@toks@=\toks15
-)
-\c@ALC@unique=\count94
-\c@ALC@line=\count95
-\c@ALC@rem=\count96
-\c@ALC@depth=\count97
+\c@ALC@unique=\count95
+\c@ALC@line=\count96
+\c@ALC@rem=\count97
+\c@ALC@depth=\count98
 \ALC@tlm=\skip53
 \algorithmicindent=\skip54
-) (./bare_conf.aux)
+)
+(./bare_conf.aux
+
+LaTeX Warning: Label `fig_first_case' multiply defined.
+
+
+LaTeX Warning: Label `fig_first_case' multiply defined.
+
+)
 \openout1 = `bare_conf.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 291.
@@ -157,10 +185,22 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 291.
 LaTeX Font Info:    ... okay on input line 291.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 291.
 LaTeX Font Info:    ... okay on input line 291.
+ (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count99
+\scratchdimen=\dimen122
+\scratchbox=\box32
+\nofMPsegments=\count100
+\nofMParguments=\count101
+\everyMPshowfont=\toks16
+\MPscratchCnt=\count102
+\MPscratchDim=\dimen123
+\MPnumerator=\count103
+\everyMPtoPDFconversion=\toks17
+)
 LaTeX Font Info:    Try loading font information for OT1+pcr on input line 380.
 
-
-(/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
+ (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
@@ -195,7 +235,28 @@ Underfull \hbox (badness 10000) detected at line 483
 [3
 
 
-] (./bare_conf.bbl)
+]
+
+pdfTeX warning: pdflatex (file ./Pictures/helmholtz-normalized.pdf): PDF inclus
+ion: found PDF version <1.5>, but at most version <1.4> allowed
+<Pictures/helmholtz-normalized.pdf, id=19, 361.35pt x 216.81pt>
+File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
+
+<use Pictures/helmholtz-normalized.pdf>
+
+pdfTeX warning: pdflatex (file ./Pictures/advdiff-normalized.pdf): PDF inclusio
+n: found PDF version <1.5>, but at most version <1.4> allowed
+<Pictures/advdiff-normalized.pdf, id=21, 361.35pt x 216.81pt>
+File: Pictures/advdiff-normalized.pdf Graphic file (type pdf)
+
+<use Pictures/advdiff-normalized.pdf>
+
+pdfTeX warning: pdflatex (file ./Pictures/burgers-normalized.pdf): PDF inclusio
+n: found PDF version <1.5>, but at most version <1.4> allowed
+<Pictures/burgers-normalized.pdf, id=23, 361.35pt x 216.81pt>
+File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
+
+<use Pictures/burgers-normalized.pdf> (./bare_conf.bbl)
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -209,17 +270,20 @@ Before submitting the final camera ready copy, remember to:
 
 [4
 
-
-] (./bare_conf.aux)
+ <./Pictures/helmholtz-normalized.pdf> <./Pictures/advdiff-normalized.pdf> <./P
+ictures/burgers-normalized.pdf>] (./bare_conf.aux)
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: There were multiply-defined labels.
+
  ) 
 Here is how much of TeX's memory you used:
- 2103 strings out of 495000
- 30863 string characters out of 1180492
- 114262 words of memory out of 3000000
- 5341 multiletter control sequences out of 15000+50000
+ 2770 strings out of 495000
+ 39819 string characters out of 1180492
+ 123342 words of memory out of 3000000
+ 5983 multiletter control sequences out of 15000+50000
  36872 words of font info for 67 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
  26i,12n,25p,1095b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -231,9 +295,9 @@ pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texm
 f-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/typ
 e1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a
 .pfb>
-Output written on bare_conf.pdf (4 pages, 99742 bytes).
+Output written on bare_conf.pdf (4 pages, 133320 bytes).
 PDF statistics:
- 48 PDF objects out of 1000 (max. 8388607)
+ 78 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

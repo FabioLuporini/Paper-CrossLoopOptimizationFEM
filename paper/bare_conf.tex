@@ -62,7 +62,7 @@
 % *** GRAPHICS RELATED PACKAGES ***
 %
 \ifCLASSINFOpdf
-  % \usepackage[pdftex]{graphicx}
+  \usepackage[pdftex]{graphicx}
   % declare the path(s) where your graphic files are
   % \graphicspath{{../pdf/}{../jpeg/}}
   % and their extensions so you won't have to specify these with
@@ -486,6 +486,34 @@ uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
 
 \section{Performance Evaluation}
 %Performance evaluation. We show all of the results got so far and we explain them. We demonstrate the claim that a compiler-driven approach is necessary to obtain maximum performance. Also, our results prove that current vendor compilers still have notable limitations, despite optimizing loop nests that are 1) affine, 2) have no stencil, and 3) ?
+\begin{figure}[h]
+\centerline{\includegraphics[scale=0.7]{Pictures/helmholtz-normalized.pdf}
+\label{fig_first_case}}
+\caption{Helmholtz}
+\end{figure}
+
+\begin{figure}[h]
+\centerline{\includegraphics[scale=0.7]{Pictures/advdiff-normalized.pdf}
+\label{fig_first_case}}
+\caption{Advection-Diffusion}
+\end{figure}
+
+\begin{figure}[h]
+\centerline{\includegraphics[scale=0.7]{Pictures/burgers-normalized.pdf}
+\label{fig_first_case}}
+\caption{Burgers}
+\end{figure}
+
+
+%\begin{figure*}[!t]
+%\centerline{\subfloat[Case I]\includegraphics[width=2.5in]{Pictures/helmholtz-normalized.pdf}%
+%\label{fig_first_case}}
+%\hfil
+%\subfloat[Case II]{\includegraphics[width=2.5in]{Pictures/advdiff-normalized.pdf}%
+%\label{fig_second_case}}}
+%\caption{Simulation results}
+%\label{fig_sim}
+%\end{figure*}
 
 \section{Related Work}
 %Show other work of people working on optimizations for computational science kernels. Inter-kernel vectorisation paper from Istvan. Previous work in FFC. Spencer et-al + Shin et. al. attempt to optimize computations that could benefit from using BLAS, but in practice they don't, due to the very small dgemm operations employed. Saday's model-driven SIMD code vectorisation for the tensor contraction engine.
