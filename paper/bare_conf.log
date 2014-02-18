@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  18 FEB 2014 11:51
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  18 FEB 2014 16:06
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -173,18 +173,18 @@ LaTeX Warning: Label `fig_first_case' multiply defined.
 )
 \openout1 = `bare_conf.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 291.
-LaTeX Font Info:    ... okay on input line 291.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 292.
+LaTeX Font Info:    ... okay on input line 292.
  (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count99
@@ -198,51 +198,56 @@ LaTeX Font Info:    ... okay on input line 291.
 \MPnumerator=\count103
 \everyMPtoPDFconversion=\toks17
 )
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 380.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 381.
 
  (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
-LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 382.
+LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 383.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 386.
+(Font)              <7> on input line 387.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 386.
+(Font)              <5> on input line 387.
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 388.
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 389.
 
 
-LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 390.
+LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 391.
 
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 418.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 418.
 
-LaTeX Warning: Citation `quadrature1' on page 2 undefined on input line 414.
-
-
-LaTeX Warning: Citation `quadrature 2' on page 2 undefined on input line 414.
-
-
-LaTeX Warning: Reference `helmholtz-code' on page 2 undefined on input line 416
-.
-
-
-LaTeX Warning: Reference `burgers-code' on page 2 undefined on input line 416.
-
-[2
-
-]
-Underfull \hbox (badness 10000) detected at line 458
+Underfull \hbox (badness 10000) detected at line 435
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 489
+Underfull \hbox (badness 10000) detected at line 470
+[][]
+ []
+
+
+LaTeX Warning: Citation `quadrature1' on page 2 undefined on input line 472.
+
+
+LaTeX Warning: Citation `quadrature 2' on page 2 undefined on input line 472.
+
+[2]
+Underfull \hbox (badness 10000) detected at line 516
+[][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 547
 [][]
  []
 
@@ -253,21 +258,21 @@ Underfull \hbox (badness 10000) detected at line 489
 
 pdfTeX warning: pdflatex (file ./Pictures/helmholtz-normalized.pdf): PDF inclus
 ion: found PDF version <1.5>, but at most version <1.4> allowed
-<Pictures/helmholtz-normalized.pdf, id=19, 361.35pt x 216.81pt>
+<Pictures/helmholtz-normalized.pdf, id=21, 361.35pt x 216.81pt>
 File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/helmholtz-normalized.pdf>
 
 pdfTeX warning: pdflatex (file ./Pictures/advdiff-normalized.pdf): PDF inclusio
 n: found PDF version <1.5>, but at most version <1.4> allowed
-<Pictures/advdiff-normalized.pdf, id=21, 361.35pt x 216.81pt>
+<Pictures/advdiff-normalized.pdf, id=23, 361.35pt x 216.81pt>
 File: Pictures/advdiff-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/advdiff-normalized.pdf>
 
 pdfTeX warning: pdflatex (file ./Pictures/burgers-normalized.pdf): PDF inclusio
 n: found PDF version <1.5>, but at most version <1.4> allowed
-<Pictures/burgers-normalized.pdf, id=23, 361.35pt x 216.81pt>
+<Pictures/burgers-normalized.pdf, id=25, 361.35pt x 216.81pt>
 File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/burgers-normalized.pdf> (./bare_conf.bbl)
@@ -294,24 +299,25 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 2774 strings out of 495000
- 39876 string characters out of 1180492
- 123342 words of memory out of 3000000
- 5987 multiletter control sequences out of 15000+50000
- 36872 words of font info for 67 fonts, out of 3000000 for 9000
+ 2789 strings out of 495000
+ 40020 string characters out of 1180492
+ 127358 words of memory out of 3000000
+ 5995 multiletter control sequences out of 15000+50000
+ 39773 words of font info for 74 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
- 26i,12n,25p,1245b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 26i,12n,25p,1390b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/ty
-pe1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/a
-msfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.
-pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texm
-f-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/typ
-e1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a
-.pfb>
-Output written on bare_conf.pdf (4 pages, 135330 bytes).
+pe1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/a
+msfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/c
+msy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy9.pfb></
+usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-te
+xlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/ur
+w/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
+</usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on bare_conf.pdf (4 pages, 154632 bytes).
 PDF statistics:
- 78 PDF objects out of 1000 (max. 8388607)
+ 86 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
