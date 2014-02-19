@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  18 FEB 2014 18:06
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  19 FEB 2014 16:52
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -198,23 +198,23 @@ LaTeX Font Info:    ... okay on input line 292.
 \MPnumerator=\count103
 \everyMPtoPDFconversion=\toks17
 )
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 381.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 388.
 
  (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
-LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 383.
+LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 390.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 387.
+(Font)              <7> on input line 394.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 387.
+(Font)              <5> on input line 394.
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 389.
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 396.
 
 
-LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 391.
+LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 398.
 
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
@@ -222,37 +222,35 @@ LaTeX Warning: Citation `firedrake-code' on page 1 undefined on input line 391.
 
 ]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 409.
+(Font)              <9> on input line 416.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 409.
+(Font)              <6> on input line 416.
 
-Underfull \hbox (badness 10000) detected at line 426
+Underfull \hbox (badness 10000) detected at line 433
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 461
+Underfull \hbox (badness 10000) detected at line 468
 [][]
  []
 
 
-LaTeX Warning: Citation `quadrature1' on page 2 undefined on input line 463.
+LaTeX Warning: Citation `quadrature1' on page 2 undefined on input line 470.
 
 
-LaTeX Warning: Citation `quadrature 2' on page 2 undefined on input line 463.
+LaTeX Warning: Citation `quadrature 2' on page 2 undefined on input line 470.
 
 
-LaTeX Warning: Citation `nek5000' on page 2 undefined on input line 469.
+LaTeX Warning: Citation `nek5000' on page 2 undefined on input line 476.
 
-[2] [3
-
-]
-Underfull \hbox (badness 10000) detected at line 509
+[2] [3]
+Underfull \hbox (badness 10000) detected at line 531
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 540
+Underfull \hbox (badness 10000) detected at line 562
 [][]
  []
 
@@ -310,7 +308,7 @@ Here is how much of TeX's memory you used:
  5998 multiletter control sequences out of 15000+50000
  39773 words of font info for 74 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
- 26i,12n,25p,1266b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 26i,12n,25p,1491b,315s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/ty
 pe1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/a
@@ -320,7 +318,7 @@ usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-te
 xlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/ur
 w/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
 </usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (5 pages, 159196 bytes).
+Output written on bare_conf.pdf (5 pages, 162349 bytes).
 PDF statistics:
  89 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
