@@ -105,7 +105,7 @@
 
 % *** MATH PACKAGES ***
 %
-%\usepackage[cmex10]{amsmath}
+\usepackage[cmex10]{amsmath}
 % A popular package from the American Mathematical Society that provides
 % many useful and powerful commands for dealing with mathematics. If using
 % it, be sure to load this package with the cmex10 option to ensure that
@@ -534,25 +534,53 @@ $\rbrace$
 
 
 % Autovectorizable LICM -> show code snippet?
+\subsection{Auto-vectorizable Loop-invariant Code Motion}
 From inspection of the codes in Figures~\ref{code:helmholtz} and~\ref{code:burgers}, it can be noticed that the computation of $A$ involves evaluating many sub-expressions that depend on two iteration variables only. Since symbols in most of these sub-expressions are read-only variables, there is ample space for loop-invariant code motion ($licm$). Vendor compilers apply $licm$, although not in the systematic way we need in our assembly kernels. We want to overcome two deficiencies that both $icc$ and $gcc$ have. First, these compilers can identify sub-expressions that are invariant with respect to the innermost loop only. This is an issue for sub-expressions depending on $i$-$k$ only, which are not automatically lifted. Second, the hoisted code is scalar, i.e. it is not subjected to auto-vectorization. We work around these limitations by doing source-level $licm$. In addition, we pre-compute all values that an invariant sub-expression assumes along the fastest varying dimension. This is implemented by introducing temporary arrays and new loops in the nest. At the price of both extra memory for storing temporaries and reduced register locality, the gain is that lifted terms can be auto-vectorized, because part of an inner loop. Note that given the short trip counts of our loops, it is important to achieve auto-vectorization of hoisted terms in order to minimize the percentage of scalar instructions, which can be otherwise significant.
 
 % Padding and Data Alignment
+\subsection{Padding and Data Alignment}
 Auto-vectorization of assembly code that computes $A$ can be less effective if data are not aligned and if the length of the innermost loop is small compared to the hardware vector length ($vl$). Data alignment is enforced in two steps. Initially, both arrays and matrices are allocated to addresses that are multiples of $vl$. Then, matrices are padded by rounding the number of columns to the nearest multiple of $vl$. For example, assume the original size of a matrix is 3$\times$3, and the underlying machine possesses AVX, which implies $vl=4$ since a vector register is 256 bits long and our kernels use double-precision floating-point values (64 bits). Then, the padded matrix on this architecture is 3$\times$4. The compiler is explicitly informed about data alignment using a suitable pragma. Padding of all matrices involved in the evaluation of the stiffness matrix allows us to safely round the loop trip count to the nearest multiple of $vl$. This avoids the introduction of a remainder (scalar) loop from the compiler, which would be responsible for inefficient vectorization. 
 
 % Register allocation and register locality
+\subsection{Toward Improving Register Locality}
 One notable problem assembly kernels are exposed to concerns register allocation and register locality. The critical situation occurs when loop trip counts and number of accessed matrices along the inner dimensions are such that available vector registers are under-utilized. Due to a kernel's working set fitting the L1 cache, it is remarkably important to optimize register management in order to maximize performance. Canonical optimizations, such as loop interchange, unroll, unroll-and-jam and register tiling are typically employed to deal with this problem. In our compiler we support these optimizations either by means of explicit source code transformation (interchange, register tiling, unroll-and-jam) or indirectly advising the compiler through standard pragmas (unroll). With register tiling, in particular, we slice the innermost loop into rectangular blocks of identical size (except the ``reminder'' block), and we apply unrolling to individual blocks to expose ILP. 
+
+% remember: op vectorization PLUS unroll and jam !!
+\subsection{Outer-product Vectorization}
+Register tiles along both inner dimensions can be determined as well. Our domain-driven strategy, based on the observation that the evaluation of the stiffness matrix can be reduced to a summation of outer products along the $j$ and $k$ dimensions, aims at optimizing register reuse, in terms of both minimization of load operations and achievement of larger tiles, over a canonical implementation. If we consider the code snippet in Figure~\ref{code:helmholtz-licm}, we can notice that the computation of $A$ is abstractly expressible as
+\begin{equation}
+\label{outer-product}
+A_{jk} = \sum_{\substack{
+  x \in B' \subseteq B \\ 
+  y \in B'' \subseteq B}} 
+x_j\cdot y_k ~~~~~~ j,k = 0,...,4
+\end{equation}
+where $B$ is the set of all matrices (or temporaries) accessed in the kernel, whereas $B'$ and $B''$ are generic problem-dependent subsets. Without loss of generality, the presence of other constant or $i$-dependent variables can be momentarily neglected. Note that regardless of the specific input problem, the assembly computation is always reducible to this form. Figure~\ref{fig:vect-by-vect} illustrates how we can evaluate 16 elements ($j,k=0,...,4$) of the stiffness matrix with just 2 vector registers. Once the first four entries are evaluated, values in a register are shuffled and the same product is performed again. Standard compiler auto-vectorization ($gcc$ and $icc$), instead, would employ 5 registers, 4 of them target of a broadcast operation (i.e. ``splatting'' a single value over the four locations of an AVX register) along the outer dimension, and 1 of a load operation along the inner dimension. In our outer-product vectorization ($op$-$vect$), the 4 broadcast accesses to the L1 cache are avoided by an initial load and by shuffling. More importantly, we avoid using $vf$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vf$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers. 
+
+\begin{figure}[h]
+\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect.pdf}
+\label{fig:vect-by-vect}}
+\caption{Outer-product vectorization by permuting values in a vector register.}
+\end{figure}
+
+The storage layout of $A$, however, is incorrect after the application of $op$-$vect$. We efficiently restore it with a sequence of vector shuffle following the pattern highlighted in Figure~\ref{fig:restore-layout}, executed just once outside of the $ijk$ loop nest. The generated pseudo-code for the simple Helmholtz problem when using $op$-$vect$ is shown in Figure~\ref{code:helmholtz-opvect}.
+
+\begin{figure}[h]
+\centerline{\includegraphics[scale=0.7]{Pictures/vect-restore.pdf}
+\label{fig:vect-restore}}
+\caption{Restoring the storage layout after $op$-$vect$.}
+\end{figure}
 
 %are sufficiently large to prevent register reuse along the innermost dimension $k$. A combination of the two scenarios is also possible. We want to exploit the small size of the iteration space and the structure of the computation to optimize register management.
 
 % Splitting
-In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension, i.e. basis function matrices, temporaries introduced by $licm$ and constants, is larger than the available registers on the CPU, it is likely to obtain poor register reuse. For example, applying $licm$ to Burgers on a 3D mesh needs 33 temporaries for the $ijk$ loop order, and compiler's hoisting of invariant loads out of the $k$ loop can be inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the stiffness matrix $A$ into multiple sub-expressions; an example, for the simpler Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. Splitting an expression has, in general, several drawbacks. Firstly, it increases the number of accesses to $A$ proportially to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation (e.g. the product $det*W3[i]$ is performed times number of sub-expressions in the code of Figure~\ref{code:helmholtz-split}). Finally, it might affect register locality, although this is not the case of the Helmholtz example: for instance, the same matrix could be accessed in different sub-expressions, requiring a proportional number of loads be performed. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself are based upon heuristics that aim at minimizing the aforementioned issues.
-
-% remember: op vectorization PLUS unroll and jam !!
+\subsection{Assembly splitting}
+In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension, i.e. basis function matrices, temporaries introduced by $licm$ and constants, is larger than the available registers on the CPU, it is likely to obtain poor register reuse. For example, applying $licm$ to Burgers on a 3D mesh needs 33 temporaries for the $ijk$ loop order, and compiler's hoisting of invariant loads out of the $k$ loop can be inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the stiffness matrix $A$ into multiple sub-expressions; an example, for the simpler Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. Splitting an expression has, in general, several drawbacks. Firstly, it increases the number of accesses to $A$ proportially to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation (e.g. the product $det*W3[i]$ is performed times number of sub-expressions in the code of Figure~\ref{code:helmholtz-split}). Finally, it might affect register locality, although this is not the case of the Helmholtz example: for instance, the same matrix could be accessed in different sub-expressions, requiring a proportional number of loads be performed. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
 
 \begin{algorithm}[t]
 \small
 \caption{Local assembly code generated by FFC for a Helmholtz problem (2D mesh, Lagrange $p=2$ elements). The padding, data alignment, $licm$ and $op$-$vect$ optimizations are applied. Data alignment and padding relate to an AVX machine. In this specific case, the unroll-and-jam factor is 1.}
-\label{code:helmholtz-split}
+\label{code:helmholtz-opvect}
 \KwSty{void} helmholtz(double A[8][8], double **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~// Declaration of basis function matrices \\
@@ -590,6 +618,11 @@ In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain ar
 ~~$\rbrace$\\
 $\rbrace$
 \end{algorithm}
+
+
+
+
+Table~\ref{} summarizes ...
 
 % mention (obvious) composability
 
