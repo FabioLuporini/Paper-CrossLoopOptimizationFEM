@@ -5,8 +5,8 @@
 % manually specify the path to it like:
 % \documentclass[conference]{../sty/IEEEtran}
 
-
-
+% TODO: ok?
+\usepackage{tabulary}
 
 
 % Some very useful LaTeX packages include:
@@ -296,30 +296,55 @@
 \title{A Domain-Specific Optimizing Compiler\\for Solving Partial Differential Equations}
 
 
-\author{\IEEEauthorblockN{Fabio Luporini}
-\IEEEauthorblockA{Department of Computing\\
-Imperial College London\\
-London, UK\\
-Email: f.luporini12@imperial.ac.uk}
-\and
-\IEEEauthorblockN{Florian Rathgeber}
-\IEEEauthorblockA{Department of Computing\\
-Imperial College London\\
-London, UK\\
-Email: f.rathgeber10@imperial.ac.uk}
-\and
-\IEEEauthorblockN{David Ham}
-\IEEEauthorblockA{Department of Computing\\
-Imperial College London\\
-London, UK\\
-Email: d.ham@imperial.ac.uk}}
-
+%\author{\IEEEauthorblockN{Fabio Luporini}
+%\IEEEauthorblockA{Department of Computing\\
+%Imperial College London\\
+%London, UK\\
+%Email: f.luporini12@imperial.ac.uk}
+%\and
+%\IEEEauthorblockN{Florian Rathgeber}
+%\IEEEauthorblockA{Department of Computing\\
+%Imperial College London\\
+%London, UK\\
+%Email: f.rathgeber10@imperial.ac.uk}
+%\and
+%\IEEEauthorblockN{Ana Lucia Varbanescu}
+%\IEEEauthorblockA{Department of Computing\\
+%Imperial College London\\
+%London, UK\\
+%Email: a.l.varbanescu@uva.nl}
+%\and
+%\IEEEauthorblockN{Gheorghe-Teodor Bercea}
+%\IEEEauthorblockA{Department of Computing\\
+%Imperial College London\\
+%London, UK\\
+%Email: gb308@doc.ic.ac.uk}
 %\and
 %\IEEEauthorblockN{Paul H. J. Kelly}
 %\IEEEauthorblockA{Department of Computing\\
 %Imperial College London\\
 %London, UK\\
 %Email: p.kelly@imperial.ac.uk}
+%\and
+%\IEEEauthorblockN{David Ham}
+%\IEEEauthorblockA{Department of Computing\\
+%Imperial College London\\
+%London, UK\\
+%Email: d.ham@imperial.ac.uk}}
+
+\author{\IEEEauthorblockN{Fabio Luporini\IEEEauthorrefmark{1},
+Florian Rathgeber\IEEEauthorrefmark{1},
+Ana Lucia Varbanescu\IEEEauthorrefmark{2}, 
+Gheorghe-Teodor Bercea\IEEEauthorrefmark{1}, \\
+Paul H. J. Kelly\IEEEauthorrefmark{1},
+and
+David Ham\IEEEauthorrefmark{1}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}Imperial College London, Department of Computing,\\
+\IEEEauthorrefmark{2}TU Delft, Faculty of Engineering, Mathematics and Computer Science (EWI)\\
+\IEEEauthorrefmark{1}\{f.luporini12$|$f.rathgeber10$|$gheorghe-teodor.bercea08$|$p.kelly$|$d.ham@imperial.ac.uk\}@imperial.ac.uk,\\
+\IEEEauthorrefmark{2}a.l.varbanescu@uva.nl
+}
+}
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -391,7 +416,7 @@ An unstructured mesh discretizes the domain of the equation into two- or three-d
 
 OP2, as well as Lizst~\cite{lizst}, adopt a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (or ``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Together with the indirections problem, kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in FEM.
 
-We focus on Finite Element Local Assembly (``assembly'', in the following), a fundamental step of FEM that covers an important fraction of the overall computation run-time, typically in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when (very) high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 60, with a minimum value of 3, depending on the order of the method). With such small kernels, our work focuses on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorisation. 
+We focus on Finite Element Local Assembly (``assembly'', in the following), a fundamental step of FEM that covers an important fraction of the overall computation run-time, typically in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 60, with a minimum value of 3, depending on the order of the method). With such small kernels, our work focuses on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorisation. 
 
 Our study is conducted in the context of Firedrake, a multilayered system for the automated solution of PDEs through FEM. PDEs are written in Firedrake using a domain-specific language called Unified Form Language (UFL). The high-level UFL notation is used by the Fenics Form Compiler (FFC) to produce assembly kernels. At the core of Firedrake~\cite{firedrake} there is PyOP2~\cite{pyop2ics} - a python implementation of the OP2 abstraction - which triggers compilation of kernels using an available vendor compiler, and eventually manages parallel execution over the unstructured mesh. We exploit the domain knowledge and the structure inherent to FFC's assembly kernels to develop an optimizing compiler for all problems that are expressible in Firedrake. 
 
@@ -539,7 +564,7 @@ From inspection of the codes in Figures~\ref{code:helmholtz} and~\ref{code:burge
 
 % Padding and Data Alignment
 \subsection{Padding and Data Alignment}
-Auto-vectorization of assembly code that computes $A$ can be less effective if data are not aligned and if the length of the innermost loop is small compared to the hardware vector length ($vl$). Data alignment is enforced in two steps. Initially, both arrays and matrices are allocated to addresses that are multiples of $vl$. Then, matrices are padded by rounding the number of columns to the nearest multiple of $vl$. For example, assume the original size of a matrix is 3$\times$3, and the underlying machine possesses AVX, which implies $vl=4$ since a vector register is 256 bits long and our kernels use double-precision floating-point values (64 bits). Then, the padded matrix on this architecture is 3$\times$4. The compiler is explicitly informed about data alignment using a suitable pragma. Padding of all matrices involved in the evaluation of the stiffness matrix allows us to safely round the loop trip count to the nearest multiple of $vl$. This avoids the introduction of a remainder (scalar) loop from the compiler, which would be responsible for inefficient vectorization. 
+Auto-vectorization of assembly code that computes $A$ can be less effective if data are not aligned and if the length of the innermost loop is smaller than the vector length ($vl$). Data alignment is enforced in two steps. Initially, both arrays and matrices are allocated to addresses that are multiples of $vl$. Then, matrices are padded by rounding the number of columns to the nearest multiple of $vl$. For example, assume the original size of a matrix is 3$\times$3, and the underlying machine possesses AVX, which implies $vl=4$ since a vector register is 256 bits long and our kernels use double-precision floating-point values (64 bits). Then, a padded matrix on this architecture will be 3$\times$4. The compiler is explicitly informed about data alignment using a suitable pragma. Padding of all matrices involved in the evaluation of the stiffness matrix allows us to safely round the loop trip count to the nearest multiple of $vl$. This avoids the introduction of a remainder (scalar) loop from the compiler, which would be responsible for inefficient vectorization. 
 
 % Register allocation and register locality
 \subsection{Toward Improving Register Locality}
@@ -555,7 +580,7 @@ A_{jk} = \sum_{\substack{
   y \in B'' \subseteq B}} 
 x_j\cdot y_k ~~~~~~ j,k = 0,...,4
 \end{equation}
-where $B$ is the set of all matrices (or temporaries) accessed in the kernel, whereas $B'$ and $B''$ are generic problem-dependent subsets. Without loss of generality, the presence of other constant or $i$-dependent variables can be momentarily neglected. Note that regardless of the specific input problem, the assembly computation is always reducible to this form. Figure~\ref{fig:vect-by-vect} illustrates how we can evaluate 16 elements ($j,k=0,...,4$) of the stiffness matrix with just 2 vector registers. Once the first four entries are evaluated, values in a register are shuffled and the same product is performed again. Standard compiler auto-vectorization ($gcc$ and $icc$), instead, would employ 5 registers, 4 of them target of a broadcast operation (i.e. ``splatting'' a single value over the four locations of an AVX register) along the outer dimension, and 1 of a load operation along the inner dimension. In our outer-product vectorization ($op$-$vect$), the 4 broadcast accesses to the L1 cache are avoided by an initial load and by shuffling. More importantly, we avoid using $vf$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vf$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers. 
+where $B$ is the set of all matrices (or temporaries) accessed in the kernel, whereas $B'$ and $B''$ are generic problem-dependent subsets. Without loss of generality, the presence of other constant or $i$-dependent variables can be momentarily neglected. Note that regardless of the specific input problem, the assembly computation is always reducible to this form. Figure~\ref{fig:vect-by-vect} illustrates how we can evaluate 16 elements ($j,k=0,...,4$) of the stiffness matrix with just 2 vector registers. Once the first four entries are evaluated, values in a register are shuffled and the same product is performed again. Standard compiler auto-vectorization ($gcc$ and $icc$), instead, would employ 5 registers, 4 of them target of a broadcast operation (i.e. ``splatting'' a single value over the four locations of an AVX register) along the outer dimension, and 1 of a load operation along the inner dimension. In our outer-product vectorization ($op$-$vect$), the 4 broadcast accesses to the L1 cache are avoided by an initial load and by shuffling. More importantly, we avoid using $vl$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vl$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers. 
 
 \begin{figure}[h]
 \centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect.pdf}
@@ -567,7 +592,7 @@ The storage layout of $A$, however, is incorrect after the application of $op$-$
 
 \begin{figure}[h]
 \centerline{\includegraphics[scale=0.7]{Pictures/vect-restore.pdf}
-\label{fig:vect-restore}}
+\label{fig:restore-layout}}
 \caption{Restoring the storage layout after $op$-$vect$.}
 \end{figure}
 
@@ -622,16 +647,38 @@ $\rbrace$
 
 
 
-Table~\ref{} summarizes ...
+Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}
+
+\begin{table}[h]
+\begin{tabulary}{1.0\columnwidth}{|C|C|}
+\hline
+Name (Abbreviation) & Parameter \\\hline\hline
+Auto-vectorizable Loop-invariant code motion ($licm$) &   \\ \hline
+Padding &  \\ \hline
+Data Alignment & \\ \hline
+Loop interchange      & loops  \\ \hline
+Loop unrolling  & unroll factor \\ \hline
+Register tiling & tile size \\ \hline
+Outer-product vectorization ($op$-$vect$) & tile size \\ \hline
+Assembly splitting ($split$) & split point, split factor \\ \hline
+\end{tabulary}
+\caption{Overview of code transformations for FFC-generated assembly kernels.}
+\label{table:code-transformations}
+\end{table}
 
 % mention (obvious) composability
 
-\clearpage
-
 \section{The PyOP2 Compiler}
+\label{sec:pyop2-compiler}
 %Design and structure of the PyOP2 Compiler. Show the steps through which the IR is transformed (need to cite Firedrake here). Briefly describe a simple cost model that allows us to prune the space of code transformations.
 
-The compiler structure
+Our approach to solving partial differential equations is based on domain-specific languages and libraries. Fenics and Firedrake provide the high-level Unified Form Language (UFL) to write problems in a notation resembling mathematical equations (``forms''). In Fenics, this specification is translated by a form compiler (FFC) into C code, which is subsequently just-in-time compiled and executed on the target architecture. In Firedrake we adopt a completely different approach. We think that FFC should produce a high-level representation of a Finite Element assembly kernel, and should abstract from the specific details of the underlying architecture. We have modified FFC, therefore, to build Abstract Syntax Trees (AST), rather than C code. ASTs are then passed to PyOP2, which implements the core of Firedrake, where parallel execution over the unstructured mesh is managed. We have developed a compiler that, given an AST conformed to the PyOP2 specification (such as those produced by the new FFC), can apply the transformations described in Section~\ref{sec:code-transf} and, subsequently, generate C code. The C representation is eventually just-in-time compiled for one of the backends that are currently supported by PyOP2, namely OpenMP, MPI, OpenMP+MPI, CUDA, OpenCL. Our compiler is now fully integrated with PyOP2, so it supports any kind of problem expressible in UFL. 
+
+The PyOP2 compiler has been thought to support a range of higher-level languages and applications that concern the resolution of partial differential equations; Firedrake, in terms of its components UFL and FFC, is one of them. We believe, however, that many of the discussed optimizations are generalizable and applicable to non-Firedrake kernels. For example, it is always the case that Finite Element Local Assembly using a quadrature strategy leads to a (more or less complex) loop nest and outer-product-like computations. 
+
+The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. The AST is initially inspected, looking for the presence of an iteration space and other domain-specific information provided by the upper layer. If the kernel is just a sequence of statement, then so-called inter-kernel vectorization, in which a non-affine loop over mesh elements is vectorized, can be applied. This might be useful in a Finite Volume context, where kernels often lack an iteration space representing the bulk of the computation. Although not implemented yet, Reguly et. al. already proved the profitability of this technique in the OP2 framework~\cite{reguly-inter-kernel}. If, instead, an iteration space is found and the underlying platform is a GPU, the compiler seeks fully-parallel loops (i.e. loops whose iterations can be executed in any order without need for synchronization) and hoist them out at the level of the ``wrapper'' (i.e. the function that iterates over mesh elements and invokes the kernel); this is aimed at optimizing register management on GPUs. 
+
+If the backend is a CPU and the AST comes from Firedrake, then a sequence of optimization steps are executed. A cost model, currently under development, is queried to estimate the potential gain (or loss) coming from the $split$ and $op$-$vect$ transformations. The model suggests a split factor and a tile size. Firstly, the compiler applies $licm$, which introduces temporary arrays, and on top of this padding and data alignment are enforced. These three transformations are always applied, since they usually provide a significant performance improvement (this will be shown in Section~\ref{sec:perf-results}). Finally, $split$ and/or $op$-$vect$ take place.  
 
 \begin{algorithm}[t]
 \caption{The PyOP2 compiler.}
@@ -643,25 +690,28 @@ The compiler structure
 it\_space = analyze(ast) \\
 \If{\KwSty{not} it\_space}{
   ast.apply\_inter\_kernel\_vectorization(wrapper)
-  \Return{ast.from\_ast\_to\_c()}
+  \Return{wrapper + ast.from\_ast\_to\_c()}
+}
+\If{isa.backend == gpu}{
+  \If{it\_space}{ast.extract\_iteration\_space(wrapper)}
+  \Return{wrapper + ast.from\_ast\_to\_c()}
 }
 plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs) \\
-~~\\
 // Optimize ast based on plan \\
 ast.apply\_licm() \\
+ast.padding() \\
+ast.data\_align() \\
 \If{plan.sz\_split}{
   ast.split(plan.sz\_split)
 }
 \If{plan.uaj\_factor}{
   ast.vr\_tile(plan.uaj\_factor)
 }
-ast.padding() \\
-ast.data\_align() \\
-\Return{ast.from\_ast\_to\_c()}
+\Return{wrapper + ast.from\_ast\_to\_c()}
 \end{algorithm}
 
 
-The compiler cost model. Used to find out suitable unroll-and-jam factor and split size.
+The cost model ..... TODO
 
 \begin{algorithm}[t]
 \caption{Procedure to estimate the most suitable unroll-and-jam factor and/or split size.}

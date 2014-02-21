@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  21 FEB 2014 12:07
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  21 FEB 2014 16:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -102,12 +102,29 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \@IEEEtmpitemindent=\dimen116
 \c@IEEEbiography=\count90
 \@IEEEtranrubishbin=\box26
-) (/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/graphicx.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/tabulary/tabulary.sty
+Package: tabulary 2008/12/01 v0.9 tabulary package (DPC)
+
+(/usr/local/texlive/2012/texmf-dist/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen117
+\extrarowheight=\dimen118
+\NC@list=\toks15
+\extratabsurround=\skip44
+\backup@length=\skip45
+)
+\TY@count=\count91
+\TY@linewidth=\dimen119
+\tymin=\dimen120
+\tymax=\dimen121
+\TY@tablewidth=\dimen122
+)
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
-\KV@toks@=\toks15
+\KV@toks@=\toks16
 )
 (/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
@@ -129,14 +146,14 @@ Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 (/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
-\Gread@gobject=\count91
+\Gread@gobject=\count92
 ))
-\Gin@req@height=\dimen117
-\Gin@req@width=\dimen118
+\Gin@req@height=\dimen123
+\Gin@req@width=\dimen124
 )
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2000/07/18 v2.13 AMS math features
-\@mathmargin=\skip44
+\@mathmargin=\skip46
 
 For additional information on amsmath, use the `?' option.
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amstext.sty
@@ -144,57 +161,57 @@ Package: amstext 2000/06/29 v2.01
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0
-\@emptytoks=\toks16
-\ex@=\dimen119
+\@emptytoks=\toks17
+\ex@=\dimen125
 ))
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d
-\pmbraise@=\dimen120
+\pmbraise@=\dimen126
 )
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
-\inf@bad=\count92
+\inf@bad=\count93
 LaTeX Info: Redefining \frac on input line 211.
-\uproot@=\count93
-\leftroot@=\count94
+\uproot@=\count94
+\leftroot@=\count95
 LaTeX Info: Redefining \overline on input line 307.
-\classnum@=\count95
-\DOTSCASE@=\count96
+\classnum@=\count96
+\DOTSCASE@=\count97
 LaTeX Info: Redefining \ldots on input line 379.
 LaTeX Info: Redefining \dots on input line 382.
 LaTeX Info: Redefining \cdots on input line 467.
 \Mathstrutbox@=\box27
 \strutbox@=\box28
-\big@size=\dimen121
+\big@size=\dimen127
 LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
-\macc@depth=\count97
-\c@MaxMatrixCols=\count98
+\macc@depth=\count98
+\c@MaxMatrixCols=\count99
 \dotsspace@=\muskip10
-\c@parentequation=\count99
-\dspbrk@lvl=\count100
-\tag@help=\toks17
-\row@=\count101
-\column@=\count102
-\maxfields@=\count103
-\andhelp@=\toks18
-\eqnshift@=\dimen122
-\alignsep@=\dimen123
-\tagshift@=\dimen124
-\tagwidth@=\dimen125
-\totwidth@=\dimen126
-\lineht@=\dimen127
-\@envbody=\toks19
-\multlinegap=\skip45
-\multlinetaggap=\skip46
-\mathdisplay@stack=\toks20
+\c@parentequation=\count100
+\dspbrk@lvl=\count101
+\tag@help=\toks18
+\row@=\count102
+\column@=\count103
+\maxfields@=\count104
+\andhelp@=\toks19
+\eqnshift@=\dimen128
+\alignsep@=\dimen129
+\tagshift@=\dimen130
+\tagwidth@=\dimen131
+\totwidth@=\dimen132
+\lineht@=\dimen133
+\@envbody=\toks20
+\multlinegap=\skip47
+\multlinetaggap=\skip48
+\mathdisplay@stack=\toks21
 LaTeX Info: Redefining \[ on input line 2666.
 LaTeX Info: Redefining \] on input line 2667.
 )
 (/usr/local/texlive/2012/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
 Package: algorithm2e 2008/00/00 v3.10 algorithms environments
-\c@AlgoLine=\count104
+\c@AlgoLine=\count105
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
@@ -222,44 +239,44 @@ Package `algorithm2e' Release 4.01 -- december 14 2009 --
 subscribe by emailing sympa@lirmm.fr with 'subscribe <list> <firstname name>'
 - Author: Christophe Fiorio (fiorio@lirmm.fr)
 ********************************************************
-\skiptotal=\skip47
-\skiplinenumber=\skip48
-\skiprule=\skip49
-\skiphlne=\skip50
-\skiptext=\skip51
-\skiplength=\skip52
-\algomargin=\skip53
-\skipalgocfslide=\skip54
-\algowidth=\dimen128
-\inoutsize=\dimen129
-\inoutline=\dimen130
-\interspacetitleruled=\dimen131
-\interspacealgoruled=\dimen132
-\interspacetitleboxruled=\dimen133
+\skiptotal=\skip49
+\skiplinenumber=\skip50
+\skiprule=\skip51
+\skiphlne=\skip52
+\skiptext=\skip53
+\skiplength=\skip54
+\algomargin=\skip55
+\skipalgocfslide=\skip56
+\algowidth=\dimen134
+\inoutsize=\dimen135
+\inoutline=\dimen136
+\interspacetitleruled=\dimen137
+\interspacealgoruled=\dimen138
+\interspacetitleboxruled=\dimen139
 \algocf@inoutbox=\box29
 \algocf@inputbox=\box30
-\AlCapSkip=\skip55
-\AlCapHSkip=\skip56
+\AlCapSkip=\skip57
+\AlCapHSkip=\skip58
 \algocf@nlbox=\box31
 \algocf@hangingbox=\box32
 \algocf@capbox=\box33
-\algoheightruledefault=\skip57
-\algoheightrule=\skip58
-\algotitleheightruledefault=\skip59
-\algotitleheightrule=\skip60
-\c@algocfline=\count105
-\c@algocfproc=\count106
-\c@algocf=\count107
+\algoheightruledefault=\skip59
+\algoheightrule=\skip60
+\algotitleheightruledefault=\skip61
+\algotitleheightrule=\skip62
+\c@algocfline=\count106
+\c@algocfproc=\count107
+\c@algocf=\count108
 \algocf@algoframe=\box34
 \algocf@algobox=\box35
 ) (/usr/local/texlive/2012/texmf-dist/tex/latex/algorithms/algorithmic.sty
 Package: algorithmic 2009/08/24 v0.1 Document Style `algorithmic'
-\c@ALC@unique=\count108
-\c@ALC@line=\count109
-\c@ALC@rem=\count110
-\c@ALC@depth=\count111
-\ALC@tlm=\skip61
-\algorithmicindent=\skip62
+\c@ALC@unique=\count109
+\c@ALC@line=\count110
+\c@ALC@rem=\count111
+\c@ALC@depth=\count112
+\ALC@tlm=\skip63
+\algorithmicindent=\skip64
 )
 (./bare_conf.aux
 
@@ -285,17 +302,17 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 292.
 LaTeX Font Info:    ... okay on input line 292.
  (/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count112
-\scratchdimen=\dimen134
+\scratchcounter=\count113
+\scratchdimen=\dimen140
 \scratchbox=\box36
-\nofMPsegments=\count113
-\nofMParguments=\count114
-\everyMPshowfont=\toks21
-\MPscratchCnt=\count115
-\MPscratchDim=\dimen135
-\MPnumerator=\count116
-\makeMPintoPDFobject=\count117
-\everyMPtoPDFconversion=\toks22
+\nofMPsegments=\count114
+\nofMParguments=\count115
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count116
+\MPscratchDim=\dimen141
+\MPnumerator=\count117
+\makeMPintoPDFobject=\count118
+\everyMPtoPDFconversion=\toks23
 ) (/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
 )
@@ -344,92 +361,104 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 388.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <11> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7.69997> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5.5> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 381.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 381.
+
+
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 381.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 413.
 
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
-LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 390.
+LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 415.
 
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 394.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 394.
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 396.
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 421.
 
 [1{/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6.25002> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 416.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 441.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 416.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 416.
+(Font)              <9> on input line 441.
 
 
-LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 470.
+LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 495.
 
-[2] [3] <Pictures/vect-by-vect.pdf, id=22, 361.35pt x 283.0575pt>
+[2] [3] <Pictures/vect-by-vect.pdf, id=23, 361.35pt x 283.0575pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 
 <use Pictures/vect-by-vect.pdf>
-Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 562.
+Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 587.
 (pdftex.def)             Requested size: 216.81168pt x 169.8358pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-
-LaTeX Warning: Reference `fig:restore-layout' on page 4 undefined on input line
- 566.
-
-<Pictures/vect-restore.pdf, id=23, 304.13625pt x 281.55188pt>
+<Pictures/vect-restore.pdf, id=24, 304.13625pt x 281.55188pt>
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 570.
+Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 595.
 (pdftex.def)             Requested size: 212.8939pt x 197.08496pt.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 571.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
-
-LaTeX Warning: Reference `' on page 5 undefined on input line 625.
-
-[5
-
-] [6
+Underfull \vbox (badness 3657) has occurred while \output is active []
 
 
-] <Pictures/helmholtz-normalized.pdf, id=533, 361.35pt x 216.81pt>
+
+LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
+ 679.
+
+[5] [6
+
+] <Pictures/helmholtz-normalized.pdf, id=534, 361.35pt x 216.81pt>
 File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/helmholtz-normalized.pdf>
 Package pdftex.def Info: Pictures/helmholtz-normalized.pdf used on input line 7
-01.
+51.
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
-<Pictures/advdiff-normalized.pdf, id=534, 361.35pt x 216.81pt>
+<Pictures/advdiff-normalized.pdf, id=535, 361.35pt x 216.81pt>
 File: Pictures/advdiff-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/advdiff-normalized.pdf>
-Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 707
+Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 757
 .
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
-<Pictures/burgers-normalized.pdf, id=535, 361.35pt x 216.81pt>
+<Pictures/burgers-normalized.pdf, id=536, 361.35pt x 216.81pt>
 File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/burgers-normalized.pdf>
-Package pdftex.def Info: Pictures/burgers-normalized.pdf used on input line 713
+Package pdftex.def Info: Pictures/burgers-normalized.pdf used on input line 763
 .
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
  (./bare_conf.bbl)
@@ -463,13 +492,13 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4127 strings out of 493488
- 59941 string characters out of 3141327
- 151643 words of memory out of 3000000
- 7379 multiletter control sequences out of 15000+200000
- 42818 words of font info for 80 fonts, out of 3000000 for 9000
+ 4272 strings out of 493488
+ 61860 string characters out of 3141327
+ 158016 words of memory out of 3000000
+ 7513 multiletter control sequences out of 15000+200000
+ 47043 words of font info for 87 fonts, out of 3000000 for 9000
  960 hyphenation exceptions out of 8191
- 38i,11n,28p,1829b,397s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,14n,28p,1829b,397s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/tex
@@ -481,15 +510,16 @@ ve/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2012/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2012/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2012/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2012/texmf-di
-st/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts
-/type1/urw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw
-/times/utmbi8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/ut
-mr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (7 pages, 440966 bytes).
+dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2012/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2012/texmf-dist
+/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/t
+ype1/urw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/t
+imes/utmbi8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr
+8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on bare_conf.pdf (7 pages, 455438 bytes).
 PDF statistics:
- 618 PDF objects out of 1000 (max. 8388607)
- 342 compressed objects within 4 object streams
+ 622 PDF objects out of 1000 (max. 8388607)
+ 345 compressed objects within 4 object streams
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 
