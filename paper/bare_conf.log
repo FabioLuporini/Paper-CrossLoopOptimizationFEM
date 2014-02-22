@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  21 FEB 2014 16:17
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  22 FEB 2014 13:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -384,61 +384,78 @@ File: omsptm.fd
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 381.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 413.
 
 
-(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/ot1pcr.fd
-File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-)
-
-LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 415.
+LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 413.
 
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 421.
+LaTeX Warning: Citation `PoCC' on page 1 undefined on input line 419.
+
+
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 423.
 
 [1{/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6.25002> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 441.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 443.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 441.
+(Font)              <9> on input line 443.
 
 
-LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 495.
+LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 497.
 
-[2] [3] <Pictures/vect-by-vect.pdf, id=23, 361.35pt x 283.0575pt>
+
+LaTeX Warning: Citation `ufl' on page 2 undefined on input line 499.
+
+
+LaTeX Warning: Citation `firedrake' on page 2 undefined on input line 499.
+
+
+LaTeX Warning: Citation `uflacs' on page 2 undefined on input line 499.
+
+
+LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 499.
+
+
+LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 499.
+
+[2] [3] <Pictures/vect-by-vect.pdf, id=22, 361.35pt x 283.0575pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 
 <use Pictures/vect-by-vect.pdf>
-Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 587.
+Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 589.
 (pdftex.def)             Requested size: 216.81168pt x 169.8358pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<Pictures/vect-restore.pdf, id=24, 304.13625pt x 281.55188pt>
+<Pictures/vect-restore.pdf, id=23, 304.13625pt x 281.55188pt>
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 595.
+Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 597.
 (pdftex.def)             Requested size: 212.8939pt x 197.08496pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
-Underfull \vbox (badness 3657) has occurred while \output is active []
 
+LaTeX Warning: Citation `ffc' on page 5 undefined on input line 677.
 
 
 LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
  679.
 
+
+LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 679
+.
+
 [5] [6
 
-] <Pictures/helmholtz-normalized.pdf, id=534, 361.35pt x 216.81pt>
+] <Pictures/helmholtz-normalized.pdf, id=533, 361.35pt x 216.81pt>
 File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/helmholtz-normalized.pdf>
@@ -446,7 +463,7 @@ Package pdftex.def Info: Pictures/helmholtz-normalized.pdf used on input line 7
 51.
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
-<Pictures/advdiff-normalized.pdf, id=535, 361.35pt x 216.81pt>
+<Pictures/advdiff-normalized.pdf, id=534, 361.35pt x 216.81pt>
 File: Pictures/advdiff-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/advdiff-normalized.pdf>
@@ -454,7 +471,7 @@ Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 757
 .
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
-<Pictures/burgers-normalized.pdf, id=536, 361.35pt x 216.81pt>
+<Pictures/burgers-normalized.pdf, id=535, 361.35pt x 216.81pt>
 File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/burgers-normalized.pdf>
@@ -492,13 +509,13 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4272 strings out of 493488
- 61860 string characters out of 3141327
- 158016 words of memory out of 3000000
- 7513 multiletter control sequences out of 15000+200000
- 47043 words of font info for 87 fonts, out of 3000000 for 9000
+ 4244 strings out of 493488
+ 61408 string characters out of 3141327
+ 160016 words of memory out of 3000000
+ 7490 multiletter control sequences out of 15000+200000
+ 46528 words of font info for 85 fonts, out of 3000000 for 9000
  960 hyphenation exceptions out of 8191
- 38i,14n,28p,1829b,397s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,14n,28p,1829b,399s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/tex
@@ -512,14 +529,14 @@ xmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2012/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2012/texmf-
 dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2012/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2012/texmf-dist
-/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/t
-ype1/urw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/t
-imes/utmbi8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr
-8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (7 pages, 455438 bytes).
+/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/typ
+e1/urw/times/utmbi8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/ti
+mes/utmr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8
+a.pfb>
+Output written on bare_conf.pdf (7 pages, 447669 bytes).
 PDF statistics:
- 622 PDF objects out of 1000 (max. 8388607)
- 345 compressed objects within 4 object streams
+ 618 PDF objects out of 1000 (max. 8388607)
+ 342 compressed objects within 4 object streams
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 
