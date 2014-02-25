@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  25 FEB 2014 14:52
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.2.9)  25 FEB 2014 17:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -424,36 +424,36 @@ LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 499.
 
 LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 499.
 
-[2] [3] <Pictures/vect-by-vect.pdf, id=22, 361.35pt x 283.0575pt>
+[2]
+
+LaTeX Warning: Citation `comdex' on page 3 undefined on input line 575.
+
+[3] <Pictures/vect-by-vect.pdf, id=22, 361.35pt x 283.0575pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 
 <use Pictures/vect-by-vect.pdf>
-Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 589.
+Package pdftex.def Info: Pictures/vect-by-vect.pdf used on input line 590.
 (pdftex.def)             Requested size: 216.81168pt x 169.8358pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
 
 <Pictures/vect-restore.pdf, id=23, 304.13625pt x 281.55188pt>
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 597.
+Package pdftex.def Info: Pictures/vect-restore.pdf used on input line 598.
 (pdftex.def)             Requested size: 212.8939pt x 197.08496pt.
+ [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
+
+LaTeX Warning: Citation `ffc' on page 5 undefined on input line 678.
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
-
-LaTeX Warning: Citation `ffc' on page 5 undefined on input line 677.
+LaTeX Warning: Citation `pyop2isc' on page 5 undefined on input line 678.
 
 
 LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
- 679.
+ 680.
 
 
-LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 679
+LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 680
 .
 
 [5] [6
@@ -463,14 +463,14 @@ File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/helmholtz-normalized.pdf>
 Package pdftex.def Info: Pictures/helmholtz-normalized.pdf used on input line 7
-51.
+52.
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
 <Pictures/advdiff-normalized.pdf, id=534, 361.35pt x 216.81pt>
 File: Pictures/advdiff-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/advdiff-normalized.pdf>
-Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 757
+Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 758
 .
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
 
@@ -478,7 +478,7 @@ Package pdftex.def Info: Pictures/advdiff-normalized.pdf used on input line 757
 File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/burgers-normalized.pdf>
-Package pdftex.def Info: Pictures/burgers-normalized.pdf used on input line 763
+Package pdftex.def Info: Pictures/burgers-normalized.pdf used on input line 764
 .
 (pdftex.def)             Requested size: 252.94327pt x 151.76596pt.
  (./bare_conf.bbl)
@@ -512,13 +512,13 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4245 strings out of 493488
- 61416 string characters out of 3141327
+ 4247 strings out of 493488
+ 61434 string characters out of 3141327
  160016 words of memory out of 3000000
- 7491 multiletter control sequences out of 15000+200000
+ 7493 multiletter control sequences out of 15000+200000
  46528 words of font info for 85 fonts, out of 3000000 for 9000
  960 hyphenation exceptions out of 8191
- 38i,14n,28p,1829b,399s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,14n,28p,1874b,399s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/tex
@@ -536,7 +536,7 @@ st/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2012/texmf-dist
 e1/urw/times/utmbi8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/ti
 mes/utmr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8
 a.pfb>
-Output written on bare_conf.pdf (7 pages, 447443 bytes).
+Output written on bare_conf.pdf (7 pages, 448006 bytes).
 PDF statistics:
  618 PDF objects out of 1000 (max. 8388607)
  342 compressed objects within 4 object streams
