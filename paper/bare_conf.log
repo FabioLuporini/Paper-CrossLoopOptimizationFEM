@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  26 FEB 2014 19:03
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  5 MAR 2014 15:02
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -316,79 +316,82 @@ LaTeX Warning: Citation `PoCC' on page 1 undefined on input line 419.
 
 ]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 443.
+(Font)              <9> on input line 444.
 
-Underfull \hbox (badness 10000) detected at line 460
+Underfull \hbox (badness 10000) detected at line 461
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 495
+Underfull \hbox (badness 10000) detected at line 496
 [][]
  []
 
 
-LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 497.
+LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 498.
 
 
-LaTeX Warning: Citation `ufl' on page 2 undefined on input line 499.
+LaTeX Warning: Citation `ufl' on page 2 undefined on input line 500.
 
 
-LaTeX Warning: Citation `uflacs' on page 2 undefined on input line 499.
+LaTeX Warning: Citation `uflacs' on page 2 undefined on input line 500.
 
 
-LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 499.
+LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 500.
 
 
-LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 499.
+LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 500.
 
 [2]
-Underfull \hbox (badness 10000) detected at line 535
+Underfull \hbox (badness 10000) detected at line 538
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 560
-[][]
- []
+LaTeX Warning: Citation `comdex' on page 3 undefined on input line 554.
 
-
-LaTeX Warning: Citation `comdex' on page 3 undefined on input line 575.
-
-[3] <Pictures/vect-by-vect.pdf, id=21, 361.35pt x 283.0575pt>
+[3] <Pictures/vect-by-vect.pdf, id=22, 361.35pt x 283.0575pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 
 <use Pictures/vect-by-vect.pdf>
-<Pictures/vect-restore.pdf, id=22, 304.13625pt x 281.55188pt>
+<Pictures/vect-restore.pdf, id=23, 304.13625pt x 281.55188pt>
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Underfull \hbox (badness 10000) detected at line 648
+Underfull \hbox (badness 10000) detected at line 623
 [][]
  []
+
+
+Underfull \hbox (badness 10000) detected at line 657
+[][]
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: Citation `ffc' on page 4 undefined on input line 689.
+
+
+LaTeX Warning: Citation `pyop2isc' on page 4 undefined on input line 689.
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
 
-LaTeX Warning: Citation `ffc' on page 5 undefined on input line 678.
-
-
-LaTeX Warning: Citation `pyop2isc' on page 5 undefined on input line 678.
-
-
 LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
- 682.
+ 691.
 
 
-LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 682
+LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 691
 .
 
 [5]
-Underfull \hbox (badness 10000) detected at line 716
+Underfull \hbox (badness 10000) detected at line 727
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 747
+Underfull \hbox (badness 10000) detected at line 758
 [][]
  []
 
@@ -437,10 +440,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3534 strings out of 495000
- 48583 string characters out of 1180492
- 145120 words of memory out of 3000000
- 6713 multiletter control sequences out of 15000+50000
+ 3535 strings out of 495000
+ 48599 string characters out of 1180492
+ 152129 words of memory out of 3000000
+ 6714 multiletter control sequences out of 15000+50000
  44902 words of font info for 83 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
  32i,15n,25p,1874b,342s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -458,7 +461,7 @@ nts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8
 hare/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/f
 onts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/time
 s/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (7 pages, 479716 bytes).
+Output written on bare_conf.pdf (7 pages, 480899 bytes).
 PDF statistics:
  615 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
