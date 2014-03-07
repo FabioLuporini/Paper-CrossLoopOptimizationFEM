@@ -6,8 +6,9 @@
 % \documentclass[conference]{../sty/IEEEtran}
 
 % TODO: ok?
-\usepackage{tabulary}
 
+\usepackage{tabularx}
+\usepackage{tabulary}
 
 % Some very useful LaTeX packages include:
 % (uncomment the ones you want to load)
@@ -416,7 +417,9 @@ OP2 adopts a kernel-oriented programming model, in which the computation semanti
 
 We focus on Local Assembly (``assembly'', in the following), a fundamental step of a Finite Element Method that covers an important fraction of the overall computation run-time, typically in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 40, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the Finite Element Method based on the OP2 abstraction~\cite{firedrake}.
 
-Optimization of assembly kernels is non-trivial. Polyhedral compilation could be used to improve performance; however, given the exceptionally small size of the kernels, effective register locality can be obtained only through an in-depth analysis of the data space, rather than by reasoning on the iteration space (our attempts to use PoCC's optimizations~\cite{PoCC}, especially unrolling and register tiling, did not improve performance over $icc$ compilation). BLAS routines could be employed as well, although fairly complicated code manipulation would be required, for a performance gain potentially far from the expectation. The major issue would concern automating identification and extraction of matrix-matrix multiplications from the code, which requires a non-trivial analysis of control- and data-flow. BLAS libraries are also known to perform distant from peak performance when the dimension of the matrices is small~\cite{nek5000}. In addition, register locality would be affected, since the same matrix could appear in a number of products. Hand-made BLAS-based implementations of the Helmholtz assembly kernel (illustrated later), varying the polynomial order from $p=1$ to $p=4$ and on a 3D mesh, have showed run-times worse than those achieved with our optimization strategy. 
+Optimization of assembly kernels is non-trivial. Polyhedral compilation could be used to improve performance; however, given the structure and the exceptionally small size of the kernels, effective SIMD vectorization can be obtained only through an in-depth analysis of both data and iteration space, which is not supported by state-of-the-art polyhedral compilers. BLAS routines could be employed as well, although fairly complicated control- and data-flow analysis would be required to automate identification and extraction of matrix-matrix multiplications. BLAS libraries are also known to perform distant from peak performance when the dimension of the matrices is small~\cite{nek5000}. As detailed in Section~\ref{sec:perf-results}, hand-made BLAS implementations of the Helmholtz assembly kernel (illustrated later) have run-times worse than those achieved with our optimization strategy. 
+
+%(our attempts to use PoCC's optimizations~\cite{PoCC}, especially unrolling and register tiling, did not improve performance over $icc$ compilation)
 
 %Also, tiling at the level of vector register, achievable through a non-affine transformation of the iteration space, has showed a significant performance improvement in a range of problems. .
 
@@ -656,11 +659,6 @@ In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain ar
 $\rbrace$
 \end{algorithm}
 
-
-
-
-
-
 Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}
 
 \begin{table}[h]
@@ -688,13 +686,13 @@ Assembly splitting ($split$) & split point, split factor \\ \hline
 
 Firedrake provides users with the Unified Form Language to write problems in a notation resembling mathematical equations. This high-level specification is translated by the Fenics Form Compiler~\cite{ffc} into an Abstract Syntax Tree representation of a Finite Element assembly kernel. ASTs are then passed to PyOP2~\cite{pyop2isc}, which lies at the core of Firedrake, where parallel execution over the unstructured mesh is managed. Our compiler, capable of applying the transformations described in Section~\ref{sec:code-transf}, is integrated with PyOP2: it receives FFC's ASTs as input, it introduces optimizations, and it generates C code as output, which is eventually just-in-time compiled on the underlying architecture. Because of the large number of (possibly parametric) transformations, we need a mechanism to select the most suitable optimization strategy for a given problem. Auto-tuning is not an attractive approach since it would be performed at run-time when kernel code is available. The optimization strategy is described in the following, along with an overview of our compiler.
 
-The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially, an AST is inspected, looking for the presence of iteration spaces and other domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been proved to be useful in several Finite-Volume-based applications~\cite{reguly-inter-kernel}. The second transformation step is applied if the backend is a manycore machine, like a GPU: the compiler tries to extract parallelism from inside the kernel, by partitioning loop iterations among different threads, if these are found to be independent~\cite{quadrature-cuda}. Then, an ordered sequence of optimization steps are executed. Application of $licm$ must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, the $split$, and subsequently the $op$-$vect$, transformations may be introduced. The compiler handles any possible corner cases: for example, if $op$-$vect$ is to be applied but the size of the iteration space is not a multiple of the vector length, then a reminder loop, amenable to auto-vectorization, is inserted.
+The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially, an AST is inspected, looking for the presence of iteration spaces and other domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been proved to be useful in several Finite-Volume-based applications~\cite{reguly-inter-kernel}. The second transformation step is applied if the backend is a manycore machine, like a GPU: the compiler tries to extract parallelism from inside the kernel, by partitioning loop iterations among different threads, if these are found to be independent~\cite{quadrature-cuda}. Then, an ordered sequence of optimization steps are executed. Application of $licm$ must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, the $split$, and subsequently the $op$-$vect$, transformations may be introduced. The compiler handles any possible corner cases: for example, if $op$-$vect$ is to be applied but the size of the iteration space is not a multiple of the vector length, then a reminder loop, amenable to auto-vectorization, is inserted. 
 
-Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters such as the unroll factor becomes of great importance. Autotuning might be used, although we avoid it to minimize the overhead of Firedrake's just-in-time compilation. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for our assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, newest versions of a vendor compiler like $icc$ employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying any other unroll-based optimizations.
+Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters such as the unroll factor becomes of great importance. Autotuning might be used, although we avoid it to minimize the overhead of Firedrake's just-in-time compilation. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for our assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, newest versions of a vendor compiler like $icc$ employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying loop unrolling, even if specific pragmas are added.
 
 All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations $ijk$ and $ikj$ are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required every iteration. Our experiments showed that the performance loss is greater than the gain due to accumulating increments in a register along the $i$ loop. The choice between $ijk$ and $ikj$ depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses, as outer, the loop along which the number of invariant loads is smaller so that more registers are availabe to carry out the computation of the stiffness matrix. 
 
-%TODO: NOT TRUE that kj == jk. You can have less matrices depending on j than those depending on k, meaning that less loads are needed along the j dimension.
+
 
 \begin{algorithm}[t]
 \caption{The PyOP2 compiler.}
@@ -714,14 +712,17 @@ it\_space = analyze(ast) \\
 }
 plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs) \\
 // Optimize ast based on plan \\
-ast.apply\_licm() \\
+ast.licm() \\
 ast.padding() \\
 ast.data\_align() \\
+\If{plan.permute}{
+  ast.permute\_assembly\_loops()
+}
 \If{plan.sz\_split}{
   ast.split(plan.sz\_split)
 }
 \If{plan.uaj\_factor}{
-  ast.vr\_tile(plan.uaj\_factor)
+  ast.op\_vect(plan.uaj\_factor)
 }
 \Return{wrapper + ast.from\_ast\_to\_c()}
 \end{algorithm}
@@ -759,11 +760,74 @@ uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
 
 Mention heuristic used by our compiler for splitting.. TODO
 
-\clearpage
 
 \section{Performance Evaluation}
 \label{sec:perf-results}
-%Performance evaluation. We show all of the results got so far and we explain them. We demonstrate the claim that a compiler-driven approach is necessary to obtain maximum performance. Also, our results prove that current vendor compilers still have notable limitations, despite optimizing loop nests that are 1) affine, 2) have no stencil, and 3) ?
+
+Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and the Phi. The \texttt{icc 2013} compiler was used, with optimization level \texttt{-O2} and with auto-vectorization enabled (\texttt{-xAVX} on the Sandy Bridge, and \texttt{TODO} on the Phi). Other optimization levels performed, in general, slightly worse than \texttt{-O2}. Our code transformations were evaluated in three real-world problems expressible with Firedrake:
+\begin{itemize}
+\item Helmholtz
+\item Advection-Diffusion
+\item Burgers
+\end{itemize}
+The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion the ``Diffusion'' equation is considered, which uses the same differential operators as Helmholtz. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem (i.e. the assembly is recalculated every time step based on the result of previous iterations) employing differential operators different than those of Helmholtz and Advection-Diffusion. The assembly code, partly exposed in Figure~\ref{code:burgers}, is therefore fairly different, with a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) employed. 
+
+These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method. Intuitively, the larger the element shape, the bigger is the iteration space. Triangles (2D), tetrahedron (3D), and prisms (3D) were tested. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three kind of elements is, respectively, $3$, $4$, and $6$. Moving from 2D to 3D also increases the number of basis function arrays, since conceptually the behaviour of the equation has to be approximated also along the $z$ dimension. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders, from $p=1$ to $p=4$, are tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In such a large space of problems, the size of the stiffness matrix rarely excees 20$\times$20, with a peak of 105$\times$105 in Burgers with prisms and $p=4$. 
+
+For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, both extraction of matrix-matrix multiplications from analysis of the kernel's AST and invasive re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there's a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might inhibit the performance gain. 
+
+Table~\ref{table:perf-results}
+%In addition, register locality would be affected, since the same matrix could appear in a number of products.
+
+%The problem is time-dependent, so , which intuitively increaes the computation cost. 
+
+%Also, our results prove that current vendor compilers still have notable limitations, despite optimizing loop nests that are 1) affine, 2) have no stencil, and 3) ?
+
+%\begin{table}[h]
+%\begin{tabulary}{1.0\columnwidth}{|C|C|}
+%\hline
+%Problem & shape & p & original & $licm$ & $licm$ \\\hline\hline
+%Auto-vectorizable Loop-invariant code motion ($licm$) &   \\ \hline
+%Padding &  \\ \hline
+%Data Alignment & \\ \hline
+%Loop interchange      & loops  \\ \hline
+%Loop unrolling  & unroll factor \\ \hline
+%Register tiling & tile size \\ \hline
+%Outer-product vectorization ($op$-$vect$) & tile size \\ \hline
+%Assembly splitting ($split$) & split point, split factor \\ \hline
+%\end{tabulary}
+%\caption{.}
+%\label{table:perf-results}
+%\end{table}
+
+%\newcommand{\massmatrixtwodresultsnorms}{
+%\begin{tabularx}{1.0\textwidth}{c|XX|XX|XX|XX|}
+%\cline{2-9}
+%& \multicolumn{2}{c|}{$n_f=1$} & \multicolumn{2}{c|}{$n_f=2$} & \multicolumn{2}{c|}{$n_f=3$} & \multicolumn{2}{c|}{$n_f=4$} \\
+%\cline{2-9}
+%& A & Tensor& A & Tensor& A & Tensor& A & Tensor\\
+%\hline
+%\multicolumn{1}{|c|}{$p=1,q=1$} & $6.89e{-}17$ & $9.30e{-}17$ & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{$p=1,q=2$} & $6.80e{-}17$ & $1.56e{-}16$ & $1.22e{-}16$ & $7.14e{-}17$ & $1.17e{-}17$ & $1.27e{-}17$ & $8.05e{-}18$ & $\mathbf{9.77e{-}5}$ \\
+%\multicolumn{1}{|c|}{$p=1,q=3$} & $8.16e{-}17$ & $8.94e{-}17$ & $6.21e{-}17$ & $\mathbf{6.77e{-}5}$ & $2.44e{-}17$ & $\mathbf{7.69e{-}4}$ & $8.61e{-}17$ & $\mathbf{5.02e{-}4}$ \\
+%\multicolumn{1}{|c|}{$p=1,q=4$} & $3.70e{-}16$ & $\mathbf{1.83e{-}4}$ & $7.12e{-}16$ & $\mathbf{4.11e{-}4}$ & $2.65e{-}16$ & $\mathbf{5.42e{-}4}$ & $5.03e{-}16$ & $\mathbf{4.36e{-}4}$ \\
+%\hline
+%\multicolumn{1}{|c|}{$p=2,q=1$} & $2.42e{-}16$ & $2.34e{-}16$ & $1.18e{-}16$ & $3.42e{-}17$ & $2.78e{-}17$ & $\mathbf{1.30e{-}4}$ & $1.22e{-}16$ & $\mathbf{3.06e{-}4}$ \\
+%\multicolumn{1}{|c|}{$p=2,q=2$} & $4.50e{-}16$ & $1.47e{-}16$ & $7.47e{-}17$ & $\mathbf{7.04e{-}5}$ & $4.05e{-}16$ & $\mathbf{6.47e{-}4}$ & - & - \\
+%\multicolumn{1}{|c|}{$p=2,q=3$} & $1.85e{-}16$ & $\mathbf{1.65e{-}4}$ & $7.76e{-}16$ & $\mathbf{5.57e{-}4}$ & $1.88e{-}15$ & $\mathbf{1.47e{-}3}$ & - & - \\
+%\multicolumn{1}{|c|}{$p=2,q=4$} & $2.22e{-}15$ & $\mathbf{2.90e{-}4}$ & $4.01e{-}15$ & $\mathbf{1.42e{-}3}$ & - & - & - & - \\
+%\hline
+%\multicolumn{1}{|c|}{$p=3,q=1$} & $6.54e{-}17$ & $5.96e{-}17$ & $8.13e{-}17$ & $\mathbf{9.70e{-}5}$ & - & - & - & - \\
+%\multicolumn{1}{|c|}{$p=3,q=2$} & $9.43e{-}17$ & $1.26e{-}16$ & $8.99e{-}16$ & $\mathbf{5.23e{-}4}$ & - & - & - & - \\
+%\multicolumn{1}{|c|}{$p=3,q=3$} & $2.27e{-}16$ & $\mathbf{2.86e{-}4}$ & $5.77e{-}15$ & $\mathbf{1.81e{-}3}$ & - & - & - & - \\
+%\multicolumn{1}{|c|}{$p=3,q=4$} & $2.45e{-}15$ & $\mathbf{5.31e{-}4}$ & $1.62e{-}14$ & $\mathbf{2.54e{-}3}$ & - & - & - & - \\
+%\hline
+%\end{tabularx}
+%}
+%\begin{figure*}
+%\massmatrixtwodresultsnorms
+%\end{figure*}
+
 \begin{figure}[h]
 \centerline{\includegraphics[scale=0.7]{Pictures/helmholtz-normalized.pdf}
 \label{fig_first_case}}
