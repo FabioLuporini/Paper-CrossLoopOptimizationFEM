@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  7 MAR 2014 14:30
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  10 MAR 2014 18:13
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -350,12 +350,12 @@ LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 503.
 LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 503.
 
 [2]
-Underfull \hbox (badness 10000) detected at line 541
+Underfull \hbox (badness 10000) detected at line 542
 [][]
  []
 
 
-LaTeX Warning: Citation `comdex' on page 3 undefined on input line 557.
+LaTeX Warning: Citation `comdex' on page 3 undefined on input line 558.
 
 [3] <Pictures/vect-by-vect.pdf, id=26, 361.35pt x 283.0575pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
@@ -365,12 +365,12 @@ File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Underfull \hbox (badness 10000) detected at line 626
+Underfull \hbox (badness 10000) detected at line 627
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 660
+Underfull \hbox (badness 10000) detected at line 661
 [][]
  []
 
@@ -378,37 +378,37 @@ Underfull \hbox (badness 10000) detected at line 660
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-LaTeX Warning: Citation `ffc' on page 4 undefined on input line 687.
+Underfull \hbox (badness 10000) detected at line 719
+[][]
+ []
 
 
-LaTeX Warning: Citation `pyop2isc' on page 4 undefined on input line 687.
+LaTeX Warning: Citation `ffc' on page 4 undefined on input line 721.
+
+
+LaTeX Warning: Citation `pyop2isc' on page 4 undefined on input line 721.
 
 
 LaTeX Warning: Citation `reguly-inter-kernel' on page 4 undefined on input line
- 689.
+ 723.
 
 
-LaTeX Warning: Citation `quadrature-cuda' on page 4 undefined on input line 689
+LaTeX Warning: Citation `quadrature-cuda' on page 4 undefined on input line 723
 .
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>] [5]
-Underfull \hbox (badness 10000) detected at line 728
+Underfull \hbox (badness 10000) detected at line 751
 [][]
  []
 
-
-Underfull \hbox (badness 10000) detected at line 759
-[][]
- []
-
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 767.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 757.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [6]
 
 LaTeX Warning: Reference `table:perf-results' on page 7 undefined on input line
- 779.
+ 769.
 
 
 
@@ -448,7 +448,7 @@ Before submitting the final camera ready copy, remember to:
  process uses the appropriate paper size.
 
 [7 <./Pictures/helmholtz-normalized.pdf> <./Pictures/advdiff-normalized.pdf> <.
-/Pictures/burgers-normalized.pdf>] (./bare_conf.aux)
+/Pictures/burgers-normalized.pdf>] [8] (./bare_conf.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -457,31 +457,32 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3608 strings out of 495000
- 49576 string characters out of 1180492
- 153907 words of memory out of 3000000
- 6779 multiletter control sequences out of 15000+50000
- 45417 words of font info for 85 fonts, out of 3000000 for 9000
+ 3615 strings out of 495000
+ 49661 string characters out of 1180492
+ 159907 words of memory out of 3000000
+ 6783 multiletter control sequences out of 15000+50000
+ 46344 words of font info for 88 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
- 32i,15n,25p,1874b,342s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 32i,15n,25p,1874b,344s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
-ve/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/ty
-pe1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/
-amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
-cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi9.pfb></
-usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/te
-xmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/f
-onts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/
-public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
-nts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8
-.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/s
-hare/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive
-/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/tim
-es/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr
-/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (7 pages, 494944 bytes).
+ve/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/ty
+pe1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/
+amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm
+/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi8.pfb><
+/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/t
+exmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive
+/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/fonts/type1/
+public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
+onts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy
+7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/
+share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texmf-
+texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type
+1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.
+pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texm
+f-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on bare_conf.pdf (8 pages, 510525 bytes).
 PDF statistics:
- 619 PDF objects out of 1000 (max. 8388607)
+ 626 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 
