@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  10 MAR 2014 18:13
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  11 MAR 2014 11:52
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -411,6 +411,11 @@ LaTeX Warning: Reference `table:perf-results' on page 7 undefined on input line
  769.
 
 
+Underfull \hbox (badness 10000) in alignment at lines 805--805
+[][][][][][][][] 
+ []
+
+
 
 pdfTeX warning: pdflatex (file ./Pictures/helmholtz-normalized.pdf): PDF inclus
 ion: found PDF version <1.5>, but at most version <1.4> allowed
@@ -480,7 +485,7 @@ texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type
 1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.
 pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texm
 f-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (8 pages, 510525 bytes).
+Output written on bare_conf.pdf (8 pages, 507402 bytes).
 PDF statistics:
  626 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

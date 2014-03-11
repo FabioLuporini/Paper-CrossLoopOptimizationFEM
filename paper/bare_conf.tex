@@ -726,7 +726,7 @@ The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes into accou
 
 Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters such as the unroll factor becomes of great importance. Autotuning might be used, although we avoid it to minimize the overhead of Firedrake's just-in-time compilation. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for our assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, newest versions of a vendor compiler like $icc$ employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying unroll-based optimizations, even if specific pragmas are added.
 
-All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations $ijk$ and $ikj$ are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required every iteration. Our experiments showed that the performance loss is greater than the gain due to accumulating increments in a register along the $i$ loop. The choice between $ijk$ and $ikj$ depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses, as outer, the loop along which the number of invariant loads is smaller so that more registers are availabe to carry out the computation of the stiffness matrix. 
+All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations $ijk$ and $ikj$ are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required every iteration; experiments showed that the performance loss is greater than the gain due to accumulating increments in a register along the $i$ loop. The choice between $ijk$ and $ikj$ depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses, as outer, the loop along which the number of invariant loads is smaller so that more registers are availabe to carry out the computation of the stiffness matrix. 
 
 
 \begin{algorithm}[t]
@@ -760,11 +760,11 @@ Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running
 \item Advection-Diffusion
 \item Burgers
 \end{itemize}
-The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion the ``Diffusion'' equation is considered, which uses the same differential operators as Helmholtz. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem (i.e. the assembly is recalculated every time step based on the result of previous iterations) employing differential operators different than those of Helmholtz and Advection-Diffusion. The assembly code, partly exposed in Figure~\ref{code:burgers}, is therefore fairly different, with a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) employed. 
+The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion, the ``Diffusion'' equation, which uses the same differential operators as Helmholtz, is considered. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem (i.e. the assembly is recalculated every time step based on the result of previous iterations) employing differential operators different than those of Helmholtz. The assembly code, partly exposed in Figure~\ref{code:burgers}, is therefore fairly different, with a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) employed. 
 
 These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method. Intuitively, the larger the element shape, the bigger is the iteration space. Triangles (2D), tetrahedron (3D), and prisms (3D) were tested. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three kind of elements is, respectively, $3$, $4$, and $6$. Moving from 2D to 3D also increases the number of basis function arrays, since conceptually the behaviour of the equation has to be approximated also along the $z$ dimension. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders, from $p=1$ to $p=4$, are tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In such a large space of problems, the size of the stiffness matrix rarely excees 20$\times$20, with a peak of 105$\times$105 in Burgers with prisms and $p=4$. 
 
-For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, both extraction of matrix-matrix multiplications from analysis of the kernel's AST and invasive re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there's a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might inhibit the performance gain. 
+For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, extraction of matrix-matrix multiplications from analysis of the kernel's AST or re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there's a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might limit the performance gain. 
 
 Table~\ref{table:perf-results}
 %In addition, register locality would be affected, since the same matrix could appear in a number of products.
@@ -791,27 +791,14 @@ Table~\ref{table:perf-results}
 %\end{table}
 
 \newcommand{\massmatrixtwodresultsnorms}{
-\begin{tabularx}{1.0\textwidth}{c|XX|XX|XX|XX|}
-\cline{2-9}
-& \multicolumn{2}{c|}{$n_f=1$} & \multicolumn{2}{c|}{$n_f=2$} & \multicolumn{2}{c|}{$n_f=3$} & \multicolumn{2}{c|}{$n_f=4$} \\
-\cline{2-9}
-& A & Tensor& A & Tensor& A & Tensor& A & Tensor\\
-\hline
-\multicolumn{1}{|c|}{$p=1,q=1$} & $6.89e{-}17$ & $9.30e{-}17$ & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{$p=1,q=2$} & $6.80e{-}17$ & $1.56e{-}16$ & $1.22e{-}16$ & $7.14e{-}17$ & $1.17e{-}17$ & $1.27e{-}17$ & $8.05e{-}18$ & $\mathbf{9.77e{-}5}$ \\
-\multicolumn{1}{|c|}{$p=1,q=3$} & $8.16e{-}17$ & $8.94e{-}17$ & $6.21e{-}17$ & $\mathbf{6.77e{-}5}$ & $2.44e{-}17$ & $\mathbf{7.69e{-}4}$ & $8.61e{-}17$ & $\mathbf{5.02e{-}4}$ \\
-\multicolumn{1}{|c|}{$p=1,q=4$} & $3.70e{-}16$ & $\mathbf{1.83e{-}4}$ & $7.12e{-}16$ & $\mathbf{4.11e{-}4}$ & $2.65e{-}16$ & $\mathbf{5.42e{-}4}$ & $5.03e{-}16$ & $\mathbf{4.36e{-}4}$ \\
-\hline
-\multicolumn{1}{|c|}{$p=2,q=1$} & $2.42e{-}16$ & $2.34e{-}16$ & $1.18e{-}16$ & $3.42e{-}17$ & $2.78e{-}17$ & $\mathbf{1.30e{-}4}$ & $1.22e{-}16$ & $\mathbf{3.06e{-}4}$ \\
-\multicolumn{1}{|c|}{$p=2,q=2$} & $4.50e{-}16$ & $1.47e{-}16$ & $7.47e{-}17$ & $\mathbf{7.04e{-}5}$ & $4.05e{-}16$ & $\mathbf{6.47e{-}4}$ & - & - \\
-\multicolumn{1}{|c|}{$p=2,q=3$} & $1.85e{-}16$ & $\mathbf{1.65e{-}4}$ & $7.76e{-}16$ & $\mathbf{5.57e{-}4}$ & $1.88e{-}15$ & $\mathbf{1.47e{-}3}$ & - & - \\
-\multicolumn{1}{|c|}{$p=2,q=4$} & $2.22e{-}15$ & $\mathbf{2.90e{-}4}$ & $4.01e{-}15$ & $\mathbf{1.42e{-}3}$ & - & - & - & - \\
-\hline
-\multicolumn{1}{|c|}{$p=3,q=1$} & $6.54e{-}17$ & $5.96e{-}17$ & $8.13e{-}17$ & $\mathbf{9.70e{-}5}$ & - & - & - & - \\
-\multicolumn{1}{|c|}{$p=3,q=2$} & $9.43e{-}17$ & $1.26e{-}16$ & $8.99e{-}16$ & $\mathbf{5.23e{-}4}$ & - & - & - & - \\
-\multicolumn{1}{|c|}{$p=3,q=3$} & $2.27e{-}16$ & $\mathbf{2.86e{-}4}$ & $5.77e{-}15$ & $\mathbf{1.81e{-}3}$ & - & - & - & - \\
-\multicolumn{1}{|c|}{$p=3,q=4$} & $2.45e{-}15$ & $\mathbf{5.31e{-}4}$ & $1.62e{-}14$ & $\mathbf{2.54e{-}3}$ & - & - & - & - \\
-\hline
+\begin{tabularx}{1.0\textwidth}{cccc|cc|cc|}
+\cline{5-8}
+& & & & \multicolumn{2}{c|}{$split$} & \multicolumn{2}{c|}{$op$-$vect$} \\
+\cline{2-8}
+& \multicolumn{1}{|c|}{original} & \multicolumn{1}{|c|}{$licm$} & $licm$+$ap$ & Best & Cost Model & Best & Cost Model\\
+\cline{1-8}
+\multicolumn{1}{|c|}{Helmholtz$\_$tri$\_$p1} & & \multicolumn{1}{|c|}{$5.49e{-}17$} & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+\cline{1-8}
 \end{tabularx}
 }
 \begin{figure*}
