@@ -411,27 +411,28 @@ The abstract goes here.
 
 
 \section{Introduction}
-In many fields, like computational fluid dynamics, computational electromagnetics, and structural mechanics, programs model phenomena by means of partial differential equations (PDEs). Numerical techniques, like Finite Volume Method and Finite Element Method, are widely employed in real-world applications to approximate solutions of PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each cell of the discretized domain by applying suitable numerical kernels. As the number of cells can be of the order of millions, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful porting of Hydra, a computational fluid dynamics industrial application devised by Rolls Royce for turbomachinery design (based on Finite Volume Method, roughly 50000 lines of code and mesh sizes that can be over 100 millions edges), to OP2~\cite{pyop2ics}, demonstrates the effectiveness of the DSL approach for implementing PDEs solvers~\cite{OP2-hydra}. 
+In many fields, like computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by means of partial differential equations (PDEs). Numerical techniques, like finite volume method and finite element method, are widely employed to approximate solutions of PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each cell of the discretized domain by applying suitable numerical kernels. As the number of cells can be of the order of millions, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful porting of Hydra, a computational fluid dynamics industrial application devised by Rolls Royce for turbomachinery design (based on Finite Volume Method, roughly 50000 lines of code and mesh sizes that can be over 100 millions edges), to OP2~\cite{pyop2ics}, demonstrates the effectiveness of the DSL approach for implementing PDEs solvers~\cite{OP2-hydra}. 
 
 OP2 adopts a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted by~\cite{fenics, fluidity, lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in Finite Element Methods.
 
-We focus on Local Assembly (``assembly'', in the following), a fundamental step of a Finite Element Method that covers an important fraction of the overall computation run-time, typically in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 30, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the Finite Element Method based on the OP2 abstraction~\cite{firedrake}.
+We focus on Local Assembly (``assembly'', in the following), a fundamental step of a Finite Element Method that covers an important fraction of the overall computation run-time, often in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 30, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the Finite Element Method based on the OP2 abstraction~\cite{firedrake}.
 
-Optimization of assembly kernels is non-trivial. Polyhedral compilation could be used to improve performance; however, given the structure and the exceptionally small size of the kernels, effective SIMD vectorization can be obtained only through an in-depth analysis of both data and iteration space, which is not supported by state-of-the-art polyhedral compilers. BLAS routines could be employed as well, although fairly complicated control- and data-flow analysis would be required to automate identification and extraction of matrix-matrix multiplications. BLAS libraries are also known to perform distant from peak performance when the dimension of the matrices is small~\cite{nek5000}. As detailed in Section~\ref{sec:perf-results}, hand-made BLAS implementations of the Helmholtz assembly kernel (illustrated later) have run-times worse than those achieved with our optimization strategy. 
+Optimization of assembly kernels is non-trivial. Given their structure and the exceptionally small size, assembly kernels benefit from transformations like generalized loop-invariant code motion, vector-register tiling and code splitting, which are not supported by state-of-the-art polyhedral and vendor compilers. BLAS routines could be theoretically employed, although fairly complicated control- and data-flow analysis would be required to automate identification and extraction of matrix-matrix multiplications. BLAS libraries are also known to perform far from peak performance when the dimension of the matrices is small~\cite{nek5000}. As detailed in Section~\ref{sec:perf-results}, hand-made BLAS implementations of the Helmholtz assembly kernel (illustrated later) have run-times worse than those achieved with our optimization strategy. 
 
 %(our attempts to use PoCC's optimizations~\cite{PoCC}, especially unrolling and register tiling, did not improve performance over $icc$ compilation)
 
 %Also, tiling at the level of vector register, achievable through a non-affine transformation of the iteration space, has showed a significant performance improvement in a range of problems. .
 
-Given the constraints on polyhedral compilation and linear-algebra-specialized libraries, we address assembly optimization by studying a set of domain-specific code transformations, applicable to a wide class of problems. We have developed an optimizing compiler and we have integrated it with Firedrake. This allows us to evaluate our code transformations in a range of real-world problems, varying parameters that impact both solution accuracy and kernel cost, namely the polynomial order of the method (from $p=1$ to $p=4$) and the mesh type (2D, 3D, 3D hybrid structured-unstructured). 
+Given the constraints on polyhedral compilation and linear-algebra-specialized libraries, we address assembly optimization by studying a set of domain-specific code transformations, applicable to a wide class of problems. We have developed an optimizing compiler and we have integrated it with Firedrake, a system for the resolution of PDEs based on the finite element method~\cite{firedrake}. This allows us to evaluate our code transformations in a range of real-world problems, varying parameters that impact both solution accuracy and kernel cost, namely the polynomial order of the method (from $p=1$ to $p=4$) and the mesh type (2D, 3D, 3D hybrid structured-unstructured). 
 
-Early experiments showed that Firedrake-generated code for non-trivial assembly kernels was sub-optimal. Our cost-model-driven sequence of source-to-source code transformations, aimed at improving SIMD vectorization and register data locality, can result in performance improvements up to 33$\%$ over ``softly-optimized'' code (i.e. where only basic transformations are performed, such as auto-vectorizable loop-invariant code motion, padding and data alignment), and up to 77$\%$ over original kernels. The contribution of this paper is therefore twofold:
+Early experiments showed that Firedrake-generated code for non-trivial assembly kernels was sub-optimal. Our cost-model-driven sequence of source-to-source code transformations, aimed at improving SIMD vectorization and register data locality, can result in performance improvements up to 33$\%$ over ``softly-optimized'' code (i.e. where only basic transformations are performed, such as loop-invariant code motion, padding and data alignment), and up to 77$\%$ over original kernels. The contribution of this paper is threefold
 \begin{itemize}
-\item An optimisation strategy for a class of kernels widely-used in scientific applications, namely Local Assembly in the context of the Finite Element Method. Our approach exploits domain knowledge to go beyond the limits of both vendor (e.g. $icc$) and research (e.g. polyhedral) compilers.
-\item Automation of such code optimizations in Firedrake. This enables performing an in-depth performance evaluation of the proposed optimization strategy in real-world simulations.
+\item An optimisation strategy for a class of kernels widely-used in scientific applications, namely local assembly in the context of the finite element method. Our approach exploits domain knowledge to go beyond the limits of both vendor (e.g. $icc$) and research (e.g. polyhedral) compilers.
+\item Design and implementation of a compiler that automates the proposed code transformations for any problems expressible in Firedrake.
+\item Systematic evaluation using a suite of examples of real-world importance, and evidence of significant performance improvements.
 \end{itemize}
 
-The paper is organized as follows. ...
+The paper is organized as follows. In Section~\ref{sec:background} we provide some background on local assembly, showing code generated by Firedrake and emphasizing important computational aspects. Section~\ref{sec:code-transf} describes in detail the various code transformations, highlighting when and how domain-knowledge has been exploited. The design and implementation of our compiler is discussed in Section~\ref{sec:pyop2-compiler}. Section~\ref{sec:perf-results} shows performance results. Related work are illustrated in Section~\ref{sec:related-work}, while Section~\ref{sec:conclusions} concludes the paper.
 
 % systematic optimization strategy -> discuss the importance of domain knowledge
 
@@ -473,16 +474,16 @@ $\rbrace$
 ~~\KwSty{static const double} W5[5] = $\lbrace$...$\rbrace$\\
 ~~\KwSty{static const double} X1$\_$D001[5][12] = $\lbrace\lbrace$...$\rbrace\rbrace$\\
 ~~\KwSty{static const double} X2$\_$D001[5][12] = $\lbrace\lbrace$...$\rbrace\rbrace$\\
-~~//It follows 11 other basis functions definitions.\\
+~~//11 other basis functions definitions.\\
 ~~...\\
 ~~\\
 ~~\KwSty{for} (\KwSty{int} i = 0; i$<$5; i++) $\lbrace$\\
 ~~~~\KwSty{double} F0 = 0.0;\\
-~~~~//It follows 10 other declarations (F1, F2,...)\\
+~~~~//10 other declarations (F1, F2,...)\\
 ~~~~...\\
 ~~~~\KwSty{for} (\KwSty{int} r = 0; r$<$12; r++) $\lbrace$\\
 ~~~~~~F0 += (w[r][0]*X1$\_$D100[i][r]);\\
-~~~~~~//It follows 10 analogous statements (F1, F2, ...)\\
+~~~~~~//10 analogous statements (F1, F2, ...)\\
 ~~~~$\rbrace$\\
 ~~~~...\\
 ~~~~\KwSty{for} (\KwSty{int} j = 0; j$<$12; j++) \\
@@ -492,19 +493,19 @@ $\rbrace$
 ~~~~~~~~~+(K6*X1$\_$D001[i][k]))*Y2[i][j]))*F11)+\\
 ~~~~~~~~~+(..((K2*X2$\_$D100[i][k])+...+(K8*X2$\_$D001[i][k])*\\
 ~~~~~~~~~*(K2*X2$\_$D100[i][j])+...+(K8*X2$\_$D001[i][j]))..)+\\
-~~~~~~~~~+ $<$roughly a hundred of sum/muls go here$>$)..)*\\
+~~~~~~~~~+ $<$roughly a hundred sum/muls go here$>$)..)*\\
 ~~~~~~~~~*det*W5[i]);\\
 ~~$\rbrace$ \\
 $\rbrace$
 \end{algorithm}
 
-Local assembly consists of evaluating so called element stiffness matrix and element stiffness vector; in this work, we focus on computation of matrices, which is the costly part of the process. A stiffness matrix can be intuitively thought as an approximated representation of the PDE solution in a specific cell (or element) of the discretized domain. Numerical integration algorithms are widely-used in assembly codes to implement evaluation of stiffness matrices~\cite{quadrature1, quadrature2}. 
+Local assembly consists of evaluating so called element stiffness matrix (just stiffness matrix in the following) and element stiffness vector; in this work, we focus on computation of stiffness matrices, which is the costly part of the process. A stiffness matrix can be intuitively thought as an approximated representation of the PDE solution in a specific cell (or element) of the discretized domain. Numerical integration algorithms are widely-used in assembly codes to evaluate stiffness matrices~\cite{quadrature1, quadrature2}. 
 
-Given a mathematical description of the input problem, expressed through the domain-specific Unified Form Language~\cite{ufl}, Firedrake generates C-code kernels implementing assembly using a numerical integration algorithm. It then triggers compilation of such kernels using an available vendor compiler, and eventually manages parallel execution over the mesh. In our work, we have enhanced this execution model by adding an optimization stage prior to the generation of C code. The code transformations described next are also generalizable to non-Firedrake assembly kernels, provided that numerical integration is used. Notable examples are~\cite{uflacs, fluidity, mcfc}, in which the kernel's loop nest and memory access pattern are reducible to that generated by Firedrake.
+Given a mathematical description of the input problem, expressed through the domain-specific Unified Form Language~\cite{ufl}, Firedrake generates C-code kernels implementing assembly using a numerical integration algorithm. It then triggers compilation of such kernels using an available vendor compiler, and eventually manages parallel execution over the mesh. The subject of this papaer is to enhance this execution model by adding an optimization stage prior to the generation of C code. The code transformations described next are also generalizable to non-Firedrake assembly kernels, provided that numerical integration is used. Notable examples are~\cite{uflacs, fluidity, mcfc}, in which the kernel's loop nest and memory access pattern are reducible to that generated by Firedrake.
 
-The complexity of Firedrake-generated kernels depends on the mathematical problem being solved. In simpler cases, the loop nest is perfect, it has short trip counts (in the range 3-15), and the computation reduces to a summation of a few products. An example is provided in Figure~\ref{code:helmholtz}, which shows an assembly kernel for a Helmholtz problem, using Lagrange basis functions on 2D elements with polynomial order $p=1$. The stiffness matrix in the code is called $A$. In other scenarios, for instance when solving a non-linear problem like Burgers (see Figure~\ref{code:burgers}), the number of arrays involved in the computation of $A$ can be much larger: in this case, 14 unique arrays are accessed, and the same array can be referenced multiple times within the expression. Also, constants evaluated in outer loops (called $F$ in the code), acting as scaling factors of arrays, may be required; trip counts can be larger (proportionally to the order of the method); arrays may be block-sparse. Note that in addition to a larger number of operations to compute the stiffness matrix, the Burgers case shows a register pressure higher than that in Helmholtz. Despite assembly kernels being problem-dependent, meaning that infinite is the space of codes that Firedrake can generate, it is still possible to identify common domain-specific traits, which can be exploited for effective code transformations and SIMD vectorization.
+The complexity of Firedrake-generated kernels depends on the finite element problem being solved. In simpler cases, the loop nest is perfect, it has short trip counts (in the range 3-15), and the computation reduces to a summation of a few products. An example is provided in Figure~\ref{code:helmholtz}, which shows an assembly kernel for a Helmholtz problem, using Lagrange basis functions on 2D elements with polynomial order $p=1$. The stiffness matrix in the code is called $A$. In other scenarios, for instance when solving a non-linear problem like Burgers (see Figure~\ref{code:burgers}), the number of arrays involved in the computation of $A$ can be much larger: in this case, 14 unique arrays are accessed, and the same array can be referenced multiple times within the expression. Also, constants evaluated in outer loops (called $F$ in the code), acting as scaling factors of arrays, may be required; trip counts can be larger (proportionally to the order of the method); arrays may be block-sparse. Note that in addition to a larger number of operations to compute the stiffness matrix, the Burgers case shows a register pressure higher than that in Helmholtz. Despite assembly kernels being problem-dependent, meaning that the space of codes that Firedrake can generate is infinite, it is still possible to identify common domain-specific traits, which can be exploited for effective code transformations and SIMD vectorization.
 
-The class of kernels we are considering has, in particular, some peculiarities. 1) The computation of the Jacobian, which is the first step of the assembly, is independent of the loop nest. This is not true in general, since the unstructured mesh might use bended elements that would require the Jacobian be re-computed every $i$ iteration; 2) memory accesses along the three loop dimensions are always 1-stride; 3) the $j$ and $k$ loops are interchangeable, whereas permutation of $i$ might be subjected to pre-computation of values (e.g. the $F$ values in Burgers) and introduction of temporary arrays; 4) the $j$ and $k$ loops iterate over the same iteration space; 5) so called basis functions arrays (denoted by $X$, $Y$, ...) are constants, and most of the sub-expressions on the right hand side of the stiffness matrix computation depend on just two loops (either $i$-$j$ or $i$-$k$). In Section~\ref{sec:code-transf} we show how to exploit these observations to define a set of systematic, composable optimizations.
+The class of kernels we are considering has, in particular, some peculiarities. 1) The computation of the Jacobian, which is the first step of the assembly, is independent of the loop nest. This is not true in general, since bent elements might be used in the unstructured mesh, which would require the Jacobian be re-computed at every $i$ iteration; 2) memory accesses along the three loop dimensions are always stride-1; 3) the $j$ and $k$ loops are interchangeable, whereas permutation of $i$ might be subjected to pre-computation of values (e.g. the $F$ values in Burgers) and introduction of temporary arrays; 4) the $j$ and $k$ loops iterate over the same iteration space; 5) arrays like $X$, $Y$, ..., which represent so called basis functions and their derivatives, are constants; 6) most of the sub-expressions on the right hand side of the stiffness matrix computation depend on just two loops (either $i$-$j$ or $i$-$k$). In Section~\ref{sec:code-transf} we show how to exploit these observations to define a set of systematic, composable optimizations.
 
 
 \section{Code Transformations}
@@ -515,7 +516,7 @@ The class of kernels we are considering has, in particular, some peculiarities. 
 
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=1$ elements). The padding, data alignment and $licm$ optimizations are applied. Data alignment and padding relate to an AVX machine. In this specific case, sub-expressions invariant to $j$ are identical to those invariant to $k$; in general, this could not be the case.}
+\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=1$ elements). The padding, data alignment and $licm$ optimizations are applied. Data alignment and padding relate to an AVX machine. In this specific case, sub-expressions invariant to $j$ are identical to those invariant to $k$; in general, this might not be the case.}
 \label{code:helmholtz-licm}
 \KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
 ~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
@@ -547,14 +548,14 @@ $\rbrace$
 Auto-vectorization of assembly code computing the stiffness matrix can be less effective if data are not aligned and if the length of the innermost loop is smaller than the vector length ($vl$). Data alignment is enforced in two steps. Initially, both arrays and matrices are allocated to addresses that are multiples of $vl$. Then, matrices are padded by rounding the number of columns to the nearest multiple of $vl$. For example, assume the original size of a matrix is 3$\times$3 and that the underlying machine possesses AVX, which implies $vl=4$ since a vector register is 256 bits long and our kernels use 64-bits double-precision floating-point values. Then, a padded matrix on this architecture will have size 3$\times$4. The compiler is explicitly informed about data alignment using a suitable pragma. Padding of all matrices involved in the evaluation of the stiffness matrix allows us to safely round the loop trip count to the nearest multiple of $vl$. This avoids the introduction of a remainder (scalar) loop from the compiler, which would be responsible for inefficient vectorization. 
 
 % Autovectorizable LICM -> show code snippet?
-\subsection{Domain-driven Loop-invariant Code Motion}
+\subsection{Generalized Loop-invariant Code Motion}
 From inspection of the codes in Figures~\ref{code:helmholtz} and~\ref{code:burgers}, it can be noticed that the computation of $A$ involves evaluating many sub-expressions that depend on two iteration variables only. Since symbols in most of these sub-expressions are read-only variables, there is ample space for loop-invariant code motion. Vendor compilers apply this technique, although not in the systematic way we need for our assembly kernels. We want to overcome two deficiencies that both $icc$ and $gcc$ have. First, these compilers can identify sub-expressions that are invariant with respect to the innermost loop only. This is an issue for sub-expressions depending on $i$-$k$, which are not automatically lifted. Second, the hoisted code is scalar, i.e. it is not subjected to auto-vectorization. We work around these limitations with source-level loop-invariant code motion. In particular, we pre-compute all values that an invariant sub-expression assumes along the fastest varying dimension. This is implemented by introducing a temporary array (per invariant sub-expression) and by adding a new loop to the nest. At the price of extra memory for storing temporaries, the gain is that lifted terms can be auto-vectorized, because part of an inner loop. Given the short trip counts of our loops, it is important to achieve auto-vectorization of hoisted terms in order to minimize the percentage of scalar instructions, which could be otherwise significant. It is also worth noting that, in some problems, invariant sub-expressions along $j$ are identical to those along $k$ (e.g. in Helmholtz). In these cases, we safely avoid redundant pre-computation since, as anticipated in Section~\ref{sec:background}, a property of our domain is that $j$ and $k$ loops share the same iteration space.
 
 Figure~\ref{code:helmholtz-licm} shows the Helmholtz assembly code after the application of loop-invariant code motion, padding, and data alignment.
 
 % Register allocation and register locality
 \subsection{Domain-driven Vector-register Tiling}
-One notable problem assembly kernels are exposed to concerns register allocation and register locality. The critical situation occurs when loop trip counts and accessed variables are such that the vector-registers pressure is high. Due to a kernel's working set fitting the L1 cache, it is remarkably important to optimize register management. Canonical optimizations, such as loop interchange, unroll, and unroll-and-jam, can be employed to deal with this problem. In the compiler we have developed, these optimizations are supported either by means of explicit code transformations (interchange, unroll-and-jam) or indirectly by delegation to the compiler through standard pragmas (unroll). Tiling at the level of vector registers can be introduced as well. Based on the observation that the evaluation of the stiffness matrix can be reduced to a ``summation of outer products'' along the $j$ and $k$ dimensions, a domain-specific vector-register tiling strategy can be implemented. If we consider the code snippet in Figure~\ref{code:helmholtz-licm} (Helmholtz after loop-invariant code motion), we can notice that the computation of $A$ is abstractly expressible as
+One notable problem of assembly kernels concerns register allocation and register locality. The critical situation occurs when loop trip counts and accessed variables are such that the vector-registers pressure is high. Since the kernel's working set fits the L1 cache, it is remarkably important to optimize register management. Canonical optimizations, such as loop interchange, unroll, and unroll-and-jam, can be employed to deal with this problem. In the compiler we have developed, these optimizations are supported either by means of explicit code transformations (interchange, unroll-and-jam) or indirectly by delegation to the compiler through standard pragmas (unroll). Tiling at the level of vector registers can be introduced as well. Based on the observation that the evaluation of the stiffness matrix can be reduced to a ``summation of outer products'' along the $j$ and $k$ dimensions, a domain-specific vector-register tiling strategy can be implemented. If we consider the code snippet in Figure~\ref{code:helmholtz-licm} (Helmholtz after loop-invariant code motion), we can notice that the computation of $A$ is abstractly expressible as
 \begin{equation}
 \label{outer-product}
 A_{jk} = \sum_{\substack{
@@ -627,8 +628,8 @@ $\rbrace$
 
 
 % Splitting
-\subsection{Assembly splitting}
-In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension, i.e. basis function matrices, temporaries introduced by loop-invariant code motion and constants, is even close to the number of available CPU registers, it is likely to obtain poor register reuse. For example, applying loop-invariant code motion to Burgers on a 3D mesh needs 33 temporaries for the $ijk$ loop order, and compiler's hoisting of invariant loads out of the $k$ loop can be inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the stiffness matrix $A$ into multiple sub-expressions; an example, for the simpler Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. Splitting an expression has, in general, several drawbacks. Firstly, it increases the number of accesses to $A$ proportially to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation (e.g. the product $det*W3[i]$ is performed times number of sub-expressions in the code of Figure~\ref{code:helmholtz-split}). Finally, it might affect register locality, although this is not the case of the Helmholtz example: for instance, the same matrix could be accessed in different sub-expressions, requiring a proportional number of loads be performed. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
+\subsection{Code splitting}
+In complex kernels, like Burgers' in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension is close to or greater than the number of available CPU registers, it is likely to obtain poor register reuse. This usually happens when the number of basis function matrices, temporaries introduced by loop-invariant code motion, and problem constants is large. For example, applying loop-invariant code motion to Burgers on a 3D mesh needs 33 temporaries for the $ijk$ loop order, and compiler's hoisting of invariant loads out of the $k$ loop can be inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the stiffness matrix $A$ into multiple sub-expressions; an example, for the simpler Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. Splitting an expression has, in general, several drawbacks. Firstly, it increases the number of accesses to $A$ proportially to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation (e.g. the product $det*W3[i]$ is performed times number of sub-expressions in the code of Figure~\ref{code:helmholtz-split}). Finally, it might affect register locality, although this is not the case of the Helmholtz example: for instance, the same matrix could be accessed in different sub-expressions, requiring a proportional number of loads be performed. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
 
 
 \begin{algorithm}[t]
@@ -659,7 +660,7 @@ In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain ar
 $\rbrace$
 \end{algorithm}
 
-Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}
+Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}.
 
 \begin{table}[h]
 \begin{tabulary}{1.0\columnwidth}{|C|C|}
@@ -723,7 +724,7 @@ The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially
 
 The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes into account the number of available vector registers ($n\_regs$) and the number of variables iterating along the $j$ and $k$ dimensions ($n\_consts$ for independent variables, $n\_outer\_arrays$ for $j$ variables, and $n\_inner\_arrays$ for $k$ variables, assuming the $ijk$ loop order) to estimate unroll-and-jam and split factors when, respectively, $op$-$vect$ and $split$ are used (if a factor is 0, then the corresponding transformation is not applied). The $split$ transformation is triggered whenever the number of hoistable terms is larger than the available registers along the outer dimension (lines 3-8), which is approximated as half of the total (line 2). A split factor of $n$ means that the assembly expression should be ``cut'' into $n$ sub-expressions. Depending on the structure of the assembly expression, each sub-expression might end up accessing a different number of arrays; the cost model is simplified by assuming that all sub-expressions are of the same size. Finally, the unroll-and-jam factor for the $op$-$vect$ transformation is determined as a function of the available registers, i.e. those not used for storing hoisted terms (line 9-11). 
 
-Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters, like the unroll factor, becomes of great importance. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, newest versions of a vendor compiler like $icc$ employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying unroll-based optimizations, even if specific pragmas are added.
+Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters, like the unroll factor, becomes of great importance. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, recent versions of a vendor compiler like $intel$'s (or $icc$) employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying unroll-based optimizations, even if specific pragmas are added.
 
 All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations $ijk$ and $ikj$ are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required every iteration; experiments showed that the performance loss is greater than the gain due to the possibility of accumulating increments in a register, rather than in memory, along the $i$ loop. The choice between $ijk$ and $ikj$ depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses, as outer, the loop along which the number of invariant loads is smaller so that more registers are availabe to carry out the computation of the stiffness matrix. 
 
@@ -759,35 +760,14 @@ Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running
 \item Advection-Diffusion
 \item Burgers
 \end{itemize}
-The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion, the ``Diffusion'' equation, which uses the same differential operators as Helmholtz, is considered. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem (i.e. the assembly is recalculated every time step based on the result of previous iterations) employing differential operators different than those of Helmholtz. The assembly code, partly exposed in Figure~\ref{code:burgers}, is therefore fairly different, with a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) employed. 
+The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion, the ``Diffusion'' equation, which uses the same differential operators as Helmholtz, is considered. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem, i.e. the assembly is recalculated every time step based on the result of previous iterations. It employs differential operators different from those of Helmholtz, which has a major impact on the generated assembly code (Figure~\ref{code:burgers}), where a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) are accessed. 
 
 These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method. Intuitively, the larger the element shape, the bigger is the iteration space. Triangles (2D), tetrahedron (3D), and prisms (3D) were tested. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three kind of elements is, respectively, $3$, $4$, and $6$. Moving from 2D to 3D also increases the number of basis function arrays, since conceptually the behaviour of the equation has to be approximated also along the $z$ dimension. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders, from $p=1$ to $p=4$, are tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In such a large space of problems, the size of the stiffness matrix rarely excees 20$\times$20, with a peak of 105$\times$105 in Burgers with prisms and $p=4$. 
 
-For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, extraction of matrix-matrix multiplications from analysis of the kernel's AST or re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there's a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might limit the performance gain. 
+For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, extraction of matrix-matrix multiplications from analysis of the kernel's AST or re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there is a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might limit the performance gain. 
 
 Table~\ref{table:perf-results}
-%In addition, register locality would be affected, since the same matrix could appear in a number of products.
 
-%The problem is time-dependent, so , which intuitively increaes the computation cost. 
-
-%Also, our results prove that current vendor compilers still have notable limitations, despite optimizing loop nests that are 1) affine, 2) have no stencil, and 3) ?
-
-%\begin{table}[h]
-%\begin{tabulary}{1.0\columnwidth}{|C|C|}
-%\hline
-%Problem & shape & p & original & $licm$ & $licm$ \\\hline\hline
-%Auto-vectorizable Loop-invariant code motion ($licm$) &   \\ \hline
-%Padding &  \\ \hline
-%Data Alignment & \\ \hline
-%Loop interchange      & loops  \\ \hline
-%Loop unrolling  & unroll factor \\ \hline
-%Register tiling & tile size \\ \hline
-%Outer-product vectorization ($op$-$vect$) & tile size \\ \hline
-%Assembly splitting ($split$) & split point, split factor \\ \hline
-%\end{tabulary}
-%\caption{.}
-%\label{table:perf-results}
-%\end{table}
 
 \newcommand{\massmatrixtwodresultsnorms}{
 \begin{tabularx}{1.0\textwidth}{cccc|cc|cc|}
@@ -823,111 +803,22 @@ Table~\ref{table:perf-results}
 \caption{Burgers}
 \end{figure}
 
-% We fix a specific loop permutation (i esterno perche minimizza.... swapping j or k, after LICM, is equivalent)
 
 \section{Related Work}
+\label{sec:related-work}
 %Show other work of people working on optimizations for computational science kernels. Inter-kernel vectorisation paper from Istvan. Previous work in FFC. Spencer et-al + Shin et. al. attempt to optimize computations that could benefit from using BLAS, but in practice they don't, due to the very small dgemm operations employed. Saday's model-driven SIMD code vectorisation for the tensor contraction engine.
 
 
 \section{Conclusions}
-
-%\subsubsection{Subsubsection Heading Here}
-%Subsubsection text here.
+\label{sec:conclusions}
 
 
-% An example of a floating figure using the graphicx package.
-% Note that \label must occur AFTER (or within) \caption.
-% For figures, \caption should occur after the \includegraphics.
-% Note that IEEEtran v1.7 and later has special internal code that
-% is designed to preserve the operation of \label within \caption
-% even when the captionsoff option is in effect. However, because
-% of issues like this, it may be the safest practice to put all your
-% \label just after \caption rather than within \caption{}.
-%
-% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class
-% option should be used if it is desired that the figures are to be
-% displayed while in draft mode.
-%
-%\begin{figure}[!t]
-%\centering
-%\includegraphics[width=2.5in]{myfigure}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
-%\caption{Simulation Results}
-%\label{fig_sim}
-%\end{figure}
-
-% Note that IEEE typically puts floats only at the top, even when this
-% results in a large percentage of a column being occupied by floats.
-
-
-% An example of a double column floating figure using two subfigures.
-% (The subfig.sty package must be loaded for this to work.)
-% The subfigure \label commands are set within each subfloat command, the
-% \label for the overall figure must come after \caption.
-% \hfil must be used as a separator to get equal spacing.
-% The subfigure.sty package works much the same way, except \subfigure is
-% used instead of \subfloat.
-%
-%\begin{figure*}[!t]
-%\centerline{\subfloat[Case I]\includegraphics[width=2.5in]{subfigcase1}%
-%\label{fig_first_case}}
-%\hfil
-%\subfloat[Case II]{\includegraphics[width=2.5in]{subfigcase2}%
-%\label{fig_second_case}}}
-%\caption{Simulation results}
-%\label{fig_sim}
-%\end{figure*}
-%
-% Note that often IEEE papers with subfigures do not employ subfigure
-% captions (using the optional argument to \subfloat), but instead will
-% reference/describe all of them (a), (b), etc., within the main caption.
-
-
-% An example of a floating table. Note that, for IEEE style tables, the 
-% \caption command should come BEFORE the table. Table text will default to
-% \footnotesize as IEEE normally uses this smaller font for tables.
-% The \label must come after \caption as always.
-%
-%\begin{table}[!t]
-%% increase table row spacing, adjust to taste
-%\renewcommand{\arraystretch}{1.3}
-% if using array.sty, it might be a good idea to tweak the value of
-% \extrarowheight as needed to properly center the text within the cells
-%\caption{An Example of a Table}
-%\label{table_example}
-%\centering
-%% Some packages, such as MDW tools, offer better commands for making tables
-%% than the plain LaTeX2e tabular which is used here.
-%\begin{tabular}{|c||c|}
-%\hline
-%One & Two\\
-%\hline
-%Three & Four\\
-%\hline
-%\end{tabular}
-%\end{table}
-
-
-% Note that IEEE does not put floats in the very first column - or typically
-% anywhere on the first page for that matter. Also, in-text middle ("here")
-% positioning is not used. Most IEEE journals/conferences use top floats
-% exclusively. Note that, LaTeX2e, unlike IEEE journals/conferences, places
-% footnotes above bottom floats. This can be corrected via the \fnbelowfloat
-% command of the stfloats package.
-
-
-
-
-% conference papers do not normally have an appendix
 
 
 % use section* for acknowledgement
 \section*{Acknowledgment}
 
-
-The authors would like to thank...
+This research is partly funded by the MAPDES project and by the Department of Computing at Imperial College London. The authors would like to thank Prof. J. Ramanujam for his invaluable suggestions, and Dr. Lawrence Mitchell and Dr. Francis Russel for their contributions to the PyOP2 projects.
 
 
 
