@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  24 MAR 2014 12:31
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  24 MAR 2014 18:11
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -283,77 +283,77 @@ LaTeX Font Info:    ... okay on input line 293.
 \MPnumerator=\count117
 \everyMPtoPDFconversion=\toks24
 )
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 382.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <11> on input line 382.
+(Font)              <11> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7.69997> on input line 382.
+(Font)              <7.69997> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5.5> on input line 382.
+(Font)              <5.5> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 382.
+(Font)              <8> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 382.
+(Font)              <6> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 382.
+(Font)              <5> on input line 346.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 382.
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 382.
+(Font)              <7> on input line 346.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 346.
 
  (/usr/share/texmf-texlive/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 382.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 346.
 
 
-LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 414.
+LaTeX Warning: Citation `pyop2ics' on page 1 undefined on input line 378.
 
 
-LaTeX Warning: Citation `fenics' on page 1 undefined on input line 416.
+LaTeX Warning: Citation `OP2-hydra' on page 1 undefined on input line 378.
 
 
-LaTeX Warning: Citation `fluidity' on page 1 undefined on input line 416.
+LaTeX Warning: Citation `fluidity' on page 1 undefined on input line 380.
 
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 418.
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 382.
 
 
-LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 426.
+LaTeX Warning: Citation `firedrake' on page 1 undefined on input line 390.
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 448.
+(Font)              <9> on input line 412.
 
-Underfull \hbox (badness 10000) detected at line 465
+Underfull \hbox (badness 10000) detected at line 429
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 500
+Underfull \hbox (badness 10000) detected at line 464
 [][]
  []
 
 
-LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 502.
+LaTeX Warning: Citation `quadrature2' on page 2 undefined on input line 466.
 
 
-LaTeX Warning: Citation `ufl' on page 2 undefined on input line 504.
+LaTeX Warning: Citation `ufl' on page 2 undefined on input line 468.
 
 
-LaTeX Warning: Citation `uflacs' on page 2 undefined on input line 504.
+LaTeX Warning: Citation `uflacs' on page 2 undefined on input line 468.
 
 
-LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 504.
+LaTeX Warning: Citation `fluidity' on page 2 undefined on input line 468.
 
 
-LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 504.
+LaTeX Warning: Citation `mcfc' on page 2 undefined on input line 468.
 
 [2]
-Underfull \hbox (badness 10000) detected at line 543
+Underfull \hbox (badness 10000) detected at line 507
 [][]
  []
 
@@ -365,12 +365,12 @@ File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Underfull \hbox (badness 10000) detected at line 627
+Underfull \hbox (badness 10000) detected at line 592
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 661
+Underfull \hbox (badness 10000) detected at line 626
 [][]
  []
 
@@ -378,42 +378,43 @@ Underfull \hbox (badness 10000) detected at line 661
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 10000) detected at line 719
+Underfull \hbox (badness 10000) detected at line 684
 [][]
  []
 
 
-LaTeX Warning: Citation `ffc' on page 4 undefined on input line 721.
-
-
-LaTeX Warning: Citation `pyop2isc' on page 4 undefined on input line 721.
+LaTeX Warning: Citation `ffc' on page 4 undefined on input line 686.
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
 
 LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
- 723.
+ 688.
 
 
-LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 723
+LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 688
 .
 
 [5]
-Underfull \hbox (badness 10000) detected at line 751
+Underfull \hbox (badness 10000) detected at line 716
 [][]
  []
 
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 757.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 722.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [6]
 
-LaTeX Warning: Reference `table:perf-results' on page 7 undefined on input line
- 769.
+LaTeX Warning: Reference `table:perf-results-licm-advdiff' on page 7 undefined 
+on input line 734.
 
 
-Underfull \hbox (badness 10000) in alignment at lines 805--805
-[][][][][][][][] 
+LaTeX Warning: Reference `table:perf-results-licm-burgers' on page 7 undefined 
+on input line 734.
+
+
+Underfull \hbox (badness 10000) in alignment at lines 764--764
+[][][][][][][] 
  []
 
 
@@ -424,6 +425,10 @@ ion: found PDF version <1.5>, but at most version <1.4> allowed
 File: Pictures/helmholtz-normalized.pdf Graphic file (type pdf)
 
 <use Pictures/helmholtz-normalized.pdf>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
 
 pdfTeX warning: pdflatex (file ./Pictures/advdiff-normalized.pdf): PDF inclusio
 n: found PDF version <1.5>, but at most version <1.4> allowed
@@ -445,7 +450,23 @@ File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-(./bare_conf.bbl)
+
+LaTeX Warning: Citation `Fenics' on page 7 undefined on input line 790.
+
+[7 <./Pictures/helmholtz-normalized.pdf> <./Pictures/advdiff-normalized.pdf>]
+(./bare_conf.bbl
+! Undefined control sequence.
+l.8 \newblock available at \url
+                               {http://hdl.handle.net/10044/1/7086 }.
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
+)
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -457,8 +478,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7 <./Pictures/helmholtz-normalized.pdf> <./Pictures/advdiff-normalized.pdf> <.
-/Pictures/burgers-normalized.pdf>] [8] (./bare_conf.aux)
+[8 <./Pictures/burgers-normalized.pdf>] (./bare_conf.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -467,11 +487,11 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3616 strings out of 495000
- 49688 string characters out of 1180492
- 157926 words of memory out of 3000000
- 6784 multiletter control sequences out of 15000+50000
- 46344 words of font info for 88 fonts, out of 3000000 for 9000
+ 3636 strings out of 495000
+ 50000 string characters out of 1180492
+ 157987 words of memory out of 3000000
+ 6802 multiletter control sequences out of 15000+50000
+ 46965 words of font info for 90 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
  32i,15n,25p,1938b,344s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
@@ -490,7 +510,7 @@ texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type
 1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.
 pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texm
 f-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (8 pages, 507865 bytes).
+Output written on bare_conf.pdf (8 pages, 518828 bytes).
 PDF statistics:
  626 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

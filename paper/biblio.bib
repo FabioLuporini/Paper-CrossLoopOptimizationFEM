@@ -44,6 +44,81 @@ C. Bertolli and D.~A. Ham and P.~H.~J.~ Kelly},
 	pages = {1116--1123}
 }
 
+@INPROCEEDINGS{Spampinato:14,
+AUTHOR = {Daniele G. Spampinato and Markus P{\"u}schel},
+TITLE = {A Basic Linear Algebra Compiler},
+BOOKTITLE = {International Symposium on Code Generation and Optimization (CGO)},
+YEAR = {2014}
+}
+
+@ARTICLE{Pueschel:05,
+AUTHOR = {Markus P{\"u}schel and Jos{\'e} M. F. Moura and Jeremy Johnson and David Padua and Manuela Veloso and Bryan Singer and Jianxin Xiong and Franz Franchetti and Aca Gacic and Yevgen Voronenko and Kang Chen and Robert W. Johnson and Nicholas Rizzolo},
+TITLE = {{SPIRAL}: Code Generation for {DSP} Transforms},
+JOURNAL = {Proceedings of the IEEE, special issue on ``Program Generation, Optimization, and Adaptation''},
+VOLUME = {93},
+NUMBER = {2},
+PAGES = {232-- 275},
+YEAR = {2005}
+}
+
+@article{assembly-opencl,
+ author = {Kruel, Filip and Bana, Krzysztof},
+ title = {Vectorized OpenCL Implementation of Numerical Integration for Higher Order Finite Elements},
+ journal = {Comput. Math. Appl.},
+ issue_date = {December, 2013},
+ volume = {66},
+ number = {10},
+ month = dec,
+ year = {2013},
+ issn = {0898-1221},
+ pages = {2030--2044},
+ numpages = {15},
+ url = {http://dx.doi.org/10.1016/j.camwa.2013.08.026},
+ doi = {10.1016/j.camwa.2013.08.026},
+ acmid = {2542945},
+ publisher = {Pergamon Press, Inc.},
+ address = {Tarrytown, NY, USA},
+ keywords = {Finite elements, Higher order approximation, Numerical integration, OpenCL, PowerXCell processor, Vectorization},
+} 
+
+
+@article{petsc-integration-gpu,
+ author = {Knepley, Matthew G. and Terrel, Andy R.},
+ title = {Finite Element Integration on GPUs},
+ journal = {ACM Trans. Math. Softw.},
+ issue_date = {February 2013},
+ volume = {39},
+ number = {2},
+ month = feb,
+ year = {2013},
+ issn = {0098-3500},
+ pages = {10:1--10:13},
+ articleno = {10},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/2427023.2427027},
+ doi = {10.1145/2427023.2427027},
+ acmid = {2427027},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Finite element integration, GPGPUs},
+} 
+
+@article{Markall20101815,
+title = "Towards generating optimised finite element solvers for \{GPUs\} from high-level specifications ",
+journal = "Procedia Computer Science ",
+volume = "1",
+number = "1",
+pages = "1815 - 1823",
+year = "2010",
+note = "\{ICCS\} 2010 ",
+issn = "1877-0509",
+doi = "http://dx.doi.org/10.1016/j.procs.2010.04.203",
+url = "http://www.sciencedirect.com/science/article/pii/S1877050910002048",
+author = "Graham R. Markall and David A. Ham and Paul H.J. Kelly",
+keywords = "Finite element method",
+keywords = "\{GPU\} "
+}
+
 @inproceedings{nek5000,
  author = {Shin, Jaewook and Hall, Mary W. and Chame, Jacqueline and Chen, Chun and Fischer, Paul F. and Hovland, Paul D.},
  title = {Speeding Up Nek5000 with Autotuning and Specialization},
@@ -61,6 +136,16 @@ C. Bertolli and D.~A. Ham and P.~H.~J.~ Kelly},
  address = {New York, NY, USA},
  keywords = {autotuning, empirical performance tuning, specialization},
 } 
+
+@MANUAL{fluidity_manual_v4,
+ title = {Fluidity Manual},
+ organization = {Applied Modelling and Computation Group},
+ address = {Department of Earth Science and Engineering, South Kensington Campus, Imperial College London, London, SW7 2AZ, UK},
+ edition = {Version 4.0-release},
+ month = {November},
+ year = {2010},
+ note = "available at \url{http://hdl.handle.net/10044/1/7086 }"
+}
 
 @Article{Francis,
   author =       "Francis P. Russell and Paul H. J. Kelly",
@@ -106,11 +191,33 @@ year = {2013},
 url = {https://github.com/OP2/OP2-Common/tree/sparse-tiling}
 }
 
-@ONLINE{bzr-ffc,
-title = {Bazaar repository of vector-register tiling framework},
-year = {2013},
-url = {https://code.launchpad.net/~f-luporini12/ffc/vector-ext}
-}
+@Misc{nek5000-web-page,
+  Author = "Paul F. Fischer, James W. Lottes and Stefan G. Kerkemeier",
+  Title  = "{nek5000} {W}eb page",
+  Note   = "http://nek5000.mcs.anl.gov",
+  Year   = "2008"}
+
+@article{FFC-TC,
+ author = {Kirby, Robert C. and Logg, Anders},
+ title = {A Compiler for Variational Forms},
+ journal = {ACM Trans. Math. Softw.},
+ issue_date = {September 2006},
+ volume = {32},
+ number = {3},
+ month = sep,
+ year = {2006},
+ issn = {0098-3500},
+ pages = {417--444},
+ numpages = {28},
+ url = {http://doi.acm.org/10.1145/1163641.1163644},
+ doi = {10.1145/1163641.1163644},
+ acmid = {1163644},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Variational form, automation, compiler, finite element},
+} 
+
+
 
 @article{op2-lcpc,
    title={Compiler Optimizations for Industrial Unstructured Mesh CFD Applications on GPUs},
@@ -141,17 +248,17 @@ url = {https://code.launchpad.net/~f-luporini12/ffc/vector-ext}
 % OP2 STUFF				     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-@incollection{op2-base,
-	Author = {Bertolli, Carlo and Betts, Adam and Mudalige, Gihan and Giles, Mike and Kelly, Paul},
-	Booktitle = {Euro-Par 2011: Parallel Processing Workshops},
-	Date-Added = {2013-03-26 04:10:04 +0000},
-	Date-Modified = {2013-03-26 04:10:04 +0000},
-	Pages = {191-200},
-	Publisher = {Springer},
-	Series = {Lecture Notes in Computer Science},
-	Title = {Design and Performance of the OP2 Library for Unstructured Mesh Applications},
-	Volume = {7155},
-	Year = {2012}}
+@article{op2-main,
+title = "Design and initial performance of a high-level unstructured mesh framework on heterogeneous parallel systems ",
+journal = "Parallel Computing ",
+volume = "39",
+number = "11",
+pages = "669 - 692",
+year = "2013",
+issn = "0167-8191",
+doi = "http://dx.doi.org/10.1016/j.parco.2013.09.004",
+author = "G.R. Mudalige and M.B. Giles and J. Thiyagalingam and I.Z. Reguly and C. Bertolli and P.H.J. Kelly and A.E. Trefethen"
+}
 	
 @article{volna,
 	Author = {Denys Dutykh and Rapha{\"e}l Poncet and Fr{\'e}d{\'e}ric Dias},
