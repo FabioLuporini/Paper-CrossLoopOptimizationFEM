@@ -267,7 +267,7 @@
 
 % *** PDF, URL AND HYPERLINK PACKAGES ***
 %
-%\usepackage{url}
+\usepackage{url}
 % url.sty was written by Donald Arseneau. It provides better support for
 % handling and breaking URLs. url.sty is already installed on most LaTeX
 % systems. The latest version can be obtained at:
@@ -294,7 +294,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{FEA-Comp: an Optimizing Compiler\\for Solving Partial Differential Equations}
+\title{XY: an Optimizing Compiler\\for Solving Partial Differential Equations}
 
 
 \author{\IEEEauthorblockN{Fabio Luporini\IEEEauthorrefmark{1},
@@ -377,7 +377,7 @@ The abstract goes here.
 \section{Introduction}
 In many fields, like computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by means of partial differential equations (PDEs). Numerical techniques, like finite volume method and finite element method, are widely employed to approximate solutions of PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each cell of the discretized domain by applying suitable numerical kernels. As the number of cells can be of the order of millions, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful porting of Hydra, a computational fluid dynamics industrial application devised by Rolls Royce for turbomachinery design (based on Finite Volume Method, roughly 50000 lines of code and mesh sizes that can be over 100 millions edges), to OP2~\cite{pyop2ics}, demonstrates the effectiveness of the DSL approach for implementing PDEs solvers~\cite{OP2-hydra}. 
 
-OP2 adopts a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted by~\cite{fenics, fluidity, lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in Finite Element Methods.
+OP2 adopts a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted by~\cite{Fenics, fluidity, lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in Finite Element Methods.
 
 We focus on Local Assembly (``assembly'', in the following), a fundamental step of a Finite Element Method that covers an important fraction of the overall computation run-time, often in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 30, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the Finite Element Method based on the OP2 abstraction~\cite{firedrake}.
 
@@ -628,10 +628,13 @@ $\rbrace$
 Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}.
 
 \begin{table}[h]
+\caption{Overview of code transformations for Firedrake-generated assembly kernels.}
+\label{table:code-transformations}
+\begin{center}
 \begin{tabulary}{1.0\columnwidth}{|C|C|}
 \hline
 Name (Abbreviation) & Parameter \\\hline\hline
-Auto-vectorizable Loop-invariant code motion ($licm$) &   \\ \hline
+Generalized loop-invariant code motion ($licm$) &   \\ \hline
 Padding &  \\ \hline
 Data Alignment & \\ \hline
 Loop interchange      & loops  \\ \hline
@@ -640,8 +643,7 @@ Register tiling & tile size \\ \hline
 Outer-product vectorization ($op$-$vect$) & tile size \\ \hline
 Assembly splitting ($split$) & split point, split factor \\ \hline
 \end{tabulary}
-\caption{Overview of code transformations for Firedrake-generated assembly kernels.}
-\label{table:code-transformations}
+\end{center}
 \end{table}
 
 % mention (obvious) composability
@@ -719,13 +721,13 @@ uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
 \section{Performance Evaluation}
 \label{sec:perf-results}
 
-Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and the Phi. The \texttt{icc 2013} compiler was used, with optimization level \texttt{-O2} and with auto-vectorization enabled (\texttt{-xAVX} on the Sandy Bridge, and \texttt{TODO} on the Phi). Other optimization levels performed, in general, slightly worse than \texttt{-O2}. Our code transformations were evaluated in three real-world problems expressible with Firedrake:
+Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and the Phi. The \texttt{icc 2013} compiler was used, with optimization level \texttt{-O2} and with auto-vectorization enabled (\texttt{-xAVX} on the Sandy Bridge, and \texttt{TODO} on the Phi). Other optimization levels performed, in general, slightly worse than \texttt{-O2}. Our code transformations were evaluated in three real-world problems based on the following PDEs:
 \begin{itemize}
 \item Helmholtz
 \item Advection-Diffusion
 \item Burgers
 \end{itemize}
-The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion, the ``Diffusion'' equation, which uses the same differential operators as Helmholtz, is considered. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem, i.e. the assembly is recalculated every time step based on the result of previous iterations. It employs differential operators different from those of Helmholtz, which has a major impact on the generated assembly code (Figure~\ref{code:burgers}), where a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) are accessed. 
+The code was written in UFL and then executed over real unstructured meshes through Firedrake. The Helmholtz code has already been shown in Figure~\ref{code:helmholtz}. For Advection-Diffusion, the ``Diffusion'' equation, which uses the same differential operators as Helmholtz, is considered. In the Diffusion kernel, the main differences with respect to Helmholtz are the absence of the $Y$ array and the presence of a few more constants for computing the stiffness matrix $A$. Burgers is a time-dependent problem, i.e. the assembly is recalculated every time step based on the result of previous iterations. It employs differential operators different from those of Helmholtz, which has a major impact on the generated assembly code (Figure~\ref{code:burgers}), where a larger number of basis function matrices ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$, ...) are accessed. 
 
 These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method. Intuitively, the larger the element shape, the bigger is the iteration space. Triangles (2D), tetrahedron (3D), and prisms (3D) were tested. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three kind of elements is, respectively, $3$, $4$, and $6$. Moving from 2D to 3D also increases the number of basis function arrays, since conceptually the behaviour of the equation has to be approximated also along the $z$ dimension. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders, from $p=1$ to $p=4$, are tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In such a large space of problems, the size of the stiffness matrix rarely excees 20$\times$20, with a peak of 105$\times$105 in Burgers with prisms and $p=4$. 
 
@@ -787,13 +789,13 @@ Tables~\ref{table:perf-results-licm-helmholtz},~\ref{table:perf-results-licm-adv
 
 \section{Related Work}
 \label{sec:related-work}
-The finite element method is used in the most disparate contexts to approximate solutions of PDEs. Well-known frameworks and applications include~\cite{nek5000-web-page},~\cite{Fenics},~\cite{fluidity_manual_v4}, and of course Firedrake; this is not an exhaustive list, though. Different techniques and algorithms are used depending on the level of accuracy that needs to be reached. When low-order polynomials are used, standard numerical integration is usually employed. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. For instance, methods based on tensor contraction~\cite{FFC-TC} and symbolic manipulation~\cite{Francis} have been implemented, although numerical integration remains the optimal choice for a wide class of problems~\cite{quadrature1}. 
+The finite element method is used in the most disparate contexts to approximate solutions of PDEs. Well-known frameworks and applications include nek5000~\cite{nek5000-web-page}, the Fenics project~\cite{Fenics}, Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake; this is not an exhaustive list, though. Numerical integration is usually employed to implement the local assembly phase. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. Methods based on tensor contraction~\cite{FFC-TC} and symbolic manipulation~\cite{Francis} have been developed, although it has been demonstrated that numerical integration remains the optimal choice for a wide class of problems~\cite{quadrature1}. 
 
-Optimization of local assembly using numerical integration for CPU platforms has been tackled in~\cite{quadrature1}. However, to the best of our knowledge, ours is the first work targeting low-level compiler optimizations. In~\cite{Markall20101815}, and more recently in~\cite{petsc-integration-gpu}, the problem has been studied for GPUs. In~\cite{assembly-opencl}, variants of the standard numerical integration algorithm are specialized for the PowerXCell processor and evaluated; it lacks, however, an exhaustive study from the compiler viewpoint as we did, and none of the optimizations presented in Section~\ref{sec:code-transf} is discussed. 
+Optimization of local assembly using numerical integration for CPU platforms has been tackled in~\cite{quadrature1}. However, to the best of our knowledge, ours is the first work targeting low-level optimizations and adopting a real compiler approach. In~\cite{Markall20101815}, and more recently in~\cite{petsc-integration-gpu}, the problem has been studied for GPU architectures. In~\cite{assembly-opencl}, variants of the standard numerical integration algorithm have been specialized for the PowerXCell processor and evaluated; The paper lacks, however, an exhaustive study from the compiler viewpoint as we did, and none of the optimizations presented in Section~\ref{sec:code-transf} are mentioned. 
 
-Domain-specific languages and automated code generation have been adopted with success in different fields. Spiral~\cite{Pueschel:05} automates generation of highly-optimized platform-specific digital signal processing numerical algorithms. Similar ideas are adopted in~\cite{Spampinato:14}, which proposes DSLs and compilers for dense linear algebra kernels. OP2~\cite{op2-main}, and its python implementation~\cite{pyop2isc}, which is also used by Firedrake, aim at achieving performance portability for scientific computations based on unstructured meshes. 
+Domain-specific languages and automated code generation have been adopted with success in different areas. Spiral~\cite{Pueschel:05} automates generation of highly-optimized platform-specific digital signal processing numerical algorithms. Similar ideas are adopted in~\cite{Spampinato:14}, where a DSL and a compiler for dense linear algebra kernels are proposed. OP2~\cite{op2-main}, and its python implementation~\cite{pyop2isc}, which is used by Firedrake to express iteration over meshes, aim at achieving performance portability for scientific codes based on unstructured meshes. Stencil DSLs and compilers, such as Pochoir~\cite{pochoir} and SDSL~\cite{stencil-compiler}, have been developed to support development and high performance in fields like image processing and scientific computations over structured grids.  
 
-- finding the best problem implementation: cost model based vs auto-tuning vs hybrid
+XY currently uses a simple cost model and heuristics to steer the optimization process. Many code generators, like those based on the Polyhedral model~\cite{PLUTO} and those driven by domain-knowledge~\cite{modeldriven}, make use of cost models. The other extreme consists of relying on auto-tuning to select the best implementation for a given problem on a certain platform. Notable examples include tuning of small matrix-matrix multiplies in nek5000~\cite{nek5000}, the ATLAS library~\cite{ATLAS}, and FFTW~\cite{FFTW} for fast fourier transforms. In both cases, pruning the implementation space, as we did in Section~\ref{sec:pyop2-compiler}, is fundamental to mitigate complexity and overhead. 
 
 %(i.e. given a mesh, those that lead to ``less accurate'' solutions than when using high-order polynomials, at a lower computational cost)
 
@@ -803,13 +805,14 @@ Domain-specific languages and automated code generation have been adopted with s
 \section{Conclusions}
 \label{sec:conclusions}
 
+In this paper we have presented design, optimizations and systematic performance evaluation of XY, a compiler for finite element local assembly. In this context, to the best of our knowledge, this is the first compiler oriented towards the introduction of low-level optimizations to maximize instruction-level parallelism, register locality and SIMD vectorization. Assembly kernels have peculiar characteristics. Their iteration space is usually very small, with the size depending on aspects like the degree of accuracy one wants to reach (polynomial order of the method) and the mesh discretization employed. The data space, in terms of number of matrices and scalar, grows proportionally to the complexity of the finite element problem. XY has been developed taking into account all of these aspects, knowing that some transformations are useful only in a subset of all possible problems. The various optimizations overcome limitations of current vendor and research compilers. The exploitation of domain-knowledge allows some of them to be particularly effective, as demonstrated by our experiments on two state-of-the-art Intel platforms. Further work include a comprehensive study about feasibility and constraints of transforming the kernel into a sequence of BLAS calls. XY supports all of the problems expressible in Firedrake, and it is already integrated with this framework. 
 
 
 
 % use section* for acknowledgement
 \section*{Acknowledgment}
 
-This research is partly funded by the MAPDES project and by the Department of Computing at Imperial College London. The authors would like to thank Prof. J. Ramanujam for his invaluable suggestions, and Dr. Lawrence Mitchell and Dr. Francis Russel for their contributions to the PyOP2 projects.
+This research is partly funded by the MAPDES project and by the Department of Computing at Imperial College London. The authors would like to thank Prof. J. Ramanujam for his invaluable suggestions, and Dr. Lawrence Mitchell and Dr. Francis Russell for their contribution to the PyOP2 project.
 
 
 

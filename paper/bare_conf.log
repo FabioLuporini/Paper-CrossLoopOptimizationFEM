@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  24 MAR 2014 18:11
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  25 MAR 2014 16:17
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -248,7 +248,10 @@ Package: algorithmic 2009/08/24 v0.1 Document Style `algorithmic'
 \ALC@tlm=\skip58
 \algorithmicindent=\skip59
 )
-(./bare_conf.aux
+(/usr/share/texmf-texlive/tex/latex/ltxmisc/url.sty
+\Urlmuskip=\muskip11
+Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
+) (./bare_conf.aux
 
 LaTeX Warning: Label `fig_first_case' multiply defined.
 
@@ -378,42 +381,42 @@ Underfull \hbox (badness 10000) detected at line 626
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 10000) detected at line 684
+Underfull \hbox (badness 10000) detected at line 686
 [][]
  []
 
 
-LaTeX Warning: Citation `ffc' on page 4 undefined on input line 686.
+LaTeX Warning: Citation `ffc' on page 4 undefined on input line 688.
 
 [4 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
 
 LaTeX Warning: Citation `reguly-inter-kernel' on page 5 undefined on input line
- 688.
+ 690.
 
 
-LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 688
+LaTeX Warning: Citation `quadrature-cuda' on page 5 undefined on input line 690
 .
 
 [5]
-Underfull \hbox (badness 10000) detected at line 716
+Underfull \hbox (badness 10000) detected at line 718
 [][]
  []
 
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 722.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 724.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [6]
 
 LaTeX Warning: Reference `table:perf-results-licm-advdiff' on page 7 undefined 
-on input line 734.
+on input line 736.
 
 
 LaTeX Warning: Reference `table:perf-results-licm-burgers' on page 7 undefined 
-on input line 734.
+on input line 736.
 
 
-Underfull \hbox (badness 10000) in alignment at lines 764--764
+Underfull \hbox (badness 10000) in alignment at lines 766--766
 [][][][][][][] 
  []
 
@@ -450,22 +453,10 @@ File: Pictures/burgers-normalized.pdf Graphic file (type pdf)
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-
-LaTeX Warning: Citation `Fenics' on page 7 undefined on input line 790.
-
 [7 <./Pictures/helmholtz-normalized.pdf> <./Pictures/advdiff-normalized.pdf>]
-(./bare_conf.bbl
-! Undefined control sequence.
-l.8 \newblock available at \url
-                               {http://hdl.handle.net/10044/1/7086 }.
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
+(./bare_conf.bbl [8 <./Pictures/burgers-normalized.pdf>]
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 74.
 )
 
 ** Conference Paper **
@@ -478,7 +469,9 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[8 <./Pictures/burgers-normalized.pdf>] (./bare_conf.aux)
+[9
+
+] (./bare_conf.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -487,10 +480,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3636 strings out of 495000
- 50000 string characters out of 1180492
- 157987 words of memory out of 3000000
- 6802 multiletter control sequences out of 15000+50000
+ 3715 strings out of 495000
+ 50936 string characters out of 1180492
+ 159144 words of memory out of 3000000
+ 6877 multiletter control sequences out of 15000+50000
  46965 words of font info for 90 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
  32i,15n,25p,1938b,344s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -510,9 +503,9 @@ texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type
 1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.
 pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texm
 f-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (8 pages, 518828 bytes).
+Output written on bare_conf.pdf (9 pages, 523787 bytes).
 PDF statistics:
- 626 PDF objects out of 1000 (max. 8388607)
+ 629 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 

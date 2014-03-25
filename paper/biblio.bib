@@ -185,11 +185,23 @@ year = {2014},
 url = {http://www.firedrakeproject.org}
 }
 
-@ONLINE{GITHUB,
-title = {GitHub repository of Sparse Tiling framework},
-year = {2013},
-url = {https://github.com/OP2/OP2-Common/tree/sparse-tiling}
-}
+@inproceedings{PLUTO,
+ author = {Bondhugula, Uday and Hartono, Albert and Ramanujam, J. and Sadayappan, P.},
+ title = {A Practical Automatic Polyhedral Parallelizer and Locality Optimizer},
+ booktitle = {Proceedings of the 2008 ACM SIGPLAN Conference on Programming Language Design and Implementation},
+ series = {PLDI '08},
+ year = {2008},
+ isbn = {978-1-59593-860-2},
+ location = {Tucson, AZ, USA},
+ pages = {101--113},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/1375581.1375595},
+ doi = {10.1145/1375581.1375595},
+ acmid = {1375595},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {affine transformations, automatic parallelization, locality optimization, loop transformations, polyhedral model, tiling},
+} 
 
 @Misc{nek5000-web-page,
   Author = "Paul F. Fischer, James W. Lottes and Stefan G. Kerkemeier",
@@ -217,31 +229,67 @@ url = {https://github.com/OP2/OP2-Common/tree/sparse-tiling}
  keywords = {Variational form, automation, compiler, finite element},
 } 
 
-
-
-@article{op2-lcpc,
-   title={Compiler Optimizations for Industrial Unstructured Mesh CFD Applications on GPUs},
-   author={Bertolli, C. and Betts, A. and Loriant, N. and Mudalige, GR and Radford, D. and Giles, MB and Kelly, PHJ},
-   year={2012}
-}
-
-@inproceedings{LOOPFUSION,
- author = {Bertolli, Carlo and Betts, Adam and Kelly, Paul H.J. and Mudalige, Gihan R. and Giles, Mike B.},
- title = {Mesh independent loop fusion for unstructured mesh applications},
- booktitle = {Proceedings of the 9th conference on Computing Frontiers},
- series = {CF '12},
- year = {2012},
- isbn = {978-1-4503-1215-8},
- location = {Cagliari, Italy},
- pages = {43--52},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/2212908.2212917},
- doi = {10.1145/2212908.2212917},
- acmid = {2212917},
+@inproceedings{pochoir,
+ author = {Tang, Yuan and Chowdhury, Rezaul Alam and Kuszmaul, Bradley C. and Luk, Chi-Keung and Leiserson, Charles E.},
+ title = {The Pochoir Stencil Compiler},
+ booktitle = {Proceedings of the Twenty-third Annual ACM Symposium on Parallelism in Algorithms and Architectures},
+ series = {SPAA '11},
+ year = {2011},
+ isbn = {978-1-4503-0743-7},
+ location = {San Jose, California, USA},
+ pages = {117--128},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1989493.1989508},
+ doi = {10.1145/1989493.1989508},
+ acmid = {1989508},
  publisher = {ACM},
  address = {New York, NY, USA},
- keywords = {compilers, loop fusion, unstructured mesh applications, whole program control flow analysis}
+ keywords = {C++, cache-oblivious algorithm, cilk, compiler, embedded domain-specific language, multicore, parallel computation, stencil computation, trapezoidal decomposition},
 } 
+
+@inproceedings{ATLAS,
+ author = {Whaley, R. Clint and Dongarra, Jack J.},
+ title = {Automatically Tuned Linear Algebra Software},
+ booktitle = {Proceedings of the 1998 ACM/IEEE Conference on Supercomputing},
+ series = {Supercomputing '98},
+ year = {1998},
+ isbn = {0-89791-984-X},
+ location = {San Jose, CA},
+ pages = {1--27},
+ numpages = {27},
+ url = {http://dl.acm.org/citation.cfm?id=509058.509096},
+ acmid = {509096},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ keywords = {BLAS, code generation, high performance, linear algebra, optimization, tuning},
+} 
+
+@INPROCEEDINGS{FFTW,
+    author = {Matteo Frigo and Steven and G. Johnson},
+    title = {The design and implementation of FFTW3},
+    booktitle = {Proceedings of the IEEE},
+    year = {2005},
+    pages = {216--231}
+}
+
+@inproceedings{stencil-compiler,
+ author = {Henretty, Tom and Veras, Richard and Franchetti, Franz and Pouchet, Louis-No\"{e}l and Ramanujam, J. and Sadayappan, P.},
+ title = {A Stencil Compiler for Short-vector SIMD Architectures},
+ booktitle = {Proceedings of the 27th International ACM Conference on International Conference on Supercomputing},
+ series = {ICS '13},
+ year = {2013},
+ isbn = {978-1-4503-2130-3},
+ location = {Eugene, Oregon, USA},
+ pages = {13--24},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/2464996.2467268},
+ doi = {10.1145/2464996.2467268},
+ acmid = {2467268},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {dsl, multicore, simd, split tiling, stencils},
+} 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
