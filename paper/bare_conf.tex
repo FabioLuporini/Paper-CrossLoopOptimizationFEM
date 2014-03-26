@@ -129,7 +129,7 @@
 
 % *** SPECIALIZED LIST PACKAGES ***
 %
-\usepackage[longend,linesnumbered]{algorithm2e}
+\usepackage[longend,linesnumbered,figure]{algorithm2e}
 \usepackage{algorithmic}
 
 
@@ -294,7 +294,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{XY: an Optimizing Compiler\\for Solving Partial Differential Equations}
+\title{XY: an Optimizing Compiler\\for Finite Element Local Assembly}
 
 
 \author{\IEEEauthorblockN{Fabio Luporini\IEEEauthorrefmark{1},
@@ -348,8 +348,11 @@ Paul H. J. Kelly\IEEEauthorrefmark{1}}
 
 \begin{abstract}
 %\boldmath
-The abstract goes here.
+The finite element method is widely-employed to determine approximated solutions of partial differential equations. Local assembly is one of its fundamental steps covering a considerable fraction of the overall run-time. In this paper we present design, implementation and systematic performance evaluation of XY, an optimizing compiler for local assembly numerical kernels. An abstract syntax tree of such kernels is provided to XY by the higher layer of abstractions, which make extensive use of domain-specific languages. XY manipulates this abstract representation by introducing composable optimizations aimed at improving instruction-level parallelism, register locality and SIMD vectorization. It then generates C code, possibly including AVX or LBRi intrinsics, which is eventually just-in-time compiled on the underlying architecture and executed. Performance evaluation using a suite of examples of real-world importance showed that speed-ups over non-optimized kernels between 1.32$\times$ and 4.44$\times$ can be achieved.
 \end{abstract}
+
+
+
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
 % if the conference you are submitting to favors bold math in the abstract,
@@ -357,7 +360,9 @@ The abstract goes here.
 % of the abstract to achieve this. Many IEEE journals/conferences frown on
 % math in the abstract anyway.
 
-% no keywords
+\begin{IEEEkeywords}
+Finite element method, compilers, optimizations, simd vectorization 
+\end{IEEEkeywords}
 
 
 
@@ -375,11 +380,11 @@ The abstract goes here.
 
 
 \section{Introduction}
-In many fields, like computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by means of partial differential equations (PDEs). Numerical techniques, like finite volume method and finite element method, are widely employed to approximate solutions of PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each cell of the discretized domain by applying suitable numerical kernels. As the number of cells can be of the order of millions, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful porting of Hydra, a computational fluid dynamics industrial application devised by Rolls Royce for turbomachinery design (based on Finite Volume Method, roughly 50000 lines of code and mesh sizes that can be over 100 millions edges), to OP2~\cite{pyop2ics}, demonstrates the effectiveness of the DSL approach for implementing PDEs solvers~\cite{OP2-hydra}. 
+In many fields, like computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by means of partial differential equations (PDEs). Numerical techniques, like finite volume method and finite element method, are widely employed to approximate solutions of PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each cell of the discretized domain by applying suitable numerical kernels. As the number of cells can be of the order of millions, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful porting of Hydra, a computational fluid dynamics industrial application devised by Rolls Royce for turbomachinery design (based on Finite Volume Method, roughly 50000 lines of code and mesh sizes that can be over 100 millions edges), to OP2~\cite{pyop2isc}, demonstrates the effectiveness of the DSL approach for implementing PDEs solvers~\cite{OP2-hydra}. 
 
-OP2 adopts a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted by~\cite{Fenics, fluidity, lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in Finite Element Methods.
+OP2 adopts a kernel-oriented programming model, in which the computation semantics is expressed through self-contained functions (``kernels''). A kernel is applied to all elements in a set of mesh components (e.g. edges, vertices, elements), with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted in~\cite{Fenics},~\cite{fluidity_manual_v4},~\cite{lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem by proposing a domain-driven optimization strategy for a class of kernels used in Finite Element Methods.
 
-We focus on Local Assembly (``assembly'', in the following), a fundamental step of a Finite Element Method that covers an important fraction of the overall computation run-time, often in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 30, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the Finite Element Method based on the OP2 abstraction~\cite{firedrake}.
+We focus on Local Assembly (``assembly'', in the following), a fundamental step of a finite element method that covers an important fraction of the overall computation run-time, often in the range 30$\%$-60$\%$. During the assembly phase, the solution of the PDE is approximated by executing a suitable kernel over all elements in the discretized domain. A kernel's working set is usually small enough to fit the L1 cache; it might need L2 cache when high-order methods are employed to improve the accuracy of the solution. However, we do not consider the latter case. An assembly kernel is characterized by the presence of an affine, usually non-perfect loop nest, where individual loops are rather small (the trip count rarely exceeds 30, with a minimum value of 3, depending on the order of the method). With such small kernels, we focus on aspects like minimization of floating-point operations, register allocation and instruction-level parallelism, especially in the form of SIMD vectorization. Our study is conducted in the context of Firedrake, a system for solving PDEs through the finite element method based on the OP2 abstraction~\cite{firedrake}.
 
 Optimization of assembly kernels is non-trivial. Given their structure and the exceptionally small size, assembly kernels benefit from transformations like generalized loop-invariant code motion, vector-register tiling and code splitting, which are not supported by state-of-the-art polyhedral and vendor compilers. BLAS routines could be theoretically employed, although fairly complicated control- and data-flow analysis would be required to automate identification and extraction of matrix-matrix multiplications. BLAS libraries are also known to perform far from peak performance when the dimension of the matrices is small~\cite{nek5000}. As detailed in Section~\ref{sec:perf-results}, hand-made BLAS implementations of the Helmholtz assembly kernel (illustrated later) have run-times worse than those achieved with our optimization strategy. 
 
@@ -387,9 +392,9 @@ Optimization of assembly kernels is non-trivial. Given their structure and the e
 
 %Also, tiling at the level of vector register, achievable through a non-affine transformation of the iteration space, has showed a significant performance improvement in a range of problems. .
 
-Given the constraints on polyhedral compilation and linear-algebra-specialized libraries, we address assembly optimization by studying a set of domain-specific code transformations, applicable to a wide class of problems. We have developed an optimizing compiler and we have integrated it with Firedrake, a system for the resolution of PDEs based on the finite element method~\cite{firedrake}. This allows us to evaluate our code transformations in a range of real-world problems, varying parameters that impact both solution accuracy and kernel cost, namely the polynomial order of the method (from $p=1$ to $p=4$) and the mesh type (2D, 3D, 3D hybrid structured-unstructured). 
+Given the constraints on polyhedral compilation and linear-algebra-specialized libraries, we address assembly optimization by studying a set of domain-specific code transformations, applicable to a wide class of problems. We have developed an optimizing compiler and we have integrated it with Firedrake. This allows us to evaluate our code transformations in a range of real-world problems, varying parameters that impact both solution accuracy and kernel cost, namely the polynomial order of the method (from $p=1$ to $p=4$) and the mesh type (2D, 3D, 3D hybrid structured-unstructured). 
 
-Early experiments showed that Firedrake-generated code for non-trivial assembly kernels was sub-optimal. Our cost-model-driven sequence of source-to-source code transformations, aimed at improving SIMD vectorization and register data locality, can result in performance improvements up to 33$\%$ over ``softly-optimized'' code (i.e. where only basic transformations are performed, such as loop-invariant code motion, padding and data alignment), and up to 77$\%$ over original kernels. The contribution of this paper is threefold
+Early experiments showed that Firedrake-generated code for non-trivial assembly kernels was sub-optimal. Our cost-model-driven sequence of source-to-source code transformations, aimed at improving SIMD vectorization and register data locality, can result in performance improvements up to 1.5$\times$ over ``softly-optimized'' code (i.e. where only basic transformations are performed, such as loop-invariant code motion, padding and data alignment), and up to 4.44$\times$ over original kernels. The contribution of this paper is threefold
 \begin{itemize}
 \item An optimisation strategy for a class of kernels widely-used in scientific applications, namely local assembly in the context of the finite element method. Our approach exploits domain knowledge to go beyond the limits of both vendor (e.g. $icc$) and research (e.g. polyhedral) compilers.
 \item Design and implementation of a compiler that automates the proposed code transformations for any problems expressible in Firedrake.
@@ -405,10 +410,9 @@ The paper is organized as follows. In Section~\ref{sec:background} we provide so
 \section{Background}
 \label{sec:background}
 %Here we discuss about the computational characteristics of computational science kernels. Briefly cite op2 kernels. Emphasis on Finite Element Assembly. Generalization and formalization of a Finite Element Assembly kernel using quadrature representation.
+
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=1$ elements).}
-\label{code:helmholtz}
 \KwSty{void} helmholtz(double A[3][3], double **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~\\
@@ -426,12 +430,12 @@ The paper is organized as follows. In Section~\ref{sec:background} we provide so
 ~~~~~~~~~~~*(K0*X$\_$D10[i][j]+K2*X$\_$D01[i][j])))*\\
 ~~~~~~~~~~~*det*W3[i]);\\
 $\rbrace$
+\caption{Local assembly code generated by Firedrake for a Helmholtz problem on a 2D triangular mesh with Lagrange $p=1$ elements.}
+\label{code:helmholtz}
 \end{algorithm}
 
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by FFC for a Burgers problem (3D mesh, Lagrange $p=1$ elements).}
-\label{code:burgers}
 \KwSty{void} burgers(double A[12][12], double **c, double **w) $\lbrace$\\
 ~~// K, det = Compute Jacobian (c) \\
 ~~\\
@@ -461,11 +465,13 @@ $\rbrace$
 ~~~~~~~~~*det*W5[i]);\\
 ~~$\rbrace$ \\
 $\rbrace$
+\caption{Local assembly code generated by Firedrake for a Burgers problem on a 3D tetrahedral mesh with Lagrange $p=1$ elements.}
+\label{code:burgers}
 \end{algorithm}
 
-Local assembly consists of evaluating so called element stiffness matrix (just stiffness matrix in the following) and element stiffness vector; in this work, we focus on computation of stiffness matrices, which is the costly part of the process. A stiffness matrix can be intuitively thought as an approximated representation of the PDE solution in a specific cell (or element) of the discretized domain. Numerical integration algorithms are widely-used in assembly codes to evaluate stiffness matrices~\cite{quadrature1, quadrature2}. 
+Local assembly consists of evaluating so called element stiffness matrix (just stiffness matrix in the following) and element stiffness vector; in this work, we focus on computation of stiffness matrices, which is the costly part of the process. A stiffness matrix can be intuitively thought as an approximated representation of the PDE solution in a specific cell (or element) of the discretized domain. Numerical integration algorithms are widely-used in assembly codes to evaluate stiffness matrices~\cite{quadrature1, fluidity_manual_v4}. 
 
-Given a mathematical description of the input problem, expressed through the domain-specific Unified Form Language~\cite{ufl}, Firedrake generates C-code kernels implementing assembly using a numerical integration algorithm. It then triggers compilation of such kernels using an available vendor compiler, and eventually manages parallel execution over the mesh. The subject of this papaer is to enhance this execution model by adding an optimization stage prior to the generation of C code. The code transformations described next are also generalizable to non-Firedrake assembly kernels, provided that numerical integration is used. Notable examples are~\cite{uflacs, fluidity, mcfc}, in which the kernel's loop nest and memory access pattern are reducible to that generated by Firedrake.
+Given a mathematical description of the input problem, expressed through the domain-specific Unified Form Language~\cite{ufl}, Firedrake generates C-code kernels implementing assembly using a numerical integration algorithm. It then triggers compilation of such kernels using an available vendor compiler, and eventually manages parallel execution over the mesh. The subject of this papaer is to enhance this execution model by adding an optimization stage prior to the generation of C code. The code transformations described next are also generalizable to non-Firedrake assembly kernels, provided that numerical integration is used.
 
 The complexity of Firedrake-generated kernels depends on the finite element problem being solved. In simpler cases, the loop nest is perfect, it has short trip counts (in the range 3-15), and the computation reduces to a summation of a few products. An example is provided in Figure~\ref{code:helmholtz}, which shows an assembly kernel for a Helmholtz problem, using Lagrange basis functions on 2D elements with polynomial order $p=1$. The stiffness matrix in the code is called $A$. In other scenarios, for instance when solving a non-linear problem like Burgers (see Figure~\ref{code:burgers}), the number of arrays involved in the computation of $A$ can be much larger: in this case, 14 unique arrays are accessed, and the same array can be referenced multiple times within the expression. Also, constants evaluated in outer loops (called $F$ in the code), acting as scaling factors of arrays, may be required; trip counts can be larger (proportionally to the order of the method); arrays may be block-sparse. Note that in addition to a larger number of operations to compute the stiffness matrix, the Burgers case shows a register pressure higher than that in Helmholtz. Despite assembly kernels being problem-dependent, meaning that the space of codes that Firedrake can generate is infinite, it is still possible to identify common domain-specific traits, which can be exploited for effective code transformations and SIMD vectorization.
 
@@ -480,8 +486,6 @@ The class of kernels we are considering has, in particular, some peculiarities. 
 
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=1$ elements). The padding, data alignment and $licm$ optimizations are applied. Data alignment and padding relate to an AVX machine. In this specific case, sub-expressions invariant to $j$ are identical to those invariant to $k$; in general, this might not be the case.}
-\label{code:helmholtz-licm}
 \KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
 ~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
 ~~// K, det = Compute Jacobian (coords) \\
@@ -504,6 +508,8 @@ The class of kernels we are considering has, in particular, some peculiarities. 
 ~~~~~~~~~~~~~~~~~~~~+LI$\_$1[k]*LI$\_$1[j])*det*W3[i]);\\
 ~~$\rbrace$\\
 $\rbrace$
+\caption{Local assembly code generated by Firedrake when padding, data alignment, and $licm$ are applied to the Helmholtz problem given in Figure~\ref{code:helmholtz}. Data alignment and padding are for an AVX machine. In this specific case, sub-expressions invariant to $j$ are identical to those invariant to $k$, so they can be precomputed once in a single loop $r$; in general, this might not be the case.}
+\label{code:helmholtz-licm}
 \end{algorithm}
 
 
@@ -533,26 +539,23 @@ where $B$ is the set of all matrices (or temporaries) accessed in the kernel, wh
 %More importantly, we avoid using $vl$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vl$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers. 
 
 \begin{figure}[h]
-\normalsize
-\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect.pdf}
-\label{fig:vect-by-vect}}
+\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect.pdf}}
 \caption{Outer-product vectorization by permuting values in a vector register.}
+\label{fig:vect-by-vect}
 \end{figure}
 
 The storage layout of $A$, however, is incorrect after the application of this ``outer-product vectorization'' ($op$-$vect$). We efficiently restore it with a sequence of vector shuffles following the pattern highlighted in Figure~\ref{fig:restore-layout}, executed once outside of the $ijk$ loop nest. The generated pseudo-code for the simple Helmholtz problem when using $op$-$vect$ is shown in Figure~\ref{code:helmholtz-opvect}.
 
 \begin{figure}[t]
-\centerline{\includegraphics[scale=0.7]{Pictures/vect-restore.pdf}
-\label{fig:restore-layout}}
+\centerline{\includegraphics[scale=0.7]{Pictures/vect-restore.pdf}}
 \caption{Restoring the storage layout after $op$-$vect$. The figure shows how 4$\times$4 elements in the top-left block of the stiffness matrix $A$ can be brought to their correct positions.}
+\label{fig:restore-layout}
 \end{figure}
 
 %are sufficiently large to prevent register reuse along the innermost dimension $k$. A combination of the two scenarios is also possible. We want to exploit the small size of the iteration space and the structure of the computation to optimize register management.
 
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=2$ elements). The padding, data alignment, $licm$ and $op$-$vect$ optimizations are applied. Data alignment and padding relate to an AVX machine. The original size of the $j$-$k$ iteration space (i.e. before padding was applied) was 6$\times$6. In this example, the unroll-and-jam factor is 1.}
-\label{code:helmholtz-opvect}
 \KwSty{void} helmholtz(double A[8][8], double **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~// Declaration of basis function matrices \\
@@ -589,18 +592,18 @@ The storage layout of $A$, however, is incorrect after the application of this `
 ~~~~$\rbrace$\\
 ~~$\rbrace$\\
 $\rbrace$
+\caption{Local assembly code generated by Firedrake when padding, data alignment, $licm$ and $op$-$vect$ are applied to the Helmholtz problem given in Figure~\ref{code:helmholtz}. Here, we assume the polynomial order is $p=2$, since $op$-$vect$ can not be used when an iteration space dimension is smaller than the vector length. The original size of the $j$-$k$ iteration space (i.e. before padding was applied) was 6$\times$6. In this example, the unroll-and-jam factor is 1.}
+\label{code:helmholtz-opvect}
 \end{algorithm}
 
 
 % Splitting
-\subsection{Code splitting}
+\subsection{Expression Splitting}
 In complex kernels, like Burgers' in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension is close to or greater than the number of available CPU registers, it is likely to obtain poor register reuse. This usually happens when the number of basis function matrices, temporaries introduced by loop-invariant code motion, and problem constants is large. For example, applying loop-invariant code motion to Burgers on a 3D mesh needs 33 temporaries for the $ijk$ loop order, and compiler's hoisting of invariant loads out of the $k$ loop can be inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the stiffness matrix $A$ into multiple sub-expressions; an example, for the simpler Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. Splitting an expression has, in general, several drawbacks. Firstly, it increases the number of accesses to $A$ proportially to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation (e.g. the product $det*W3[i]$ is performed times number of sub-expressions in the code of Figure~\ref{code:helmholtz-split}). Finally, it might affect register locality, although this is not the case of the Helmholtz example: for instance, the same matrix could be accessed in different sub-expressions, requiring a proportional number of loads be performed. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
 
 
 \begin{algorithm}[t]
 \small
-\caption{Local assembly code generated by Firedrake for a Helmholtz problem (2D mesh, Lagrange $p=1$ elements). The padding, data alignment, $licm$ and $split$ optimizations are applied. Data alignment and padding relate to an AVX machine. In this specific case, the split factor is 2.}
-\label{code:helmholtz-split}
 \KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
 ~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
 ~~// K, det = Compute Jacobian (coords) \\
@@ -623,13 +626,13 @@ In complex kernels, like Burgers' in Figure~\ref{code:burgers}, and on certain a
 ~~~~~~~~A[j][k] += LI$\_$1[k]*LI$\_$1[j]*det*W3[i];\\
 ~~$\rbrace$\\
 $\rbrace$
+\caption{Local assembly code generated by Firedrake when $split$ is applied to the optimized Helmholtz problem given in Figure~\ref{code:helmholtz-licm}. In this example, the split factor is 2.}
+\label{code:helmholtz-split}
 \end{algorithm}
 
 Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}.
 
 \begin{table}[h]
-\caption{Overview of code transformations for Firedrake-generated assembly kernels.}
-\label{table:code-transformations}
 \begin{center}
 \begin{tabulary}{1.0\columnwidth}{|C|C|}
 \hline
@@ -644,24 +647,25 @@ Outer-product vectorization ($op$-$vect$) & tile size \\ \hline
 Assembly splitting ($split$) & split point, split factor \\ \hline
 \end{tabulary}
 \end{center}
+\caption{Overview of code transformations for Firedrake-generated assembly kernels.}
+\label{table:code-transformations}
 \end{table}
 
 % mention (obvious) composability
 
-\section{The PyOP2 Compiler}
+\section{Overview of the XY Compiler}
 \label{sec:pyop2-compiler}
 %Design and structure of the PyOP2 Compiler. Show the steps through which the IR is transformed (need to cite Firedrake here). Briefly describe a simple cost model that allows us to prune the space of code transformations.
 
 \begin{algorithm}[t]
-\caption{The PyOP2 compiler.}
 \label{algo:PyOP2Compiler}
-  \textbf{The PyOP2 Compiler}\\
+  \textbf{The XY Compiler}\\
   \KwIn{ast, wrapper, isa}
   \KwOut{code}
 // Analyze ast and build optimization plan \\
 it\_space = analyze(ast) \\
 \If{\KwSty{not} it\_space}{
-  ast.apply\_inter\_kernel\_vectorization(wrapper)
+  ast.apply\_inter\_kernel\_vectorization(wrapper, isa)
   \Return{wrapper + ast.from\_ast\_to\_c()}
 }
 \If{isa.backend == gpu}{
@@ -680,24 +684,25 @@ ast.data\_align() \\
   ast.split(plan.sz\_split)
 }
 \If{plan.uaj\_factor}{
-  ast.op\_vect(plan.uaj\_factor)
+  uaj = MIN(plan.uaj\_factor, $\lfloor$it\_space.j.size/isa.vf$\rfloor$) \\
+  ast.op\_vect(uaj)
 }
 \Return{wrapper + ast.from\_ast\_to\_c()}
+\caption{Pseudocode of the XY pipeline.}
 \end{algorithm}
 
-Firedrake provides users with the Unified Form Language to write problems in a notation resembling mathematical equations. This high-level specification is translated by the Fenics Form Compiler~\cite{ffc} into an Abstract Syntax Tree representation of a Finite Element assembly kernel. ASTs are then passed to PyOP2~\cite{pyop2isc}, which lies at the core of Firedrake, where parallel execution over the unstructured mesh is managed. Our compiler, capable of applying the transformations described in Section~\ref{sec:code-transf}, is integrated with PyOP2: it receives FFC's ASTs as input, it introduces optimizations, and it generates C code as output, which is eventually just-in-time compiled on the underlying architecture. Because of the large number of (possibly parametric) transformations, we need a mechanism to select the most suitable optimization strategy for a given problem. Autotuning might be used, although at the moment we avoid it to minimize the run-time overhead. Our optimization strategy, based on heuristics and a simple cost model, is described in the following, along with an overview of our compiler.
+Firedrake provides users with the Unified Form Language to write problems in a notation resembling mathematical equations. This high-level specification is translated by the Fenics Form Compiler~\cite{FFC-Compiler} into an Abstract Syntax Tree representation of a Finite Element assembly kernel. ASTs are then passed to PyOP2~\cite{pyop2isc}, which lies at the core of Firedrake, where parallel execution over the unstructured mesh is managed. Our compiler, capable of applying the transformations described in Section~\ref{sec:code-transf}, is integrated with PyOP2: it receives FFC's ASTs as input, it introduces optimizations, and it generates C code as output, which is eventually just-in-time compiled on the underlying architecture. Because of the large number of (possibly parametric) transformations, we need a mechanism to select the most suitable optimization strategy for a given problem. Autotuning might be used, although at the moment we avoid it to minimize the run-time overhead. Our optimization strategy, based on heuristics and a simple cost model, is described in the following, along with an overview of our compiler.
 
-The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially, an AST is inspected, looking for the presence of iteration spaces and other domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been proved to be useful in several Finite-Volume-based applications~\cite{reguly-inter-kernel}. The second transformation step is applied if the backend is a manycore machine, like a GPU: the compiler tries to extract parallelism from inside the kernel, by partitioning loop iterations among different threads, if these are found to be independent~\cite{quadrature-cuda}. Then, an ordered sequence of optimization steps are executed. Application of $licm$ must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, the $split$ and $op$-$vect$ transformations may be introduced; their implementation is based on analysis and trasformation of the AST. When $op$-$vect$ is selected, the compiler outputs proper AVX (or LRbi) intrinsics code. Any possible corner cases are handled: for example, if $op$-$vect$ is to be applied, but the size of the iteration space is not a multiple of the vector length, then a reminder loop, amenable to auto-vectorization, is inserted. 
+The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially, an AST is inspected, looking for the presence of iteration spaces and other domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been proved to be useful in several Finite-Volume-based applications~\cite{inter-kernel-vect}. The second transformation step is applied if the backend is a manycore machine, like a GPU: the compiler tries to extract parallelism from inside the kernel, by partitioning loop iterations among different threads, if these are found to be independent~\cite{quadrature-cuda}. Then, an ordered sequence of optimization steps are executed. Application of $licm$ must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, the $split$ and $op$-$vect$ transformations may be introduced; their implementation is based on analysis and trasformation of the AST. When $op$-$vect$ is selected, the compiler outputs proper AVX (or LRbi) intrinsics code. Any possible corner cases are handled: for example, if $op$-$vect$ is to be applied, but the size of the iteration space is not a multiple of the vector length, then a reminder loop, amenable to auto-vectorization, is inserted. 
 
-The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes into account the number of available vector registers ($n\_regs$) and the number of variables iterating along the $j$ and $k$ dimensions ($n\_consts$ for independent variables, $n\_outer\_arrays$ for $j$ variables, and $n\_inner\_arrays$ for $k$ variables, assuming the $ijk$ loop order) to estimate unroll-and-jam and split factors when, respectively, $op$-$vect$ and $split$ are used (if a factor is 0, then the corresponding transformation is not applied). The $split$ transformation is triggered whenever the number of hoistable terms is larger than the available registers along the outer dimension (lines 3-8), which is approximated as half of the total (line 2). A split factor of $n$ means that the assembly expression should be ``cut'' into $n$ sub-expressions. Depending on the structure of the assembly expression, each sub-expression might end up accessing a different number of arrays; the cost model is simplified by assuming that all sub-expressions are of the same size. Finally, the unroll-and-jam factor for the $op$-$vect$ transformation is determined as a function of the available registers, i.e. those not used for storing hoisted terms (line 9-11). 
+The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes into account the number of available logical vector registers ($n\_regs$) and the number of variables iterating along the $j$ and $k$ dimensions ($n\_consts$ for independent variables, $n\_outer\_arrays$ for $j$ variables, and $n\_inner\_arrays$ for $k$ variables, assuming the $ijk$ loop order) to estimate unroll-and-jam and split factors when, respectively, $op$-$vect$ and $split$ are used. The $n\_consts$ parameter includes temporary registers to carry out computations, so setting its value is partly driven by heuristics. If a factor is 0, then the corresponding transformation is not applied. The $split$ transformation is triggered whenever the number of hoistable terms is larger than the available registers along the outer dimension (lines 3-8), which is approximated as half of the total (line 2). A split factor of $n$ means that the assembly expression should be ``cut'' into $n$ sub-expressions. Depending on the structure of the assembly expression, each sub-expression might end up accessing a different number of arrays; the cost model is simplified by assuming that all sub-expressions are of the same size. Finally, the unroll-and-jam factor for the $op$-$vect$ transformation is determined as a function of the available registers, i.e. those not used for storing hoisted terms (line 9-11). 
 
-Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters, like the unroll factor, becomes of great importance. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, recent versions of a vendor compiler like $intel$'s (or $icc$) employ cost models capable of estimating close-to-optimal values for such parameters.  We therefore leave the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying unroll-based optimizations, even if specific pragmas are added.
+Loop unroll and unroll-and-jam of outer loops are fundamental to expose ILP and data reuse, and so tuning critical parameters, like the unroll factor, becomes of great importance. It is our experience (inspection of assembly code, comparison with other hand-made implementations), however, that for assembly kernels, where the loop nest is affine, bounds are known at compile-time, and memory accesses are unit-stride, recent versions of a vendor compiler like $intel$'s (or $icc$) employ cost models capable of estimating close-to-optimal values for such parameters. We leave therefore the backend compiler in charge to select unroll and unroll-and-jam factors. This choice also simplifies the compiler's cost model. The only situation in which we explicitly unroll-and-jam a loop is when $op$-$vect$ is used, since the transformed code seems to prevent the $icc$ compiler from applying unroll-based optimizations, even if specific pragmas are added. Note that, regardless of the output of the cost model, the unroll-and-jam factor never exceeds the actual size of the outer loop (line 25 in Figure~\ref{algo:PyOP2Compiler}, assuming the default loop order $ijk$).
 
 All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations $ijk$ and $ikj$ are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required every iteration; experiments showed that the performance loss is greater than the gain due to the possibility of accumulating increments in a register, rather than in memory, along the $i$ loop. The choice between $ijk$ and $ikj$ depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses, as outer, the loop along which the number of invariant loads is smaller so that more registers are availabe to carry out the computation of the stiffness matrix. 
 
 
 \begin{algorithm}[t]
-\caption{The cost model is employed by the compiler to estimate the most suitable unroll-and-jam (when $op$-$vect$ is used) and split factors, avoiding the overhead of auto-tuning.}
 \label{algo:applyCostModel}
   \textbf{Cost Model}\\
   \KwIn{n\_outer\_arrays, n\_inner\_arrays, n\_consts, n\_regs}
@@ -715,12 +720,14 @@ split\_factor = 0 \\
 n\_regs\_avail = n\_regs - (n\_outer\_arrays + n\_consts)\\
 uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
 \Return{$<$split\_factor, uaj\_factor$>$}
+\caption{The cost model is employed by the compiler to estimate the most suitable unroll-and-jam (when $op$-$vect$ is used) and split factors, avoiding the overhead of auto-tuning.}
 \end{algorithm}
 
 
 \section{Performance Evaluation}
 \label{sec:perf-results}
 
+\subsection{Experimental Setup}
 Experiments were run on two Intel machines, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and the Phi. The \texttt{icc 2013} compiler was used, with optimization level \texttt{-O2} and with auto-vectorization enabled (\texttt{-xAVX} on the Sandy Bridge, and \texttt{TODO} on the Phi). Other optimization levels performed, in general, slightly worse than \texttt{-O2}. Our code transformations were evaluated in three real-world problems based on the following PDEs:
 \begin{itemize}
 \item Helmholtz
@@ -733,57 +740,65 @@ These problems were studied varying both the shape of mesh elements and the poly
 
 For the Helmholtz 3D problem, manual implementations based on MKL BLAS were tested on Sandy Bridge. This particular kernel can be easily reduced to a sequence of four matrix-matrix multiplications that can be computed via calls to BLAS \texttt{dgemm}. In the case of $p=4$, where the stiffness matrix is of size 35$\times$35, the computation was almost twice slower than the case in which only $licm$, data alignment and padding were used. As anticipated, extraction of matrix-matrix multiplications from analysis of the kernel's AST or re-design of the Fenics Form Compiler to explicitly expose these operations will be addressed in further work. However, these experiments justify that there is a set of problems for which turning to BLAS is not beneficial in terms of performance. It is possible that employing BLAS is useful for particularly large problems, for instance Burgers on 3D meshes with $p \geq 3$, although the loss in data locality due to re-loading matrices appearing in multiple products might limit the performance gain. 
 
-Tables~\ref{table:perf-results-licm-helmholtz},~\ref{table:perf-results-licm-advdiff}, and~\ref{table:perf-results-licm-burgers} illustrate the speed-ups obtained on the Sandy Bridge and the Phi machines when $licm$, data alignment, and padding are used, over non-transformed code. Inspection of assembly code generated by $icc$ confirmed all limitations described in Section~\ref{sec:code-transf-licm}: only sub-expressions invariant with respect to outer loops are hoisted and, interestingly, not vectorized. This motivates the usually significant gain. Padding and data alignment enhance, in general, the quality of SIMD auto-vectorization. Sometimes the value of $licm$-$ap$ is similar to that of $licm$ because the stiffness matrix size is, without padding, already a multiple of the vector length, and data is automatically aligned. Occasionally $licm$-$ap$ is slower than $licm$ (e.g. in Burgers 3D p3). This is due to the large number of aligned temporaries introduced by $licm$, which probably lead to cache associativity conflicts. 
-
-
+\subsection{Impact of Generalized Loop-invariant Code Motion}
 \newcommand{\massmatrixtwodresultsnorms}{
-\begin{tabularx}{1.0\textwidth}{p{3.5cm}|p{1.98cm}p{1.98cm}p{1.98cm}|p{1.98cm}p{1.98cm}p{1.98cm}|}
-\cline{2-7}
-& \multicolumn{3}{c|}{\texttt{AVX}} & \multicolumn{3}{c|}{\texttt{PHI}} \\
-\cline{2-7}
-& \texttt{original} & \texttt{licm} & \texttt{licm+ap} & \texttt{original} & \texttt{licm} & \texttt{licm+ap}\\
-\cline{1-7}
-\multicolumn{1}{|c|}{\texttt{triangle p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{triangle p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{triangle p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{triangle p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\cline{1-7}
-\multicolumn{1}{|c|}{\texttt{tetrahedron p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{tetrahedron p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{tetrahedron p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{tetrahedron p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\cline{1-7}
-\multicolumn{1}{|c|}{\texttt{prism p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{prism p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{prism p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\multicolumn{1}{|c|}{\texttt{prism p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
-\cline{1-7}
-
+\begin{tabularx}{1.0\textwidth}{p{3.5cm}p{3.5cm}|p{2.25cm}p{2.25cm}p{2.25cm}p{2.25cm}|}
+\cline{3-6}
+& & \multicolumn{2}{c|}{\texttt{AVX}} & \multicolumn{2}{c|}{\texttt{Phi}}\\
+\cline{3-6}
+& & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm+ap}} & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm+ap}} \\
+\cline{1-6}
+\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{prism}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\cline{1-6}
+\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{triangle}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{prism}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\cline{1-6}
+\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{triangle}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{prism}} & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ & 1.34$\times$-4.32$\times$ \\
+\cline{1-6}
 \end{tabularx}
 }
 
 \begin{table*}[t]\normalsize
 \massmatrixtwodresultsnorms
 \label{table:perf-results-licm-helmholtz}
-\caption{Impact of generalized loop-invariant code motion ($licm$ column) on the Helmholtz problem, for three kind of elements belonging to the Conjugate Gradient family (triangle, tetrahedron, prism) and for the range of polynomial orders $p$ $\in$ $\lbrace$1, 4$\rbrace$. The column $licm$-$ap$ illustrates the combination of $licm$ with data alignment and padding.}
+\caption{Impact of generalized loop-invariant code motion ($licm$ column) on the Helmholtz, Diffusion and Burgers problems, for three kind of elements belonging to the Lagrange family (triangle, tetrahedron, prism), for the range of polynomial orders $p$ $\in$ $\lbrace$1, 4$\rbrace$. Each entry indicates the range of speed-ups obtained over the non-optimized implementation. The column $licm$-$ap$ illustrates the combination of $licm$ with data alignment and padding. Results are shown for both the Sandy Bridge and the Phi machine.}
 \end{table*}
 
+Tables~\ref{table:perf-results-licm-helmholtz},~\ref{table:perf-results-licm-advdiff}, and~\ref{table:perf-results-licm-burgers} illustrate the speed-ups obtained on the Sandy Bridge and the Phi machines when $licm$, data alignment, and padding are used, over non-transformed code. Inspection of assembly code generated by $icc$ confirmed all limitations described in Section~\ref{sec:code-transf-licm}: only sub-expressions invariant with respect to outer loops are hoisted and, interestingly, not vectorized. This motivates the usually significant gain. Padding and data alignment enhance, in general, the quality of SIMD auto-vectorization. As shown in Figure~\ref{algo:PyOP2Compiler}, these transformations are applied on top of $licm$, so we refer to them as $licm$-$ap$. Sometimes the run-time of $licm$-$ap$ is similar to that of $licm$ because the stiffness matrix size is, without padding, already a multiple of the vector length, and data is automatically aligned. Occasionally $licm$-$ap$ is slower than $licm$ (e.g. in Burgers 3D p3). This is due to the large number of aligned temporaries introduced by $licm$, which probably leads to cache associativity conflicts. 
+
+\subsection{Impact of Vector-register Tiling}
+Figures~\ref{fig:opvect-helmholtz-speedup},~\ref{fig:opvect-diffusion-speedup}, and~\ref{fig:opvect-burgers-speedup} show the speed-ups achieved by applying $op$-$vect$ on top of $licm$-$ap$ to the Helmoltz, Diffusion, and Burgers assembly kernels, respectively. For each problem instance we report the best run-time obtained by empirically testing a set of different unroll/unroll-and-jam factors, and the one retrieved through the XY's cost model.
+
+% why better results at higher order
+
+\subsection{Impact of Expression Splitting}
+% why split useless in helmholtz/diffusion
+% why vect vect+split useless in burgers
+
+
+
+
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.7]{Pictures/helmholtz-normalized.pdf}
-\label{fig_first_case}}
-\caption{Helmholtz}
+\centerline{\includegraphics[scale=0.7]{Pictures/helmholtz-normalized-opvect.pdf}
+\label{fig:opvect-helmholtz-speedup}}
+\caption{Speed-ups obtained by applying $op$-$vect$ on top of $licm$-$ap$ to the Helmholtz kernel.}
 \end{figure}
 
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.7]{Pictures/advdiff-normalized.pdf}
-\label{fig_first_case}}
-\caption{Advection-Diffusion}
+\centerline{\includegraphics[scale=0.7]{Pictures/diffusion-normalized-opvect.pdf}
+\label{fig:opvect-diffusion-speedup}}
+\caption{Speed-ups obtained by applying $op$-$vect$ on top of $licm$-$ap$ to the Diffusion kernel.}
 \end{figure}
 
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.7]{Pictures/burgers-normalized.pdf}
-\label{fig_first_case}}
-\caption{Burgers}
+\centerline{\includegraphics[scale=0.7]{Pictures/burgers-normalized-split.pdf}
+\label{fig:opvect-burgers-speedup}}
+\caption{Speed-ups obtained by applying $op$-$vect$ on top of $licm$-$ap$ to the Burgers kernel.}
 \end{figure}
 
 
@@ -815,7 +830,37 @@ In this paper we have presented design, optimizations and systematic performance
 This research is partly funded by the MAPDES project and by the Department of Computing at Imperial College London. The authors would like to thank Prof. J. Ramanujam for his invaluable suggestions, and Dr. Lawrence Mitchell and Dr. Francis Russell for their contribution to the PyOP2 project.
 
 
-
+%\newcommand{\massmatrixtwodresultsnorms}{
+%\begin{tabularx}{1.0\textwidth}{p{3.5cm}|p{1.98cm}p{1.98cm}p{1.98cm}|p{1.98cm}p{1.98cm}p{1.98cm}|}
+%\cline{2-7}
+%& \multicolumn{3}{c|}{\texttt{AVX}} & \multicolumn{3}{c|}{\texttt{PHI}} \\
+%\cline{2-7}
+%& \texttt{original} & \texttt{licm} & \texttt{licm+ap} & \texttt{original} & \texttt{licm} & \texttt{licm+ap}\\
+%\cline{1-7}
+%\multicolumn{1}{|c|}{\texttt{triangle p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{triangle p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{triangle p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{triangle p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\cline{1-7}
+%\multicolumn{1}{|c|}{\texttt{tetrahedron p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{tetrahedron p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{tetrahedron p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{tetrahedron p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\cline{1-7}
+%\multicolumn{1}{|c|}{\texttt{prism p1}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{prism p2}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{prism p3}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\multicolumn{1}{|c|}{\texttt{prism p4}} & $5.49e{-}17$ & $4.95e{-}17$ & $1.44e{-}17$ & $1.34e{-}17$ & $1.56e{-}17$ & $\mathbf{4.43e{-}5}$ \\
+%\cline{1-7}
+%
+%\end{tabularx}
+%}
+%
+%\begin{table*}[t]\normalsize
+%\massmatrixtwodresultsnorms
+%\label{table:perf-results-licm-helmholtz}
+%\caption{Impact of generalized loop-invariant code motion ($licm$ column) on the Helmholtz problem, for three kind of elements belonging to the Lagrange family (triangle, tetrahedron, prism) and for the range of polynomial orders $p$ $\in$ $\lbrace$1, 4$\rbrace$. The column $licm$-$ap$ illustrates the combination of $licm$ with data alignment and padding.}
+%\end{table*}
 
 
 % trigger a \newpage just before the given reference

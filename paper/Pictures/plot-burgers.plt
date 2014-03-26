@@ -1,4 +1,4 @@
-set title "Impact of op-vect on the Diffusion kernel"
+set title "Impact of split on the Burgers kernel"
 set xlabel "Polynomial Order"
 set ylabel "Normalized Runtime w.r.t. licm-ap"
 
@@ -10,19 +10,19 @@ set style histogram cluster gap 5 title offset character 1, -0.25, 0
 set style fill pattern 1 border -1
 set boxwidth 0.9
  
-set key left maxrows 3
+set key below maxrows 3
 
 set grid ytics
 
 #set autoscale y
-set yrange [0.0:1.5]
+set yrange [0.0:1.6]
 set ytics 0.2
 
 set terminal pdf
-set output "diffusion-normalized-opvect.pdf"
+set output "burgers-normalized-split.pdf"
 
 plot newhistogram "", \
-                  'diffusion-normalized-opvect.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
+                  'burgers-normalized-split.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
                   '' u 3:xtic(1) title col lc rgb "#FF0000",\
                   '' u 4:xtic(1) t col lc rgb "#6495ED", \
                   '' u 5:xtic(1) t col lc rgb "#00BFF", \
