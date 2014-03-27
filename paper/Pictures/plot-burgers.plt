@@ -10,7 +10,7 @@ set style histogram cluster gap 5 title offset character 1, -0.25, 0
 set style fill pattern 1 border -1
 set boxwidth 0.9
  
-set key below maxrows 3
+set key left maxrows 2
 
 set grid ytics
 
