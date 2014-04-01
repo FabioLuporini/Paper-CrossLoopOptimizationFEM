@@ -55,8 +55,10 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-A}}Experimental Setup}{7}}
 \newlabel{algo:applyCostModel}{{8}{7}}
 \@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces The cost model is employed by the compiler to estimate the most suitable unroll-and-jam (when $op$-$vect$ is used) and split factors, avoiding the overhead of auto-tuning.}}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-B}}Impact of Generalized Loop-invariant Code Motion}{7}}
 \citation{IACA}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-B}}Impact of Generalized Loop-invariant Code Motion}{8}}
+\newlabel{table:perf-results-licm}{{\unhbox \voidb@x \hbox {V-B}}{8}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Impact of generalized loop-invariant code motion ($licm$ column) on the Helmholtz, Diffusion and Burgers problems, for three kind of elements belonging to the Lagrange family (triangle, tetrahedron, prism), for the range of polynomial orders $p \in \delimiter "4266308 $1, 4$\delimiter "5267309 $. Each entry indicates the range of speed-ups obtained over the non-optimized implementation. The column $licm$-$ap$ illustrates the combination of $licm$ with data alignment and padding. Results are shown for both the Sandy Bridge and the Phi machine.}}{8}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-C}}Impact of Vector-register Tiling}{8}}
 \newlabel{sec:perf-eval-opvect}{{\unhbox \voidb@x \hbox {V-C}}{8}}
 \@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Speed-ups obtained by applying $op$-$vect$ on top of $licm$-$ap$ to the Helmholtz kernel. Tri, Tet, and Prism stand, respectively, for triangual, tetrahedral and prismatic mesh. CM stands for cost model.}}{8}}
@@ -73,13 +75,12 @@
 \citation{FFC-TC}
 \citation{Francis}
 \citation{quadrature1}
-\newlabel{table:perf-results-licm}{{\unhbox \voidb@x \hbox {V-B}}{9}}
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Impact of generalized loop-invariant code motion ($licm$ column) on the Helmholtz, Diffusion and Burgers problems, for three kind of elements belonging to the Lagrange family (triangle, tetrahedron, prism), for the range of polynomial orders $p \in \delimiter "4266308 $1, 4$\delimiter "5267309 $. Each entry indicates the range of speed-ups obtained over the non-optimized implementation. The column $licm$-$ap$ illustrates the combination of $licm$ with data alignment and padding. Results are shown for both the Sandy Bridge and the Phi machine.}}{9}}
 \@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Speed-ups obtained by applying $op$-$vect$ on top of $licm$-$ap$ to the Burgers kernel. Tri, Tet, and Prism stand, respectively, for triangual, tetrahedral and prismatic mesh. CM stands for cost model.}}{9}}
 \newlabel{fig:split-burgers-speedup}{{13}{9}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-E}}Comparison with Fenics Form Compiler's built-in Optimizations}{9}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Related Work}{9}}
-\newlabel{sec:related-work}{{VI}{9}}
+\newlabel{table:comparison-to-FFC-opt}{{\unhbox \voidb@x \hbox {V-E}}{9}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Summary of performance comparison between FEniCS and COFFEE on the Sandy Bridge machine. The slow down and speed up columns compare the best COFFEE implementation and the FEniCS implementation with optimizations enabled.}}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-F}}Comparison with hand-made BLAS-based implementations}{9}}
 \citation{quadrature1}
 \citation{Markall20101815}
 \citation{petsc-integration-gpu}
@@ -109,8 +110,8 @@
 \bibcite{FFC-TC}{10}
 \bibcite{petsc-integration-gpu}{11}
 \bibcite{assembly-opencl}{12}
-\newlabel{table:comparison-to-FFC-opt}{{\unhbox \voidb@x \hbox {V-E}}{10}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Summary of performance comparison between FEniCS and COFFEE on the Sandy Bridge machine. The slow down and speed up columns compare the best COFFEE implementation and the FEniCS implementation with optimizations enabled.}}{10}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Related Work}{10}}
+\newlabel{sec:related-work}{{VI}{10}}
 \@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusions}{10}}
 \newlabel{sec:conclusions}{{VII}{10}}
 \@writefile{toc}{\contentsline {section}{References}{10}}
