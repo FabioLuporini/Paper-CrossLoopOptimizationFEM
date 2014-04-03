@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  1 APR 2014 17:20
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  3 APR 2014 09:52
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -280,55 +280,54 @@ LaTeX Font Info:    ... okay on input line 293.
 \MPnumerator=\count117
 \everyMPtoPDFconversion=\toks24
 )
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 348.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <11> on input line 348.
+(Font)              <11> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7.69997> on input line 348.
+(Font)              <7.69997> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5.5> on input line 348.
+(Font)              <5.5> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 348.
+(Font)              <8> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 348.
+(Font)              <6> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 348.
+(Font)              <5> on input line 349.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 348.
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 348.
+(Font)              <7> on input line 349.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 349.
 
  (/usr/share/texmf-texlive/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 348.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 349.
  [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
-Underfull \hbox (badness 10000) detected at line 426
+Underfull \hbox (badness 10000) detected at line 425
 [][]
  []
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 430.
+(Font)              <9> on input line 429.
 
-Underfull \hbox (badness 10000) detected at line 449
+Underfull \hbox (badness 10000) detected at line 448
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 484
+Underfull \hbox (badness 10000) detected at line 483
 [][]
  []
 
-[2]
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 490.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 489.
 
- (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-) [3]
-Underfull \hbox (badness 10000) detected at line 557
+) [2] [3]
+Underfull \hbox (badness 10000) detected at line 556
 [][]
  []
 
@@ -343,27 +342,27 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
-Underfull \hbox (badness 10000) detected at line 631
+Underfull \hbox (badness 10000) detected at line 630
 [][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 665
+Underfull \hbox (badness 10000) detected at line 664
 [][]
  []
 
 [5 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
-Underfull \hbox (badness 10000) detected at line 725
+Underfull \hbox (badness 10000) detected at line 724
 [][]
  []
 
 [6]
-Underfull \hbox (badness 10000) detected at line 763
+Underfull \hbox (badness 10000) detected at line 762
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in alignment at lines 808--808
+Underfull \hbox (badness 10000) in alignment at lines 807--807
 [][][][][][] 
  []
 
@@ -381,8 +380,11 @@ pdfTeX warning: pdflatex (file ./Pictures/diffusion-normalized-opvect.pdf): PDF
 <Pictures/diffusion-normalized-opvect.pdf, id=87, 361.35pt x 216.81pt>
 File: Pictures/diffusion-normalized-opvect.pdf Graphic file (type pdf)
 
-<use Pictures/diffusion-normalized-opvect.pdf> [8 <./Pictures/helmholtz-normali
-zed-opvect.pdf> <./Pictures/diffusion-normalized-opvect.pdf>]
+<use Pictures/diffusion-normalized-opvect.pdf>
+Underfull \vbox (badness 7759) has occurred while \output is active []
+
+ [8 <./Pictures/helmholtz-normalized-opvect.pdf> <./Pictures/diffusion-normaliz
+ed-opvect.pdf>]
 
 pdfTeX warning: pdflatex (file ./Pictures/burgers-normalized-split.pdf): PDF in
 clusion: found PDF version <1.5>, but at most version <1.4> allowed
@@ -423,9 +425,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[11
-
-] (./bare_conf.aux) ) 
+[11] (./bare_conf.aux) ) 
 Here is how much of TeX's memory you used:
  3720 strings out of 495000
  51133 string characters out of 1180492
@@ -434,23 +434,23 @@ Here is how much of TeX's memory you used:
  46927 words of font info for 88 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
  32i,15n,24p,1948b,334s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</us
-r/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/tex
-mf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/
-fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/
-public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
-nts/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10
-.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/sh
-are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-tex
-live/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/
-type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/public
-/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm
-/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy9.pfb><
-/usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-t
-exlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/u
-rw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb
-></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (11 pages, 424220 bytes).
+{/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}<
+/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/
+texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texli
+ve/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/typ
+e1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/am
+sfonts/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cm
+r10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr
+/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-
+texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fon
+ts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
+/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy9.pf
+b></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texm
+f-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type
+1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.
+pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on bare_conf.pdf (11 pages, 424754 bytes).
 PDF statistics:
  634 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

@@ -19,9 +19,15 @@ difficult to automate; also - are you sure you want to mention
 automation? I think here you want to state that there are many and it is
 difficult to choose, like you say in the following paragraph. The
 automation is a second concern, isn't it?
+
+>>> Agree: automation is a second concern, dropping it
+
 -- also, make sure that "small problem sizes" does not seem
 contradictory to "huge domain" - it is unclear what the problem size is
 here.
+
+>>> Yep
+
 -- why do you want a "single/unique" sequence of transformations? I mean
 - to me, it sounds like you want to point out that such a
 "one-size-fits-all" solution doesn't exist, and "a specific sequence of
@@ -36,6 +42,8 @@ the sequence of transformations that leads to the highest performance."
 
 -- having introduced the problem, "Therefore" might be more appropriate
 here; the rest is very strong, I find.
+
+>>> I could use it, i'll think about it. Yes, I like it, I think I'm gonna take it
 
 *Therefore*, we present the design and systematic evaluation of COFFEE,
 a domain-specific compiler for local assembly kernels.
@@ -52,6 +60,9 @@ experiments, based on XXX real-world examples (from xxx equations and 4
 problem sizes) and 2 architectures (... and ...). Our results show that
 an average kernel performance improvement of as much as ...%, which can
 save XXX mins/hours for the entire FEM solver.
+
+>>> Not that easy, I stopped the calculations after the assembly...
+
 
 ---
 
@@ -74,11 +85,18 @@ The finite element method is widely employed to approximate solutions of
 partial differential equations. Its local assembly operation, in which a
 problem-specific kernel is applied to all elements of the discretized
 domain, makes it amenable to parallelization. Executing these kernels
-efficiently is fundamental when solving very large problems. Automating
-their optimization is, however, a challenging issue. Even though these
+efficiently is fundamental when solving very large problems. 
+
+>>> Misleading: the kernel themselves should be efficient - I mean, that's
+what the paper is about - not just the scheduler.
+
+Automating their optimization is, however, a challenging issue. Even though these
 kernels generally contain affine loop nests, short loop lengths and the
 complexity of mathematical expressions make it hard to determine a
 single or unique sequence of successful [successive?] transformations.
+
+>>> Taking this re-wording
+
 In this context, we present the design and systematic evaluation of
 COFFEE, a domain-specific compiler for local assembly kernels. COFFEE
 manipulates abstract syntax trees by introducing composable
@@ -97,6 +115,8 @@ Hi Fabio,
 
 First a couple of trivial name things. My publication name is David A. Ham and you need to give Department of Mathematics for me as well as DoC.
 
+>>> Done
+
 I've taken the liberty of suggesting a rewording of the numerics bit at the start of the abstract:
 
 Numerical solution of partial differential equations using the 
@@ -104,6 +124,8 @@ finite element method is one of the key applications of high
 performance computing. Its characteristic operation is the local 
 assembly of linear and bilinear forms by  executing a problem-
 specific kernel for each element in the discretized problem domain.
+
+>>> OK, but dropping "linear/bilinear form" that might tell nothing to most of the reviewers
 
 You need the word "the" before design.
 
