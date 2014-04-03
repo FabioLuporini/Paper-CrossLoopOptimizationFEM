@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  3 APR 2014 09:52
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.12.18)  3 APR 2014 15:04
 entering extended mode
  %&-line parsing enabled.
 **bare_conf.tex
@@ -331,14 +331,11 @@ Underfull \hbox (badness 10000) detected at line 556
 [][]
  []
 
-<Pictures/vect-by-vect.pdf, id=24, 354.57469pt x 273.27094pt>
+[4] <Pictures/vect-by-vect.pdf, id=32, 354.57469pt x 273.27094pt>
 File: Pictures/vect-by-vect.pdf Graphic file (type pdf)
 
 <use Pictures/vect-by-vect.pdf>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[4] <Pictures/vect-restore.pdf, id=33, 290.58563pt x 271.76532pt>
+<Pictures/vect-restore.pdf, id=33, 290.58563pt x 271.76532pt>
 File: Pictures/vect-restore.pdf Graphic file (type pdf)
 
 <use Pictures/vect-restore.pdf>
@@ -351,12 +348,15 @@ Underfull \hbox (badness 10000) detected at line 664
 [][]
  []
 
-[5 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
+
 Underfull \hbox (badness 10000) detected at line 724
 [][]
  []
 
-[6]
+[5 <./Pictures/vect-by-vect.pdf> <./Pictures/vect-restore.pdf>]
+Underfull \vbox (badness 2478) has occurred while \output is active []
+
+ [6]
 Underfull \hbox (badness 10000) detected at line 762
 [][]
  []
@@ -381,18 +381,18 @@ pdfTeX warning: pdflatex (file ./Pictures/diffusion-normalized-opvect.pdf): PDF
 File: Pictures/diffusion-normalized-opvect.pdf Graphic file (type pdf)
 
 <use Pictures/diffusion-normalized-opvect.pdf>
-Underfull \vbox (badness 7759) has occurred while \output is active []
 
- [8 <./Pictures/helmholtz-normalized-opvect.pdf> <./Pictures/diffusion-normaliz
-ed-opvect.pdf>]
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[8 <./Pictures/helmholtz-normalized-opvect.pdf>]
 
 pdfTeX warning: pdflatex (file ./Pictures/burgers-normalized-split.pdf): PDF in
 clusion: found PDF version <1.5>, but at most version <1.4> allowed
-<Pictures/burgers-normalized-split.pdf, id=408, 361.35pt x 216.81pt>
+<Pictures/burgers-normalized-split.pdf, id=250, 361.35pt x 216.81pt>
 File: Pictures/burgers-normalized-split.pdf Graphic file (type pdf)
 
-<use Pictures/burgers-normalized-split.pdf> [9 <./Pictures/burgers-normalized-s
-plit.pdf>] (./bare_conf.bbl
+<use Pictures/burgers-normalized-split.pdf> [9 <./Pictures/diffusion-normalized
+-opvect.pdf> <./Pictures/burgers-normalized-split.pdf>] (./bare_conf.bbl
 Underfull \hbox (badness 10000) in paragraph at lines 4--7
 []\OT1/ptm/m/it/8 Intel ar-chi-tec-ture code an-a-lyzer\OT1/ptm/m/n/8 .  [On-li
 ne]. Avail-able:
@@ -429,7 +429,7 @@ Before submitting the final camera ready copy, remember to:
 Here is how much of TeX's memory you used:
  3720 strings out of 495000
  51133 string characters out of 1180492
- 155229 words of memory out of 3000000
+ 156229 words of memory out of 3000000
  6886 multiletter control sequences out of 15000+50000
  46927 words of font info for 88 fonts, out of 3000000 for 9000
  39 hyphenation exceptions out of 8191
@@ -450,7 +450,7 @@ b></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texm
 f-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type
 1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.
 pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (11 pages, 424754 bytes).
+Output written on bare_conf.pdf (11 pages, 424418 bytes).
 PDF statistics:
  634 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
