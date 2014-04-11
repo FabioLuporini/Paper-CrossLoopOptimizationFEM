@@ -16,7 +16,7 @@ set grid ytics
 
 #set autoscale y
 # set yrange [0.0:1.6]
-set yrange [0.0:1.2]
+set yrange [0.0:1.3]
 set ytics 0.2
 
 set terminal pdf
