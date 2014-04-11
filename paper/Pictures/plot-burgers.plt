@@ -1,4 +1,4 @@
-set title "Impact of split on the Burgers kernel (Sandy Bridge)"
+set title "Impact of split on the Burgers kernel (Xeon Phi)"
 set xlabel "Polynomial Order"
 set ylabel "Normalized Runtime w.r.t. licm-ap"
 
@@ -15,14 +15,15 @@ set key left maxrows 2
 set grid ytics
 
 #set autoscale y
-set yrange [0.0:1.6]
+# set yrange [0.0:1.6]
+set yrange [0.0:1.2]
 set ytics 0.2
 
 set terminal pdf
-set output "burgers-normalized-split.pdf"
+set output "burgers-normalized-split-phi.pdf"
 
 plot newhistogram "", \
-                  'burgers-normalized-split.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
+                  'burgers-normalized-split-phi.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
                   '' u 3:xtic(1) title col lc rgb "#FF0000",\
                   '' u 4:xtic(1) t col lc rgb "#6495ED", \
                   '' u 5:xtic(1) t col lc rgb "#00BFF", \

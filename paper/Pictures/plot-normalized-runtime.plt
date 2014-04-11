@@ -1,4 +1,4 @@
-set title "Impact of op-vect on the Helmholtz kernel (Xeon Phi)"
+set title "Impact of op-vect on the Diffusion kernel (Xeon Phi)"
 set xlabel "Polynomial Order"
 set ylabel "Normalized Runtime w.r.t. licm-ap"
 
@@ -19,10 +19,10 @@ set yrange [0.0:1.5]
 set ytics 0.2
 
 set terminal pdf
-set output "helmholtz-normalized-opvect-phi.pdf"
+set output "diffusion-normalized-opvect-phi.pdf"
 
 plot newhistogram "", \
-                  'helmholtz-normalized-opvect-phi.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
+                  'diffusion-normalized-opvect-phi.txt' u 2:xtic(1) title col lc rgb "#CD5C5C",\
                   '' u 3:xtic(1) title col lc rgb "#FF0000",\
                   '' u 4:xtic(1) t col lc rgb "#6495ED", \
                   '' u 5:xtic(1) t col lc rgb "#00BFF", \
