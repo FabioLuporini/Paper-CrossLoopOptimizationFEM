@@ -1,4 +1,4 @@
-set title "Impact of split on the Burgers kernel"
+set title "Impact of split on the Burgers kernel (Sandy Bridge)"
 set xlabel "Polynomial Order"
 set ylabel "Normalized Runtime w.r.t. licm-ap"
 
