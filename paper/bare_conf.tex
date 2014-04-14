@@ -453,8 +453,8 @@ $\rbrace$
 
 \begin{algorithm}[t]
 \footnotesize
-\KwSty{void} burgers(double A[12][12], double **c, double **w) $\lbrace$\\
-~~// K, det = Compute Jacobian (c) \\
+\KwSty{void} burgers(double A[12][12], double **coords, double **w) $\lbrace$\\
+~~// K, det = Compute Jacobian (coords) \\
 ~~\\
 ~~\KwSty{static const double} W5[5] = $\lbrace$...$\rbrace$\\
 ~~\KwSty{static const double} X1$\_$D001[5][12] = $\lbrace\lbrace$...$\rbrace\rbrace$\\
@@ -763,7 +763,7 @@ uaj\_factor = $\lceil$n\_reg\_avail / n\_inner\_arrays$\rceil$ \\
 
 \subsection{Experimental Setup}
 
-Experiments were run on two Intel architectures, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and a Xeon Phi (5110P, running at 1.05Ghz in native mode, 32KB L1 cache and 512KB L2 cache). We have chosen these two architectures because of the differences in the number of logical registers and SIMD lanes, which can impact the effectiveness of the optimization strategy. All experiments are sequential. The \texttt{icc 13.1} compiler was used. On the Sandy Bridge, the compilation flags used were \texttt{-O2} and \texttt{-xAVX} for auto-vectorization. On the Xeon Phi, optimization level \texttt{-O3} was used. Other optimization levels performed, in general, slightly worse. Our code transformations were evaluated in three real-world problems based on the following PDEs:
+Experiments were run on a single core of two Intel architectures, a Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB L2 cache) and a Xeon Phi (5110P, running at 1.05Ghz in native mode, 32KB L1 cache and 512KB L2 cache). We have chosen these two architectures because of the differences in the number of logical registers and SIMD lanes, which can impact the effectiveness of the optimization strategy. The \texttt{icc 13.1} compiler was used. On the Sandy Bridge, the compilation flags used were \texttt{-O2} and \texttt{-xAVX} for auto-vectorization. On the Xeon Phi, optimization level \texttt{-O3} was used. Other optimization levels performed, in general, slightly worse. Our code transformations were evaluated in three real-world problems based on the following PDEs:
 \begin{itemize}
 \item Helmholtz
 \item Advection-Diffusion
@@ -774,28 +774,6 @@ The code was written in UFL (available at~\cite{ufl-code}) and then executed ove
 These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method, whereas the element family, Lagrange, is fixed. As might be expected, the larger the element shape and $p$, the larger the iteration space. Triangles, tetrahedron, and prisms were tested as element shape. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three element shapes is, respectively, $3$, $4$, and $6$. Moving to bigger shapes has the effect of increasing the number of basis function arrays, since, intuitively, the behavior of the equation has now to be approximated also along a third axis. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders from $p=1$ to $p=4$ were tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In all these cases, the size of the element matrix rarely exceeds 30$\times$30, with a peak of 105$\times$105 in Burgers with prisms and $p=4$.
 
 \subsection{Impact of Generalized Loop-invariant Code Motion}
-%\newcommand{\massmatrixtwodresultsnorms}{
-%\begin{tabularx}{1.0\textwidth}{p{3.5cm}p{3.5cm}|p{2.25cm}p{2.25cm}p{2.25cm}p{2.25cm}|}
-%\cline{3-6}
-%& & \multicolumn{2}{c|}{\texttt{Sandy Bridge}} & \multicolumn{2}{c|}{\texttt{Xeon Phi}}\\
-%\cline{3-6}
-%& & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} \\
-%\cline{1-6}
-%%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.05$\times$-1.68$\times$ & \multicolumn{1}{c|}{~1.32$\times$-4.14$\times$} & ~~1.15$\times$-1.70$\times$ & ~~1.54$\times$-3.27$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.36$\times$-2.64$\times$ & \multicolumn{1}{c|}{~1.35$\times$-3.32$\times$} & ~~1.18$\times$-1.87$\times$ & ~~1.27$\times$-2.92$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~2.16$\times$-2.45$\times$ & \multicolumn{1}{c|}{~2.42$\times$-2.63$\times$} & ~~0.96$\times$-1.64$\times$ & ~~1.84$\times$-1.72$\times$ \\
-%\cline{1-6}
-%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.09$\times$-1.64$\times$ & \multicolumn{1}{c|}{~1.37$\times$-4.28$\times$} & ~~1.13$\times$-1.22$\times$ & ~~0.92$\times$-2.79$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.30$\times$-3.11$\times$ & \multicolumn{1}{c|}{~1.41$\times$-3.82$\times$} & ~~1.08$\times$-2.11$\times$ & ~~1.10$\times$-5.53$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.81$\times$-2.70$\times$ & \multicolumn{1}{c|}{~2.55$\times$-3.13$\times$} & ~~1.04$\times$-2.74$\times$ & ~~1.73$\times$-4.14$\times$ \\
-%\cline{1-6}
-%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.53$\times$-2.46$\times$ & \multicolumn{1}{c|}{~1.56$\times$-2.77$\times$} & ~~1.19$\times$-2.97$\times$ & ~~2.70$\times$-4.27$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.58$\times$-2.24$\times$ & \multicolumn{1}{c|}{~1.59$\times$-2.10$\times$} & ~~1.03$\times$-1.21$\times$ & ~~1.31$\times$-1.55$\times$ \\
-%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.32$\times$-2.11$\times$ & \multicolumn{1}{c|}{~1.42$\times$-2.31$\times$} & ~~1.04$\times$-1.40$\times$ & ~~1.27$\times$-2.18$\times$ \\
-%\cline{1-6}
-%\end{tabularx}
-%}
 
 \newcommand{\massmatrixtwodresultsnorms}{
 \begin{tabularx}{1.0\textwidth}{cccccc|cccc|cccc|cccc}
@@ -827,7 +805,7 @@ These problems were studied varying both the shape of mesh elements and the poly
 \label{table:perf-results-licm}
 \end{table*}
 
-Table~\ref{table:perf-results-licm} illustrates the performance improvement obtained on the Sandy Bridge and Xeon Phi machines when \emph{licm}, data alignment, and padding are used. We distinguish between \emph{licm} and \emph{licm-ap}; the latter makes use of padding and data alignment. Inspection of assembly code generated by \texttt{icc} confirmed all limitations described in Section~\ref{sec:code-transf-licm}: only sub-expressions invariant to the inner loop are hoisted and their execution is not vectorized. Padding and data alignment enhance, in general, the quality of auto-vectorization. Sometimes the run-time of \emph{licm-ap} is similar to that of \emph{licm} because the element matrix size is already a multiple of the vector length, so no scalar reminder loop has to be introduced. Occasionally \emph{licm-ap} is slower than \emph{licm} (e.g. in Burgers 3D p3 on the Sandy Bridge). One possible explanation is that the large number of aligned temporaries introduced by \emph{licm} induce cache associativity conflicts.
+Table~\ref{table:perf-results-licm} illustrates the performance improvement obtained on the Sandy Bridge and Xeon Phi machines when \emph{licm}, data alignment, and padding are used. We distinguish between \emph{licm} and \emph{licm-ap}; the latter makes use of padding and data alignment. Inspection of assembly code generated by \texttt{icc} confirmed all limitations described in Section~\ref{sec:code-transf-licm}: only sub-expressions invariant to the inner loop are hoisted and their execution is not vectorized. Padding and data alignment enhance, in general, the quality of auto-vectorization. Sometimes the run-time of \emph{licm-ap} is similar to that of \emph{licm} because the element matrix size is already a multiple of the vector length, so no scalar reminder loop has to be introduced. Occasionally \emph{licm-ap} is slower than \emph{licm} (e.g. in Burgers $p=3$ on the Sandy Bridge). One possible explanation is that the large number of aligned temporaries introduced by \emph{licm} induce cache associativity conflicts.
 
 \subsection{Impact of Vector-register Tiling}
 \label{sec:perf-eval-opvect}
@@ -910,7 +888,7 @@ For the Helmholtz problem on a tetrahedral mesh, manual implementations based on
 
 \section{Related Work}
 \label{sec:related-work}
-The finite element method is extensively used to approximate solutions of PDEs. Well-known frameworks and applications include nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics}, Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical integration is usually employed to implement the local assembly phase. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. Methods based on tensor contraction~\cite{FFC-TC} and symbolic manipulation~\cite{Francis} have been developed. We have designed COFFEE to specifically target numerical integration because it has been demonstrated that it remains the optimal choice for a wide class of problems~\cite{quadrature1}.
+The finite element method is extensively used to approximate solutions of PDEs. Well-known frameworks and applications include nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics}, Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical integration is usually employed to implement the local assembly phase. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. Methods based on tensor contraction~\cite{FFC-Compiler} and symbolic manipulation~\cite{Francis} have been developed. We have designed COFFEE to specifically target numerical integration because it has been demonstrated that it remains the optimal choice for a wide class of problems~\cite{quadrature1}.
 
 Optimization of local assembly using numerical integration for CPU platforms has been addressed in FEniCS~\cite{quadrature1}. The comparison between COFFEE and this work is presented in Section~\ref{sec:perf-results-fenics}. In~\cite{Markall20101815}, and more recently in~\cite{petsc-integration-gpu}, the problem has been studied for GPU architectures. In~\cite{assembly-opencl}, variants of the standard numerical integration algorithm have been specialized and evaluated for the PowerXCell processor, but an exhaustive study from the compiler viewpoint - like ours - is missing, and none of the optimizations presented in Section~\ref{sec:code-transf} are mentioned. Among these efforts, to the best of our knowledge, COFFEE is the first work targeting low-level optimizations through a real compiler approach.
 
