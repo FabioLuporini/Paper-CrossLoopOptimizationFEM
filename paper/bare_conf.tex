@@ -425,7 +425,7 @@ The paper is organized as follows. In Section~\ref{sec:background} we provide so
 \end{algorithm}
 
 \begin{algorithm}[t]
-\small
+\footnotesize
 \KwSty{void} helmholtz(double A[3][3], double **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~\\
@@ -448,7 +448,7 @@ $\rbrace$
 \end{algorithm}
 
 \begin{algorithm}[t]
-\small
+\footnotesize
 \KwSty{void} burgers(double A[12][12], double **c, double **w) $\lbrace$\\
 ~~// K, det = Compute Jacobian (c) \\
 ~~\\
@@ -529,7 +529,7 @@ Auto-vectorization of assembly code computing the element matrix can be less eff
 From the inspection of the codes in Figures~\ref{code:helmholtz} and~\ref{code:burgers}, it can be noticed that the computation of $A$ involves evaluating many sub-expressions that depend on two iteration variables only. Since symbols in most of these sub-expressions are read-only variables, there is ample space for loop-invariant code motion. Vendor compilers apply this technique, although not in the systematic way we need for our assembly kernels. We want to overcome two deficiencies that both $intel$ and $gnu$ compilers have. First, they identify sub-expressions that are invariant with respect to the innermost loop only. This is an issue for sub-expressions depending on $i$-$k$, which are not automatically lifted in the loop order \texttt{ijk}. Second, the hoisted code is scalar, i.e. it is not subjected to auto-vectorization. We work around these limitations with source-level loop-invariant code motion. In particular, we pre-compute all values that an invariant sub-expression assumes along its fastest varying dimension. This is implemented by introducing a temporary array per invariant sub-expression and by adding a new loop to the nest. At the price of extra memory for storing temporaries, the gain is that lifted terms can be auto-vectorized, as part of an inner loop. Given the short trip counts of our loops, it is important to achieve auto-vectorization of hoisted terms in order to minimize the percentage of scalar instructions, which could be otherwise significant. It is also worth noting that, in some problems, invariant sub-expressions along $j$ are identical to those along $k$ (e.g. in Helmholtz). In these cases, we safely avoid redundant pre-computation since, as anticipated in Section~\ref{sec:background}, a property of our domain is that $j$ and $k$ loops share the same iteration space.
 
 \begin{algorithm}[t]
-\small
+\footnotesize
 \KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
 ~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
 ~~// K, det = Compute Jacobian (coords) \\
@@ -587,7 +587,7 @@ The storage layout of $A$, however, is incorrect after the application of this o
 %are sufficiently large to prevent register reuse along the innermost dimension $k$. A combination of the two scenarios is also possible. We want to exploit the small size of the iteration space and the structure of the computation to optimize register management.
 
 \begin{algorithm}[t]
-\small
+\footnotesize
 \KwSty{void} helmholtz(double A[8][8], double **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~// Declaration of basis function matrices \\
@@ -639,19 +639,9 @@ Splitting an expression has three drawbacks. Firstly, it increases the number of
 
 
 \begin{algorithm}[t]
-\small
+\footnotesize
 \KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
-%~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
 ~~~~// Same code as in Figure~\ref{code:helmholtz-licm} up to line 15 \\
-%~~// Declaration of basis function matrices \\
-%~~\\
-%~~\KwSty{for} (\KwSty{int} i = 0; i$<$3; i++) $\lbrace$ \\
-%~~~~double LI$\_$0[4] ALIGN;\\
-%~~~~double LI$\_$1[4] ALIGN;\\
-%~~~~\KwSty{for} (\KwSty{int} r = 0; r$<$4; r++) $\lbrace$ \\
-%~~~~~~LI$\_$0[r] = ((K1*X$\_$D10[i][r])+(K3*X$\_$D01[i][r]));\\
-%~~~~~~LI$\_$1[r] = ((K0*X$\_$D10[i][r])+(K2*X$\_$D01[i][r]));\\
-%~~~~$\rbrace$\\
 ~~~~\KwSty{for} (\KwSty{int} j = 0; j$<$3; j++) \\
 ~~~~~~\KwSty{$\#$pragma vector aligned}\\
 ~~~~~~\KwSty{for} (\KwSty{int} k = 0; k$<$4; k++) \\
@@ -692,13 +682,14 @@ Expression splitting (\emph{split}) & split point, split factor \\ \hline
 %Design and structure of the PyOP2 Compiler. Show the steps through which the IR is transformed (need to cite Firedrake here). Briefly describe a simple cost model that allows us to prune the space of code transformations.
 
 \begin{algorithm}[t]
+\footnotesize
   \textbf{The COFFEE Compiler}\\
   \KwIn{ast, wrapper, isa}
   \KwOut{code}
 // Analyze ast and build optimization plan \\
 it\_space = analyze(ast) \\
 \If{\KwSty{not} it\_space}{
-  ast.apply\_inter\_kernel\_vectorization(wrapper, isa)
+  ast.apply\_inter\_kernel\_vectorization(wrapper, isa)\\
   \Return{wrapper + ast.from\_ast\_to\_c()}
 }
 plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs) \\
@@ -778,33 +769,56 @@ The code was written in UFL (available at~\cite{ufl-code}) and then executed ove
 These problems were studied varying both the shape of mesh elements and the polynomial order $p$ of the method, whereas the element family, Lagrange, is fixed. As might be expected, the larger the element shape and $p$, the larger the iteration space. Triangles, tetrahedron, and prisms were tested as element shape. For instance, in the case of Helmholtz with $p=1$, the size of the $j$ and $k$ loops for the three element shapes is, respectively, $3$, $4$, and $6$. Moving to bigger shapes has the effect of increasing the number of basis function arrays, since, intuitively, the behaviour of the equation has now to be approximated also along a third axis. On the other hand, the polynomial order affects only the problem size (the three loops $i$, $j$, and $k$, and, as a consequence, the size of $X$ and $Y$ arrays). A range of polynomial orders, from $p=1$ to $p=4$, were tested; higher polynomial orders are excluded from the study because of current Firedrake limitations. In all these cases, the size of the element matrix rarely exceeds 30$\times$30, with a peak of 105$\times$105 in Burgers with prisms and $p=4$.
 
 \subsection{Impact of Generalized Loop-invariant Code Motion}
+%\newcommand{\massmatrixtwodresultsnorms}{
+%\begin{tabularx}{1.0\textwidth}{p{3.5cm}p{3.5cm}|p{2.25cm}p{2.25cm}p{2.25cm}p{2.25cm}|}
+%\cline{3-6}
+%& & \multicolumn{2}{c|}{\texttt{Sandy Bridge}} & \multicolumn{2}{c|}{\texttt{Xeon Phi}}\\
+%\cline{3-6}
+%& & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} \\
+%\cline{1-6}
+%%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.05$\times$-1.68$\times$ & \multicolumn{1}{c|}{~1.32$\times$-4.14$\times$} & ~~1.15$\times$-1.70$\times$ & ~~1.54$\times$-3.27$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.36$\times$-2.64$\times$ & \multicolumn{1}{c|}{~1.35$\times$-3.32$\times$} & ~~1.18$\times$-1.87$\times$ & ~~1.27$\times$-2.92$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~2.16$\times$-2.45$\times$ & \multicolumn{1}{c|}{~2.42$\times$-2.63$\times$} & ~~0.96$\times$-1.64$\times$ & ~~1.84$\times$-1.72$\times$ \\
+%\cline{1-6}
+%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.09$\times$-1.64$\times$ & \multicolumn{1}{c|}{~1.37$\times$-4.28$\times$} & ~~1.13$\times$-1.22$\times$ & ~~0.92$\times$-2.79$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.30$\times$-3.11$\times$ & \multicolumn{1}{c|}{~1.41$\times$-3.82$\times$} & ~~1.08$\times$-2.11$\times$ & ~~1.10$\times$-5.53$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.81$\times$-2.70$\times$ & \multicolumn{1}{c|}{~2.55$\times$-3.13$\times$} & ~~1.04$\times$-2.74$\times$ & ~~1.73$\times$-4.14$\times$ \\
+%\cline{1-6}
+%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.53$\times$-2.46$\times$ & \multicolumn{1}{c|}{~1.56$\times$-2.77$\times$} & ~~1.19$\times$-2.97$\times$ & ~~2.70$\times$-4.27$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.58$\times$-2.24$\times$ & \multicolumn{1}{c|}{~1.59$\times$-2.10$\times$} & ~~1.03$\times$-1.21$\times$ & ~~1.31$\times$-1.55$\times$ \\
+%\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.32$\times$-2.11$\times$ & \multicolumn{1}{c|}{~1.42$\times$-2.31$\times$} & ~~1.04$\times$-1.40$\times$ & ~~1.27$\times$-2.18$\times$ \\
+%\cline{1-6}
+%\end{tabularx}
+%}
+
 \newcommand{\massmatrixtwodresultsnorms}{
-\begin{tabularx}{1.0\textwidth}{p{3.5cm}p{3.5cm}|p{2.25cm}p{2.25cm}p{2.25cm}p{2.25cm}|}
-\cline{3-6}
-& & \multicolumn{2}{c|}{\texttt{Sandy Bridge}} & \multicolumn{2}{c|}{\texttt{Xeon Phi}}\\
-\cline{3-6}
-& & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} & \multicolumn{1}{c}{\texttt{licm}} & \multicolumn{1}{c|}{\texttt{licm-ap}} \\
-\cline{1-6}
-%\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ & ~~1.34$\times$-4.32$\times$ & ~1.34$\times$-4.32$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.05$\times$-1.68$\times$ & \multicolumn{1}{c|}{~1.32$\times$-4.14$\times$} & ~~1.15$\times$-1.70$\times$ & ~~1.54$\times$-3.27$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.36$\times$-2.64$\times$ & \multicolumn{1}{c|}{~1.35$\times$-3.32$\times$} & ~~1.18$\times$-1.87$\times$ & ~~1.27$\times$-2.92$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Helmholtz}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~2.16$\times$-2.45$\times$ & \multicolumn{1}{c|}{~2.42$\times$-2.63$\times$} & ~~0.96$\times$-1.64$\times$ & ~~1.84$\times$-1.72$\times$ \\
-\cline{1-6}
-\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.09$\times$-1.64$\times$ & \multicolumn{1}{c|}{~1.37$\times$-4.28$\times$} & ~~1.13$\times$-1.22$\times$ & ~~0.92$\times$-2.79$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.30$\times$-3.11$\times$ & \multicolumn{1}{c|}{~1.41$\times$-3.82$\times$} & ~~1.08$\times$-2.11$\times$ & ~~1.10$\times$-5.53$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Diffusion}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.81$\times$-2.70$\times$ & \multicolumn{1}{c|}{~2.55$\times$-3.13$\times$} & ~~1.04$\times$-2.74$\times$ & ~~1.73$\times$-4.14$\times$ \\
-\cline{1-6}
-\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{triangle}} & ~~1.53$\times$-2.46$\times$ & \multicolumn{1}{c|}{~1.56$\times$-2.77$\times$} & ~~1.19$\times$-2.97$\times$ & ~~2.70$\times$-4.27$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{tetrahedron}} & ~~1.58$\times$-2.24$\times$ & \multicolumn{1}{c|}{~1.59$\times$-2.10$\times$} & ~~1.03$\times$-1.21$\times$ & ~~1.31$\times$-1.55$\times$ \\
-\multicolumn{1}{|c|}{\texttt{Burgers}} & \multicolumn{1}{c|}{\texttt{prism}} & ~~1.32$\times$-2.11$\times$ & \multicolumn{1}{c|}{~1.42$\times$-2.31$\times$} & ~~1.04$\times$-1.40$\times$ & ~~1.27$\times$-2.18$\times$ \\
-\cline{1-6}
+\begin{tabularx}{1.0\textwidth}{cccccc|cccc|cccc|cccc}
+\cline{3-18}
+& & \multicolumn{8}{c}{\texttt{Sandy Bridge}} & \multicolumn{8}{c}{\texttt{Xeon Phi}}\\
+\cline{3-18}
+& & \multicolumn{4}{c}{\texttt{licm}} & \multicolumn{4}{c}{\texttt{licm-ap}} & \multicolumn{4}{c}{\texttt{licm}} & \multicolumn{4}{c}{\texttt{licm-ap}} \\
+\cline{1-18}
+& & \texttt{p1} & \texttt{p2} & \texttt{p3} & \texttt{p4} & \texttt{p1} & \texttt{p2} & \texttt{p3} & \texttt{p4} & \texttt{p1} & \texttt{p2} & \texttt{p3} & \texttt{p4} & \texttt{p1} & \texttt{p2} & \texttt{p3} & \texttt{p4} \\[0.1cm]
+\texttt{Helmholtz} & \texttt{triangle} & 1.05 & 1.46 & 1.68 & 1.67 & 1.32 & 1.88 & 2.87 & 4.13 & 1.05 & 1.46 & 1.68 & 1.67 & 1.32 & 1.88 & 2.87 & 4.13 \\
+\texttt{Helmholtz} & \texttt{tetrahedron} & 1.36 & 2.10 & 2.64 & 2.27 & 1.35 & 3.32 & 2.66 & 3.27 & 1.36 & 2.10 & 2.64 & 2.27 & 1.35 & 3.32 & 2.66 & 3.27 \\
+\texttt{Helmholtz} & \texttt{prism} & 2.16 & 2.28 & 2.45 & 2.06 & 2.63 & 2.74 & 2.43 & 2.75 & 2.16 & 2.28 & 2.45 & 2.06 & 2.63 & 2.74 & 2.43 & 2.75\\[0.1cm]
+%\cline{1-18}
+\texttt{Diffusion} & \texttt{triangle} & 1.09 & 1.68 & 1.97 & 1.64 & 1.38 & 1.99 & 3.07 & 4.28 & 2.15 & 1.82 & 2.71 & 2.32 & 2.55 & 3.13 & 2.73 & 2.69\\
+\texttt{Diffusion} & \texttt{tetrahedron} & 1.30 & 2.20 & 3.12 & 2.60 & 1.41 & 3.70 & 3.18 & 3.82 & 2.15 & 1.82 & 2.71 & 2.32 & 2.55 & 3.13 & 2.73 & 2.69\\
+\texttt{Diffusion} & \texttt{prism} & 2.15 & 1.82 & 2.71 & 2.32 & 2.55 & 3.13 & 2.73 & 2.69 & 2.15 & 1.82 & 2.71 & 2.32 & 2.55 & 3.13 & 2.73 & 2.69\\[0.1cm]
+%\cline{1-18}
+\texttt{Burgers} & \texttt{triangle} & 1.53 & 1.81 & 2.68 & 2.46 & 1.56 & 2.28 & 2.61 & 2.77 & 1.53 & 1.81 & 2.68 & 2.46 & 1.56 & 2.28 & 2.61 & 2.77 \\
+\texttt{Burgers} & \texttt{tetrahedron} & 1.61 & 2.24 & 1.69 & 1.59 & 1.61 & 2.10 & 1.60 & 1.78 & 1.53 & 1.81 & 2.68 & 2.46 & 1.56 & 2.28 & 2.61 & 2.77 \\
+\texttt{Burgers} & \texttt{prism} & 2.11 & 2.20 & 1.66 & 1.32 & 2.19 & 2.32 & 1.64 & 1.42 & 1.53 & 1.81 & 2.68 & 2.46 & 1.56 & 2.28 & 2.61 & 2.77 \\
+\cline{1-18}
 \end{tabularx}
 }
 
-\begin{table*}[t]\small
+\begin{table*}[t]\footnotesize
 \massmatrixtwodresultsnorms
 ~
-\caption{Performance improvement due to generalized loop-invariant code motion (\emph{licm} column) on the Helmholtz, Diffusion and Burgers problems, varying the element shape (triangle, tetrahedron, prism) and the polynomial order ($p \in [1, 4]$), using the Lagrange element family, over the original, non-optimized code. Each entry indicates the minimum and maximum speedup obtained in the range of $p$ values. The column \emph{licm-ap} illustrates the combination of \emph{licm} with data alignment and padding. Results are shown for both the Sandy Bridge and the Xeon Phi architectures.}
+\caption{Performance improvement due to generalized loop-invariant code motion (\emph{licm} columns) on the Helmholtz, Diffusion and Burgers problems, varying the element shape (triangle, tetrahedron, prism) and the polynomial order ($p \in [1, 4]$), using the Lagrange element family, over the original, non-optimized code. The \emph{licm-ap} columns illustrate the effect of combining \emph{licm} with data alignment and padding. Results are shown for both the Sandy Bridge and the Xeon Phi architectures.}
 \label{table:perf-results-licm}
 \end{table*}
 
