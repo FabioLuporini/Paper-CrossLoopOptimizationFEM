@@ -389,8 +389,7 @@ Finite element integration, local assembly, compilers, optimizations, simd vecto
 
 
 \section{Introduction}
-In many fields, such as computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by partial differential equations (PDEs). Numerical techniques, such as the finite volume method and finite element method, are widely-employed to approximate solutions of these PDEs. Unstructured meshes are often used to
-discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each element of the discretized domain by applying suitable numerical operations. As the number of elements can be of the order of trillions \cite{Rossinelli2013}, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful port of Hydra, an industrial computational fluid dynamics application developed by Rolls Royce for turbomachinery design (based on finite volume method, roughly 50,000 lines of code and with meshes in excess of 100M edges), to OP2~\cite{op2-main}, demonstrates the effectiveness of the DSL approach in the implementation of PDE solvers~\cite{IstvanHydra}.
+In many fields, such as computational fluid dynamics, computational electromagnetics, and structural mechanics, phenomena are modelled by partial differential equations (PDEs). Numerical techniques, such as the finite volume method and finite element method, are widely-employed to approximate solutions of these PDEs. Unstructured meshes are often used to discretize the equation domain, since their geometric flexibility allows solvers to be extremely effective. The solution is sought in each element of the discretized domain by applying suitable numerical operations. As the number of elements can be of the order of trillions \cite{Rossinelli2013}, a major issue is the time required to execute the computation, which can be hours or days. To address this problem, domain-specific languages (DSLs) have been developed. The successful port of Hydra, an industrial computational fluid dynamics application developed by Rolls Royce for turbomachinery design (based on finite volume method, roughly 50,000 lines of code and with meshes in excess of 100M edges), to OP2~\cite{op2-main}, demonstrates the effectiveness of the DSL approach in the implementation of PDE solvers~\cite{IstvanHydra}.
 
 OP2 adopts a programming model in which computations are expressed through self-contained functions, referred to as ``kernels''. A kernel is applied to all elements in a set of mesh components, such as edges, vertices, or cells, with an implicit synchronization between the application of two consecutive kernels. On commodity multi-cores, a kernel is executed sequentially by a thread, while parallelism is achieved partitioning the mesh and assigning each partition to a thread. Similar programming and execution models are adopted in~\cite{pyop2isc},~\cite{Fenics},~\cite{fluidity_manual_v4},~\cite{lizst}. Kernel optimization is one of the major concerns in unstructured mesh applications. In this paper, we tackle this problem in the context of the finite element method.
 
@@ -575,7 +574,7 @@ where $B$ is the set of all basis functions (or temporary variables, e.g. \textt
 %More importantly, we avoid using $vl$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vl$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers.
 
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect.pdf}}
+\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect-inline.pdf}}
 \caption{Outer-product vectorization by permuting values in a vector register.}
 \label{fig:vect-by-vect}
 \end{figure}
@@ -583,7 +582,7 @@ where $B$ is the set of all basis functions (or temporary variables, e.g. \textt
 The storage layout of $A$, however, is incorrect after the application of this outer-product-based vectorization (\emph{op-vect}, in the following). It can be efficiently restored with a sequence of vector shuffles following the pattern highlighted in Figure~\ref{fig:restore-layout}, executed once outside of the \texttt{ijk} loop nest. The generated pseudo-code for the simple Helmholtz problem when using \emph{op-vect} is shown in Figure~\ref{code:helmholtz-opvect}.
 
 \begin{figure}[t]
-\centerline{\includegraphics[scale=0.60]{Pictures/vect-restore.pdf}}
+\centerline{\includegraphics[scale=0.60]{Pictures/vect-restore-inline.pdf}}
 \caption{Restoring the storage layout after \emph{op-vect}. The figure shows how 4$\times$4 elements in the top-left block of the element matrix $A$ can be moved to their correct positions. Each rotation, represented by a group of three same-colored arrows, is implemented by a single shuffle intrinsic.}
 \label{fig:restore-layout}
 \end{figure}
@@ -724,7 +723,7 @@ The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially
 All loops are interchangeable provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations \texttt{ijk} and \texttt{ikj} are likely to maximize performance. Conceptually, this is motivated by the fact that if the $i$ loop were in an inner position, then a significantly higher number of load instructions would be required at every iteration. We tested this hypothesis in manually crafted kernels. We found that the performance loss is greater than the gain due to the possibility of accumulating increments in a register, rather than in memory, along the $i$ loop. The choice between \texttt{ijk} and \texttt{ikj} depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses as outermost the loop along which the number of invariant loads is smaller so that more registers remain available to carry out the computation of the element matrix.
 
 % "vendor compilers such as Intel's" is awkward and unclear. If Intel is the only one you have looked at, then say "the Intel compiler", otherwise name the ones for which you know this to be true.
-Since loop unroll and unroll-and-jam of outer loops are fundamental to the exposure of instruction-level parallelism, tuning critical parameters such as the unroll factor is of great importance. However, inspecting assembly code and comparing with other hand-written implementations indicates that recent versions of vendor compilers such as Intel's are capable of estimating close-to-optimal values for such parameters. This is particularly true for assembly kernels, in which the loop nest is affine, bounds are usually very small and known at compile-time, and memory accesses are stride one. We therefore leave the backend compiler in charge of selecting the unroll factor. This choice also simplifies COFFEE's cost model. The only situation in which we explicitly unroll-and-jam a loop is when \emph{op-vect} is used, since the transformed code seems to prevent the Intel compiler from applying this optimization, even if specific pragmas are added. 
+Since loop unroll and unroll-and-jam of outer loops are fundamental to the exposure of instruction-level parallelism, tuning critical parameters such as the unroll factor is of great importance. However, inspecting assembly code and comparing with other hand-written implementations indicates that recent versions of the Intel compiler are capable of estimating close-to-optimal values for such parameters. This is particularly true for assembly kernels, in which the loop nest is affine, bounds are usually very small and known at compile-time, and memory accesses are stride one. We therefore leave the backend compiler in charge of selecting the unroll factor. This choice also simplifies COFFEE's cost model. The only situation in which we explicitly unroll-and-jam a loop is when \emph{op-vect} is used, since the transformed code seems to prevent the Intel compiler from applying this optimization, even if specific pragmas are added. 
 
 %Note that, regardless of the output of the cost model, the unroll-and-jam factor never exceeds the actual size of the outer loop (line 19 in Figure~\ref{algo:PyOP2Compiler}, assuming the default loop order \texttt{ijk}).
 
@@ -818,25 +817,25 @@ On the Sandy Bridge, we have also measured the performance of individual kernels
 Application of \emph{op-vect} to the Burgers problem induces significant slow downs due to the large number of temporary arrays that need to be tiled, which exceeds the available logical registers on the underlying architecture. Expression splitting can be used in combination with \emph{op-vect} to alleviate this issue; this is discussed in the next section.
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/helmholtz-normalized-opvect.pdf}
+\includegraphics[scale=0.67]{Pictures/helmholtz-normalized-opvect.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Helmholtz kernel on the Sandy Bridge. CM refers to where the cost model has been used to determine the sequence of code transformations.}
 \label{fig:opvect-helmholtz-speedup}
 \end{figure}
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/helmholtz-normalized-opvect-phi.pdf}
+\includegraphics[scale=0.67]{Pictures/helmholtz-normalized-opvect-phi.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Helmholtz kernel on the Xeon Phi. CM refers to where the cost model has been used to determine the sequence of code transformations.}
 \label{fig:opvect-helmholtz-speedup-phi}
 \end{figure}
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/diffusion-normalized-opvect.pdf}
+\includegraphics[scale=0.67]{Pictures/diffusion-normalized-opvect.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Diffusion kernel on the Sandy Bridge. CM refers to where the cost model has been used to determine the sequence of code transformations.}
 \label{fig:opvect-diffusion-speedup}
 \end{figure}
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/diffusion-normalized-opvect-phi.pdf}
+\includegraphics[scale=0.67]{Pictures/diffusion-normalized-opvect-phi.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Diffusion kernel on the Xeon Phi. CM refers to where the cost model has been used to determine the sequence of code transformations.}
 \label{fig:opvect-diffusion-speedup-phi}
 \end{figure}
@@ -850,13 +849,13 @@ Expression splitting relieves the register pressure when the element matrix eval
 The \emph{split} transformation was also tried in combination with \emph{op-vect} (\emph{split-op-vect}), although the cost model prevents its adoption on both platforms. Despite improvements up to 1.22$\times$, \emph{split-op-vect} never outperforms \emph{split}. This is for two reasons: for small split factors, such as 1 and 2, the data space to be tiled is still too big, and register spilling affects run-time; for higher ones, sub-expressions become so small that, as explained in Section~\ref{sec:perf-eval-opvect}, full or partial unrolling of the loop nest achieves a certain degree of register re-use by itself.
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/burgers-normalized-split.pdf}
+\includegraphics[scale=0.67]{Pictures/burgers-normalized-split.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Burgers kernel on the Sandy Bridge. CM refers to the cases in which the cost model has been used to determine the sequence of code transformations.}
 \label{fig:split-burgers-speedup}
 \end{figure}
 
 \begin{figure}[h]
-\includegraphics[scale=0.7]{Pictures/burgers-normalized-split-phi.pdf}
+\includegraphics[scale=0.67]{Pictures/burgers-normalized-split-phi.pdf}
 \caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Burgers kernel on the Xeon Phi. CM refers to the cases in which the cost model has been used to determine the sequence of code transformations.}
 \label{fig:split-burgers-speedup-phi}
 \end{figure}
@@ -888,7 +887,7 @@ For the Helmholtz problem on a tetrahedral mesh, manual implementations based on
 
 \section{Related Work}
 \label{sec:related-work}
-The finite element method is extensively used to approximate solutions of PDEs. Well-known frameworks and applications include nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics}, Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical integration is usually employed to implement the local assembly phase. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. Methods based on tensor contraction~\cite{FFC-Compiler} and symbolic manipulation~\cite{Francis} have been developed. We have designed COFFEE to specifically target numerical integration because it has been demonstrated that it remains the optimal choice for a wide class of problems~\cite{quadrature1}.
+The finite element method is extensively used to approximate solutions of PDEs. Well-known frameworks and applications include nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics}, Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical integration is usually employed to implement the local assembly phase. The recent introduction of DSLs to decouple the finite element specification from its underlying implementation facilitated, however, the development of novel approaches. Methods based on tensor contraction~\cite{FFC-Compiler} and symbolic manipulation~\cite{Francis} have been implemented. We have designed COFFEE to specifically target numerical integration because it has been demonstrated that it remains the optimal choice for a wide class of problems~\cite{quadrature1}.
 
 Optimization of local assembly using numerical integration for CPU platforms has been addressed in FEniCS~\cite{quadrature1}. The comparison between COFFEE and this work is presented in Section~\ref{sec:perf-results-fenics}. In~\cite{Markall20101815}, and more recently in~\cite{petsc-integration-gpu}, the problem has been studied for GPU architectures. In~\cite{assembly-opencl}, variants of the standard numerical integration algorithm have been specialized and evaluated for the PowerXCell processor, but an exhaustive study from the compiler viewpoint - like ours - is missing, and none of the optimizations presented in Section~\ref{sec:code-transf} are mentioned. Among these efforts, to the best of our knowledge, COFFEE is the first work targeting low-level optimizations through a real compiler approach.
 
