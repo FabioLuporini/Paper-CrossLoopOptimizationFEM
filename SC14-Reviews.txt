@@ -1,0 +1,132 @@
+Review of pap264s2 by Reviewer 1 	top
+
+ Summary and High Level Discussion
+COFFEE is a domain-specific compiler for optimizing code that does “local 
+assembly” kernels in a finite element solver. The code is generated from a high 
+level language for PDEs. An invocation of the kernel typically does tensor-like 
+calculators over relatively small matrices; e.g., triply nested loops operating 
+on about a dozen iterations. Because the DSL context, COFFEE has a lot of 
+flexibility on how it organizes/orders the calculations to tailor execution to a 
+target architecture. 
+
+The loop-invariant code motion in section III.B is notably something that 
+programmers sometimes do but not compilers till now. III.C describes a curious 
+way to do outer-product calculations. Overall, I liked the way the paper 
+demonstrates aggressive optimization at the loop nest level of code coming from 
+a high-level DSL.
+
+ Comments for Rebuttal
+Section III, first paragraph. I had difficulty with this paragraph. For 
+non-practitioners of PDEs, it would be useful to explain, or give a reference to 
+an explanation, of why “hyperelasticity” make “such optimizations” insufficient. 
+Or is “hyperelasticity” what leads to the lifting problems described later in 
+the paragraph?
+
+ Detailed Comments for Authors
+Section III.D could point out the distinction between splitting and classic loop 
+distribution/fission (http://en.wikipedia.org/wiki/Loop_fission). The 
+distinction seems to be that class loop distribution would not see the 
+opportunity because it requires re-associating sums.
+
+Review of pap264s2 by Reviewer 2 	top
+
+ Summary and High Level Discussion
+This paper presents 3 optimizations for finite element kernels. The 
+optimizations are generalized loop invariant code motion, vector-register 
+tiling, and expression splitting, 
+
+They are applied to 3 real-world applications. Experiments are performed and 
+results are given. In 2 applications, the speed ups are good - there is some 
+slow down on another applications, which also has some speed up.
+
+ Comments for Rebuttal
+1. You only consider kernels where the working set is small enough to fit in an 
+L1 cache. Why don't you consider the other case? How restrictive is this 
+assumption when considering the many kernels?
+
+2. How do the 3 benchmarks chosen represent applications in this area.
+
+3. Does the optimization enable solving finite element applications that could 
+not be done previously? In order words, although the technique is faster, is the 
+speed up necessary.
+
+4. What is the overhead of the optimizations in terms of code growth and memory?
+
+ Detailed Comments for Authors
+I don't think this work is well motivated. It is unclear why faster times are 
+needed. More intuition would have been nice in the technical sections.
+
+Review of pap264s2 by Reviewer 3 	top
+
+ Summary and High Level Discussion
+The paper presents a domain-specific compiler, COFFEE, for local assembly 
+kernels. Local assembly kernels’ runtime contribute significantly in the finite 
+element method, thus it’s important to optimize them. For such kernels, COFFEE 
+focuses on minimizing floating point operations, register allocation, and 
+increasing instruction-level parallelism. The paper proposes optimization 
+strategies, design, and implementation of COFFEE. The results show that, with 
+these optimizations, COFFEE achieves up to 1.5x and 4.4x speedup over existing 
+compilation techniques and over original kernels, respectively.
+
+ Comments for Rebuttal
+1.	There has been recent work published on polyhedral compilers for 
+improving runtime of scientific workloads through loop fusion. It would be 
+interesting if authors evaluate against those techniques, or at least discuss 
+them qualitatively. 2. Are techniques proposed in this paper applicable to 
+scientific workloads or domains other than partial differential equations?
+
+ Detailed Comments for Authors
+1.	It is not clear to me how important is the problem addressed in this 
+paper. The paper lacks motivation, which makes it hard for readers to gauge its 
+relevance. 2.	The background section needs to be carefully written for making 
+the underlying concepts easy to understand for non-expert readers. Without 
+proper definitions, the terms become jargon and may not get the attention they 
+deserve from some reviewers. The paper is overall well written with very few 
+grammatical errors, but is hard to follow for non-expert readers as mentioned 
+earlier.
+
+Review of pap264s2 by Reviewer 4 	top
+
+ Summary and High Level Discussion
+Authors developed a domain specific compiler to accelerate the single core 
+performance for finite element local assembly. The compiler optimizations 
+include loop invariant code motion, expression splitting and register tiling. 
+
+Strengths: The local assembly matrices are very small matrix, generally fits 
+into L1 cache thus makes them hard to utilize BLAS routines. The proposed 
+compiler addresses the vectorization and register usage challenges. In addition, 
+the work has been integrated into Firedrake Framework, which shows its maturity. 
+
+Weaknesses: Even though performance results are promising, I found the “three 
+real-world problems” not very real. Please correct me if I am wrong. Are these 
+applications have common usage? I would consider them as small kernels.
+
+ Comments for Rebuttal
+* What are the padded values initialized to? Are there any cases that the value 
+* used to initialize the padded sections of the array can change the numerical 
+* results? Do you need to check if there is no side effects of these values?
+
+* It is not clear to me why Line 13 and 14 are not fused with the j loop in Line 
+* 16 in Figure 4? Why are there two j loops (r and j)? Can you explain? 
+
+* I was wondering if a (future) core has 100+ registers, will your compiler 
+* optimizations become obsolete? or this will allow computing higher order 
+* polynomials more efficiently.
+
+ Detailed Comments for Authors
+* Can you reword the sentence starting with “Our cost-model-driven sequence of 
+* source-to-source code transformations …”?
+
+* Is it possible to compute the basis functions and their derivatives on the fly 
+* instead of using a const arrays?
+
+* What is super word level parallelism?
+
+* “…. 16 entires (j,k = 0, …4”) should 4 be 3?
+
+* Unified Form Language should be abbreviated in parenthesis when it is first 
+* used. Later on it is only referred as UFL. 
+
+* Figure 9 is not very useful. A flow diagram might be better to explain the 
+* pipeline. The diagram can include the interaction between PyOP2, Firedrake and 
+* Coffee.
