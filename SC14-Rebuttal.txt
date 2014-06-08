@@ -1,4 +1,70 @@
 We thank our reviewers (R1-R4). We appreciate the positive feedback on our 
 paper. We agree and will correct the presentation issues, especially concerning 
-the use of "PDE language".
+the use of jargon.
 
+We understand there are three main concerns: relevance of the three chosen 
+applications; motivations; relationship with polyhedral compilers.
+
+1.Applications (R2, R3, R4)
+The Helmholtz, Diffusion, and Burgers equations are actually problems of real 
+importance. TODO: add here what kind of problems they solve. The use of DSL 
+technology drastically simplifies their development, but the code generation 
+still needs thousands lines of code in the Firedrake/COFFEE framework. The fact 
+that resulting local assembly kernels have small loops and fit a CPU's L1 cache 
+is a mathematical property, not a restriction or a simplificative assumption we 
+made. Thus, same problems, out of the Firedrake context, would have exactly the 
+same size and computational problems.
+
+2.Motivations (R2, R3)
+Resolution of partial differential equations in real-world problems requires 
+hours/days of computation even when running in parallel on thousands of nodes.  
+Local assembly, which is a fundamental phase of finite element methods, may 
+represent a large fraction of the run-time, possibly more than 50% depending on 
+the specific problem being solved. The big point, which we want to clarify and 
+reiterate in the paper, is that strong optimization of sequential code leads to 
+notable reductions of the overall execution time. Being fully integrated with a 
+real framework like Firedrake, COFFEE fosters the development of science by 
+improving run-times of long-lasting computations written by domain specialists.  
+We believe this is an important aspect of our research.
+The second concern is about the choice of the three computations. The motivation 
+here is that these local assembly kernels are exponents of a much larger class 
+of problems. Thus, problems based on completely different equations will benefit 
+from the application of analogous sets of transformations.
+
+3.Relationship with other tools (R1, R3, R4)
+Polyhedral and vendor compilers do not (practically, can not) apply the 
+transformations automated in COFFEE because of their domain-specific and/or 
+non-affine nature. For example, as explained in the paper, the generalized 
+loop-invariant code motion exploits a mathematical property on the size of the 
+loops to minimize pre-computation of hoisted terms. Vector-register tiling is 
+tied to the peculiar memory access pattern characterizing our kernels: to the 
+best of our knowledge, no register tiling technique computing outer-products 
+using in-register shuffling has ever been automated in a tool. Padding, as 
+questioned in R4, is safe in our kernels, but in general is not; in addition, it is mostly 
+profitable for very small arrays: so, again, no compilers adopt it. The split 
+transformation, as pointed out by R1, is based on the associativity of sums, 
+which breaks standard loop fissioning optimizations reasoning on memory access 
+pattern and iteration spaces.
+These considerations provide an intuition behind our claim that COFFEE is 
+domain-specific compiler capable of optimizing code in a way that no available 
+tools can do. 
+
+4. Technical aspects (R1, R2, R4)
+- R1 (code splittng): we plan to clarify the distinction between classic loop 
+  fission and code splitting.
+- R2 (overhead): The grow in code and memory footprint is always limited. There 
+  is no particular manual loop unrolling that makes the code exceed the instruction 
+cache. The use of temporaries for loop-invariant code motion is minimized by 
+ensuring that same sub-expressions are not computed multiple times; our 
+profiling experiments show that, even when high-order polynomials are employed, 
+the use of temporaries never outreaches the L1 cache (i.e. loop-invariant code motion is always profitable).
+- R4 (padding): As explained earlier, padding is always safe: values computed in 
+  the padded regions of the element matrix are simply discared once returned 
+from the assembly routine.
+- R4 (loop fusion): In Section 3B we explain that we want to vectorize lines 
+  13-14, and the simplest way of triggering compiler's auto-vectorization is to 
+put those statements in an innermost loop, given a tree of loops.
+- R4 (registers): More registers would make the optimization problem even more 
+  interesting: that is exactly why we have tested the transformations on the 
+intel phi, where we have 32 logical registers instead of 16 as in the sandy 
+bridge. 
