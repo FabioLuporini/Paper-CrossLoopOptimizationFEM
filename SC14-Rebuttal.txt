@@ -3,6 +3,7 @@ paper. We agree and will correct the presentation issues concerning jargon,
 applications, motivations, relationship with other (polyhedral) tools.
 
 1.Applications (R2, R3, R4)
+
 The three benchmark kernels chosen are completely real examples and comprise the 
 core operators in some of the most frequently encountered finite element 
 problems. The Helmholtz and Diffusion kernels are unsimplified examples of the 
@@ -24,7 +25,8 @@ simplified the development of finite element methods for our tests (see the
 reference to the UFL code in the paper); however, the code generation in 
 Firedrake is a complex piece of software involving thousands lines of code.
 
-2.Motivations (R2, R3)
+2.Motivation (R2, R3)
+
 Computational cost is a critical limitation in finite element simulations. To 
 provide one particular example we are particularly concerned about, it has been 
 well established that mesh resolution is critical in the accuracy of numerical 
@@ -38,42 +40,45 @@ the overall finite element method's execution time, directly impacts large-scale
 simulations running on supercomputers.
 
 3.Relationship with other tools (R1, R3, R4)
+
 Polyhedral and vendor compilers do not (practically: can not) apply the 
 transformations automated in COFFEE because of their domain-specific and/or 
 non-affine nature. For example, as explained in the paper, the generalized 
 loop-invariant code motion exploits the mathematical property that the size of 
 the loops may be identical to minimize pre-computation of hoisted terms. 
-Vector-register tiling is tied to the peculiar memory access pattern 
+Vector-register tiling is tied to the particular memory access pattern 
 characterizing our kernels: to the best of our knowledge, no register tiling 
 technique computing outer-products using in-register shuffling has ever been 
 automated in a tool. Padding, as questioned in R4, is safe in our kernels, but 
 in general is not; in addition, it is mostly profitable for very small arrays: 
 so, again, no compilers adopt it.  The split transformation, as pointed out by 
-R1, is based on the associativity of sums, which breaks standard loop fissioning 
+R1, is based on the associativity of sums, which breaks standard loop fission
 optimizations reasoning on memory access pattern and iteration space.
 
 4.Technical aspects (R1, R2, R4)
-- R1 (splittng): we plan to clarify the distinction between classic loop 
+
+- R1 (splitting): we plan to clarify the distinction between classic loop 
   fission and code splitting.
 - R2 (overhead): The grow in code and memory footprint is always limited. There 
-  is no particular manual loop unrolling that makes the code exceeding the 
-instruction cache. The use of temporaries for loop-invariant code motion is 
-minimized by avoiding redundant precomputation of same sub-expressions; 
-our profiling experiments show that, even when high-order polynomials are 
-employed, the use of temporaries never outreaches the L1 cache (i.e.  
-loop-invariant code motion is always profitable).
+  is no particular manual loop unrolling that causes the code to exceed the 
+  instruction cache. The use of temporaries for loop-invariant code motion is 
+  minimized by avoiding redundant precomputation of same sub-expressions; 
+  our profiling experiments show that, even when high-order polynomials are 
+  employed, the use of temporaries never exceeds the L1 cache (i.e.  
+  loop-invariant code motion is always profitable).
 - R4 (padding): As explained earlier, padding is always safe: values computed in 
-  the padded regions of the element matrix are simply discared once returned 
-from the assembly routine.
+  the padded regions of the element matrix are simply discarded once returned 
+  from the assembly routine.
 - R4 (loop fusion): In Section 3B we explain that we want to vectorize lines 
   13-14, and the simplest way of triggering compiler's auto-vectorization is to 
-put those statements in an innermost loop, given a tree of loops.
+  put those statements in an innermost loop, given a tree of loops.
 - R4 (registers): More registers would make the optimization problem even more 
   interesting: that is exactly why we have tested the transformations on the 
-intel phi, where we have 32 logical registers instead of 16 as in the sandy 
-bridge. 
+  Intel Phi, where we have 32 logical registers instead of 16 as in the Sandy 
+  Bridge. 
 
 5.Jargon (R1, R2, R3, R4)
-We will definitely simplify the unclear descriptions related to the finite 
-element methid and give more intuition about its general structure, avoiding the 
+
+We are going to simplify the unclear descriptions related to the finite 
+element method and give more intuition about its general structure, avoiding the 
 use of technical terms that make the paper difficult to read.
