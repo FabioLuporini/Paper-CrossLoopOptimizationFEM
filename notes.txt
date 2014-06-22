@@ -1,8 +1,0 @@
-Contributions of the paper:
-- An optimisation strategy that can be generalised to a wide variety of kernels
- employed in many computational science codes. The key feature common
- to these kernels is that they usually fit the L1 cache of commodity processors.
-- Automation of such code optimizations in a framework for the resoloution of partial
- differential equations through the Finite Element Method, called Firedrake.
- This allows us to perform an in-depth performance evaluation of the various
- transformations in real-world computations.
