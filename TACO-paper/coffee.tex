@@ -13,7 +13,7 @@
 
 \documentclass[prodmode,acmtecs]{acmsmall} % Aptara syntax
 
-\usepackage{tabularx}
+
 \usepackage{tabulary}
 \usepackage[cmex10]{amsmath}
 \usepackage{url}
@@ -42,20 +42,20 @@
 
 % Title portion
 \title{COFFEE: an Optimizing Compiler for Finite Element Local Assembly}
-\author{GANG ZHOU
-\affil{College of William and Mary}
-YAFENG WU
-\affil{University of Virginia}
-TING YAN
-\affil{Eaton Innovation Center}
-TIAN HE
-\affil{University of Minnesota}
-CHENGDU HUANG
-\affil{Google}
-JOHN A. STANKOVIC
-\affil{University of Virginia}
-TAREK F. ABDELZAHER
-\affil{University of Illinois at Urbana-Champaign}}
+\author{Fabio Luporini
+\affil{Imperial College London}
+Ana Lucia Varbanescu
+\affil{University of Amsterdam}
+Florian Rathgeber
+\affil{Imperial College London}
+Gheorghe-Teodor Bercea
+\affil{Imperial College London}
+J. Ramanujam
+\affil{Louisiana State University}
+David A. Ham
+\affil{Imperial College London}
+Paul H.J. Kelly
+\affil{Imperial College London}}
 % NOTE! Affiliations placed here should be for the institution where the
 %       BULK of the research was done. If the author has gone to a new
 %       institution, before publication, the (above) affiliation should NOT be changed.
@@ -64,21 +64,16 @@ TAREK F. ABDELZAHER
 %       currently affiliated with NASA.
 
 \begin{abstract}
-The numerical solution of partial differential equations using the finite
-element method is one of the key applications of high performance
-computing. Local assembly is its characteristic operation. This entails the
-execution of a problem-specific kernel for each element in the discretized problem domain. Since the domain size can be huge, executing efficient kernels is fundamental. Their optimization is, however, a challenging issue. Even though affine loop nests are generally present, the short trip counts and the complexity of mathematical expressions make it hard to determine a single or unique sequence of successful transformations. We present, therefore, the design and systematic evaluation of COFFEE, a domain-specific compiler for local assembly kernels. COFFEE manipulates abstract syntax trees by introducing composable optimizations aimed at improving instruction-level parallelism, especially SIMD vectorization, and register locality. It then generates C code including vector intrinsics. Experiments using a range of finite-element forms of increasing complexity show that significant performance improvement is achieved.
+The numerical solution of partial differential equations using the finite element method is one of the key applications of high performance computing. Local assembly is its characteristic operation. This entails the execution of a problem-specific kernel for each element in the discretized problem domain. Since the domain size can be huge, executing efficient kernels is fundamental. Their optimization is, however, a challenging issue. Even though affine loop nests are generally present, the short trip counts and the complexity of mathematical expressions make it hard to determine a single or unique sequence of successful transformations. We present, therefore, the design and systematic evaluation of COFFEE, a domain-specific compiler for local assembly kernels. COFFEE manipulates abstract syntax trees by introducing composable optimizations aimed at improving instruction-level parallelism, especially SIMD vectorization, and register locality. It then generates C code including vector intrinsics. Experiments using a range of finite-element forms of increasing complexity show that significant performance improvement is achieved.
 \end{abstract}
 
-\category{C.2.2}{Computer-Communication Networks}{Network Protocols}
+\category{G.1.8}{Numerical Analysis}{Partial Differential Equations - Finite element methods}
 
-\terms{Design, Algorithms, Performance}
+\terms{Design, Performance}
 
 \keywords{Finite element integration, local assembly, compilers, optimizations, simd vectorization}
 
-\acmformat{Gang Zhou, Yafeng Wu, Ting Yan, Tian He, Chengdu Huang, John A. Stankovic,
-and Tarek F. Abdelzaher, 2010. A multifrequency MAC specially
-designed for  wireless sensor network applications.}
+\acmformat{Fabio Luporini, Ana Lucia Varbanescu, Florian Rathgeber, Gheorghe-Teodor Bercea, J. Ramanujam, David A. Ham, and Paul H. J. Kelly, 2014. COFFEE: an Optimizing Compilerfor Finite Element Local Assembly.}
 % At a minimum you need to supply the author names, year and a title.
 % IMPORTANT:
 % Full first names whenever they are known, surname last, followed by a period.
@@ -93,12 +88,7 @@ designed for  wireless sensor network applications.}
 \begin{bottomstuff}
 This research is partly funded by the MAPDES project, by the Department of Computing at Imperial College London, by EPSRC through grants EP/I00677X/1, EP/I006761/1, and EP/L000407/1, and by NERC grants NE/K008951/1 and NE/K006789/1. The authors would like to thank Dr. Carlo Bertolli, Dr. Lawrence Mitchell, and Dr. Francis Russell for their invaluable suggestions and their contribution to the Firedrake project.
 
-Author's addresses: G. Zhou, Computer Science Department,
-College of William and Mary; Y. Wu  {and} J. A. Stankovic,
-Computer Science Department, University of Virginia; T. Yan,
-Eaton Innovation Center; T. He, Computer Science Department,
-University of Minnesota; C. Huang, Google; T. F. Abdelzaher,
-(Current address) NASA Ames Research Center, Moffett Field, California 94035.
+Author's addresses: Fabio Luporini $\&$ Florian Rathgeber $\&$ Gheorghe-Teodor Bercea $\&$ Paul H. J. Kelly, Department of Computing, Imperial College London; Ana Lucia Varbanescu, Department of Computer Sciences, University of Amsterdam; David A. Ham, Department of Computing and Department of Mathematics, Imperial College London; J. Ramanujam, Department of Electrical and Computer Engineering, Louisiana State University.
 \end{bottomstuff}
 
 \maketitle
@@ -195,7 +185,7 @@ $\rbrace$
 \label{code:burgers}
 \end{algorithm}
 
-Local assembly is the computation of contributions of a specific cell in the discretized domain to the PDE solution. The process consists of numerically evaluating problem-specific integrals to produce a matrix and a vector (\cite{quadrature1, fluidity_manual_v4}), whose sizes depend on the order of the method. This operation is applied to all cells in the discretized domain. In this work we focus on local matrices, or ``element matrices'', which are more costly to compute than element vectors. 
+Local assembly is the computation of contributions of a specific cell in the discretized domain to the PDE solution. The process consists of numerically evaluating problem-specific integrals to produce a matrix and a vector (\cite{quadrature1}, \cite{fluidity_manual_v4}), whose sizes depend on the order of the method. This operation is applied to all cells in the discretized domain. In this work we focus on local matrices, or ``element matrices'', which are more costly to compute than element vectors. 
 
 Given a finite element description of the input problem, expressed through the domain-specific Unified Form Language~\cite{ufl} (UFL), Firedrake generates a C-code kernel implementing assembly using a numerical integration algorithm. The same kernel can be applied to any elements: this descends from the mathematical formulation of assembly, which states that the evaluation of a local matrix can be reduced to integrating on a fixed ``reference'' element - a special element that does not belong to the domain - after a suitable change of coordinates. Firedrake triggers the compilation of an assembly kernel using an available vendor compiler, and manages its (parallel) execution over all elements in the mesh. As already stated, the subject of this paper is to enhance this execution model by adding an optimization stage prior to the generation of C code. 
 
@@ -207,6 +197,7 @@ The structure of a local assembly kernel is shown in Figure~\ref{code:general-st
 
 \begin{table}[h]
 \begin{center}
+\tbl{Type and variable names used in the various code snippets to identify local assembly objects.}{
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Object name & Type & Variable name(s) \\\hline
@@ -218,9 +209,9 @@ Numerical integration weights & double[] & W \\
 Basis functions (and derivatives) & double[][] & X, Y, X1, ... \\ 
 Element matrix & double[][] & A\\ \hline
 \end{tabulary}
+}
 \end{center}
 \label{table:map-name-letters}
-\caption{Type and variable names used in the various code snippets to identify local assembly objects.}
 \end{table}
 
 The actual complexity of a local assembly kernel depends on the finite element problem being solved. In simpler cases, the loop nest is perfect, it has short trip counts (in the range 3-15), and the computation reduces to a summation of a few products involving basis functions. An example is provided in Figure~\ref{code:helmholtz}, which shows the assembly kernel for a Helmholtz problem using Lagrange basis functions on 2D elements with polynomial order $p=1$. In other scenarios, for instance when solving the Burgers equation, whose assembly code is given in Figure~\ref{code:burgers}, the number of arrays involved in the computation of the element matrix can be much larger: in this case, 14 unique arrays are accessed, and the same array can be referenced multiple times within the expression. This may also require the evaluation of constants in outer loops (called $F$ in the code) to act as scaling factors of arrays; trip counts can be larger (proportionally to the order of the method); and arrays may be block-sparse. In addition to a larger number of operations, more complex cases like the Burgers equation are characterized by high register pressure. The Helmholtz and Burgers equations, along with the Diffusion problem, 
@@ -375,6 +366,7 @@ Table~\ref{table:code-transformations} summarizes the code transformations descr
 
 \begin{table}[h]
 \begin{center}
+\tbl{Overview of code transformations for Firedrake-generated assembly kernels.}{
 \begin{tabulary}{1.0\columnwidth}{C|C}
 \hline
 Name (Abbreviation) & Parameter \\\hline
@@ -386,8 +378,8 @@ Loop unrolling  & unroll factor \\
 Outer-product vectorization (\emph{op-vect}) & tile size \\ 
 Expression splitting (\emph{split}) & split point, split factor \\ \hline
 \end{tabulary}
+}
 \end{center}
-\caption{Overview of code transformations for Firedrake-generated assembly kernels.}
 \label{table:code-transformations}
 \end{table}
 
@@ -490,7 +482,7 @@ In the following, results for the loop order \texttt{ijk} are shown. For the con
 \subsection{Impact of Generalized Loop-invariant Code Motion}
 
 \newcommand{\massmatrixtwodresultsnorms}{
-\begin{tabularx}{1.0\textwidth}{cccccc|cccc|cccc|cccc}
+\begin{tabulary}{1.0\textwidth}{cccccc|cccc|cccc|cccc}
 \cline{3-18}
 & & \multicolumn{8}{c}{\texttt{Sandy Bridge}} & \multicolumn{8}{c}{\texttt{Xeon Phi}}\\
 \cline{3-18}
@@ -509,13 +501,14 @@ In the following, results for the loop order \texttt{ijk} are shown. For the con
 \texttt{Burgers} & \texttt{tetrahedron} & 1.61 & 2.24 & 1.69 & 1.59 & 1.61 & 2.10 & 1.60 & 1.78 & 1,01 & 2,55 & 0,98 & 1,21 & 1,48 & 3,83 & 1,55 & 1,29 \\
 \texttt{Burgers} & \texttt{prism} & 2.11 & 2.20 & 1.66 & 1.32 & 2.19 & 2.32 & 1.64 & 1.42 & 1,39 & 1,56 & 1,18 & 1,04 & 2,18 & 2,82 & 1,24 & 1,25 \\
 \cline{1-18}
-\end{tabularx}
+\end{tabulary}
 }
 
-\begin{table*}[t]\footnotesize
+\begin{table*}[t]
+\tbl{Performance improvement due to generalized loop-invariant code motion (\emph{licm} columns) on the Helmholtz, Diffusion and Burgers problems, varying the element shape (triangle, tetrahedron, prism) and the polynomial order ($p \in [1, 4]$), using the Lagrange element family, over the original, non-optimized code. The \emph{licm-ap} columns illustrate the effect of combining \emph{licm} with data alignment and padding. Results are shown for both the Sandy Bridge and the Xeon Phi architectures.}{
+\scriptsize
 \massmatrixtwodresultsnorms
-~
-\caption{Performance improvement due to generalized loop-invariant code motion (\emph{licm} columns) on the Helmholtz, Diffusion and Burgers problems, varying the element shape (triangle, tetrahedron, prism) and the polynomial order ($p \in [1, 4]$), using the Lagrange element family, over the original, non-optimized code. The \emph{licm-ap} columns illustrate the effect of combining \emph{licm} with data alignment and padding. Results are shown for both the Sandy Bridge and the Xeon Phi architectures.}
+}
 \label{table:perf-results-licm}
 \end{table*}
 
@@ -597,6 +590,7 @@ Table~\ref{table:comparison-to-FFC-opt} summarizes the performance achieved by C
 
 \begin{table}[h]
 \begin{center}
+\tbl{Performance comparison between FEniCS (optimizations enabled) and COFFEE on the Sandy Bridge.}{
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Problem & Max slow down & Max speed up \\\hline
@@ -604,8 +598,8 @@ Helmholtz & - & 4.14$\times$ \\
 Diffusion & - & 4.28$\times$ \\
 Burgers & 2.24$\times$ & 1.61$\times$ \\\hline
 \end{tabulary}
+}
 \end{center}
-\caption{Performance comparison between FEniCS (optimizations enabled) and COFFEE on the Sandy Bridge.}
 \label{table:comparison-to-FFC-opt}
 \end{table}
 
@@ -643,8 +637,6 @@ In this paper, we have presented design, optimizations and systematic performanc
                              % 'legacy' bibs and bibs with 'alternate codings'.
                              % Gerry Murray - March 2012
 
-% Electronic Appendix
-\elecappendix
 
 \medskip
 
