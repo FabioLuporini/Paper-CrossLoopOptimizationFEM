@@ -863,7 +863,7 @@
 
 \DeclareOption{acmtecs}{
   \typeout{}
-  \typeout{Using ACM, TECS option: 2010/05/04 by Aptara}
+  \typeout{Using ACM, TACO option: 2010/05/04 by Aptara}
   \typeout{}
   \global\@acmjacmfalse
   \global\@acmtissecfalse
@@ -903,9 +903,9 @@
   \global\@acmtocefalse
   \global\@acmteacfalse
   \global\@acmtommfalse
-  \def\@journalName{ACM Transactions on Embedded Computing Systems}
-  \def\@journalNameShort{ACM Trans. Embedd. Comput. Syst.}
-  \def\@journalCode{tecs}
+  \def\@journalName{ACM Transactions on Architecture and Code Optimization}
+  \def\@journalNameShort{ACM Trans. Arch. \& Code Opt.}
+  \def\@journalCode{taco}
   \def\@permissionCodeOne{1539-9087} 
 }
 
