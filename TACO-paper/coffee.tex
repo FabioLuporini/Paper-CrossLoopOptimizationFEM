@@ -13,7 +13,9 @@
 
 \documentclass[prodmode,acmtecs]{acmsmall} % Aptara syntax
 
-
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subfig}
 \usepackage{tabulary}
 \usepackage[cmex10]{amsmath}
 \usepackage{url}
@@ -230,7 +232,7 @@ The code transformations presented in this section are applicable to all finite 
 % TODO: could add a sentence here to bridge the two paragraphs
 
 % Padding and Data Alignment
-\subsection{Prerequisites for Effective Auto-vectorization: Padding and Data Alignment}
+\subsection{Padding and Data Alignment}
 Auto-vectorization of assembly code computing the element matrix can be less effective if data are not aligned and if the length of the innermost loop is not a multiple of the vector length $vl$. Data alignment is enforced in two steps. Initially, all arrays are allocated to addresses that are multiples of $vl$. Then, two dimensional arrays are padded by rounding the number of columns to the nearest multiple of $vl$. For instance, assume the original size of a basis function array is 3$\times$3 and $vl=4$ (e.g. AVX processor, with 256 bit long vector registers and 64-bit double-precision floating-point values). In this case, a padded version of the array will have size 3$\times$4. The compiler is explicitly informed about data alignment using a suitable pragma. Padding of all two dimensional arrays involved in the evaluation of the element matrix also allows us to safely round the loop trip count to the nearest multiple of $vl$. This avoids the introduction of a remainder (scalar) loop from the compiler, which would render vectorization less efficient.
 
 % Autovectorizable LICM -> show code snippet?
@@ -281,7 +283,7 @@ where $B$ is the set of all basis functions (or temporary variables, e.g. \textt
 
 %More importantly, we avoid using $vl$-1 registers per each outer-loop-dependent variable (i.e. all $x$ terms in Equation~\ref{outer-product}), with $vl$ being the vector length. This is a considerable gain, which allows us to slice the iteration space into bigger tiles, implemented directly by vector registers.
 
-\begin{figure}[b]
+\begin{figure}[h]
 \centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect-inline.pdf}}
 \caption{Outer-product vectorization by permuting values in a vector register.}
 \label{fig:vect-by-vect}
@@ -289,7 +291,7 @@ where $B$ is the set of all basis functions (or temporary variables, e.g. \textt
 
 The storage layout of $A$, however, is incorrect after the application of this outer-product-based vectorization (\emph{op-vect}, in the following). It can be efficiently restored with a sequence of vector shuffles following the pattern highlighted in Figure~\ref{fig:restore-layout}, executed once outside of the \texttt{ijk} loop nest. The generated pseudo-code for the simple Helmholtz problem when using \emph{op-vect} is shown in Figure~\ref{code:helmholtz-opvect}.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centerline{\includegraphics[scale=0.60]{Pictures/vect-restore-inline.pdf}}
 \caption{Restoring the storage layout after \emph{op-vect}. The figure shows how 4$\times$4 elements in the top-left block of the element matrix $A$ can be moved to their correct positions. Each rotation, represented by a group of three same-colored arrows, is implemented by a single shuffle intrinsic.}
 \label{fig:restore-layout}
@@ -344,9 +346,9 @@ $\rbrace$
 % Splitting
 \subsection{Expression Splitting}
 \label{sec:expr-split}
-In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension is close to or greater than the number of available CPU registers, poor register reuse is likely to be obtained. This usually happens when the number of basis function arrays, temporaries introduced by generalized loop-invariant code motion, and problem constants is large. For example, applying loop-invariant code motion to Burgers on a 3D mesh requires 33 temporaries for the \texttt{ijk} loop order. This can make hoisting of the invariant loads out of the $k$ loop inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the element matrix $A$ into multiple sub-expressions; an example, for the Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. 
+In complex kernels, like Burgers in Figure~\ref{code:burgers}, and on certain architectures, achieving effective register allocation can be challenging. If the number of variables independent of the innermost-loop dimension is close to or greater than the number of available CPU registers, poor register reuse is likely to be obtained. This usually happens when the number of basis function arrays, temporaries introduced by generalized loop-invariant code motion, and problem constants is large. For example, applying loop-invariant code motion to Burgers on a 3D mesh requires 33 temporaries for the \texttt{ijk} loop order. This can make hoisting of the invariant loads out of the $k$ loop inefficient on architectures with a relatively low number of registers. One potential solution to this problem consists of suitably ``splitting'' the computation of the element matrix $A$ into multiple sub-expressions; an example, for the Helmholtz problem, is given in Figure~\ref{code:helmholtz-split}. The transformation can be regarded as a special case of classic loop fission, in which sum's associativity is exploited to distribute the expression across multiple loops. To the best of our knowledge, expression splitting is not supported by available compilers.
 
-Splitting an expression has three drawbacks. Firstly, it increases the number of accesses to $A$ proportionally to the ``split factor'', which is the number of sub-expressions produced. Secondly, depending on how the split is executed, it can lead to redundant computation; for example, the times the product $det*W3[i]$ is performed is proportional to the number of sub-expressions, as shown in the code snippet. Finally, it might affect register locality: for instance, the same array could be accessed in different sub-expressions, requiring a proportional number of loads be performed. This is not the case of the Helmholtz example. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
+Splitting an expression has, however, several drawbacks. Firstly, it increases the number of accesses to $A$ proportionally to the ``split factor'', which is the number of sub-expressions produced. Also, depending on how the split is executed, it can lead to redundant computation; for example, the times the product $det*W3[i]$ is performed is proportional to the number of sub-expressions, as shown in the code snippet. Further, it increases loop overhead (e.g. branch instructions). Finally, it might affect register locality: for instance, the same array could be accessed in different sub-expressions, requiring a proportional number of loads be performed. This is not the case of the Helmholtz example. Nevertheless, as shown in Section~\ref{sec:perf-results}, the performance gain from improved register reuse along inner dimensions can still be greater, especially if the split factor and the splitting itself use heuristics to minimize the aforementioned issues.
 
 
 \begin{algorithm}[t]
@@ -526,7 +528,7 @@ Table~\ref{table:perf-results-licm} illustrates the performance improvement obta
 
 \subsection{Impact of Vector-register Tiling}
 \label{sec:perf-eval-opvect}
-Figures~\ref{fig:opvect-helmholtz-speedup} and~\ref{fig:opvect-diffusion-speedup} show the performance achieved applying \emph{op-vect} on top of \emph{licm-ap} to the Helmoltz and Diffusion kernels on the Sandy Bridge, whereas Figures~\ref{fig:opvect-helmholtz-speedup-phi} and~\ref{fig:opvect-diffusion-speedup-phi} illustrate analogous results for the Xeon Phi. For each problem instance we report two bars: one indicates the best run-time obtained by auto-tuning the unroll/unroll-and-jam factors, whereas the other shows the result retrieved with COFFEE's cost model. In general, there is no substantial difference between the two. This is chiefly because these kernels fit the L1 cache, so, within a certain degree of confidence, it is possible to predict the fastest implementation based on register allocation.
+Figures~\ref{fig:opvect-helmholtz-speedup} and~\ref{fig:opvect-diffusion-speedup} show the performance achieved applying \emph{op-vect} on top of \emph{licm-ap} to the Helmoltz and Diffusion kernels on the Sandy Bridge and Xeon Phi architectures, respectively. For each problem instance we report two bars: one indicates the best run-time obtained by auto-tuning the unroll/unroll-and-jam factors, whereas the other shows the result retrieved with COFFEE's cost model. In general, there is no substantial difference between the two. This is chiefly because these kernels fit the L1 cache, so, within a certain degree of confidence, it is possible to predict the fastest implementation based on register allocation.
 
 The rationale behind these results is that, for smaller configurations, vector-register tiling is marginally helpful, while its impact is the dominant factor for larger problems. This is because in the considered kernels the number of accessed arrays along the innermost loop dimension is rather small (between 2 and 4), so extensive unrolling is often enough to maximize register re-use when the loops are relatively short. On the other hand, as the iteration space becomes bigger, vector-register tiling leads to improvements up to 1.4$\times$ on the Sandy Bridge (Diffusion, prismatic mesh, $p=4$) and up to 1.4$\times$ on the Xeon Phi (Helmholtz, tetrahedral mesh, $p=3$). Using the Intel Architecture Code Analyzer tool~\cite{IACA} on the Sandy Bridge, we confirmed that this is a consequence of increased register re-use. In Helmholtz $p=4$, for example, the tool showed that when using \emph{op-vect} the number of clock cycles to execute one iteration of the $j$ loop decreases by roughly 17$\%$, and that this is a result of the relieved pressure on both of the data (cache) ports available in the core.
 
@@ -535,62 +537,39 @@ On the Sandy Bridge, we have also measured the performance of individual kernels
 Application of \emph{op-vect} to the Burgers problem induces significant slow downs due to the large number of temporary arrays that need to be tiled, which exceeds the available logical registers on the underlying architecture. Expression splitting can be used in combination with \emph{op-vect} to alleviate this issue; this is discussed in the next section.
 
 \begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/helmholtz-normalized-opvect.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Helmholtz kernel on the Sandy Bridge. CM refers to where the cost model has been used to determine the sequence of code transformations.}
-\label{fig:opvect-helmholtz-speedup}
+	\centering
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/helmholtz-normalized-opvect.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/helmholtz-normalized-opvect-phi.pdf}}
+	\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Helmholtz kernel. CM refers to where the cost model has been used to determine the sequence of code transformations.}
+	\label{fig:opvect-helmholtz-speedup}
 \end{figure}
 
 \begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/helmholtz-normalized-opvect-phi.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Helmholtz kernel on the Xeon Phi. CM refers to where the cost model has been used to determine the sequence of code transformations.}
-\label{fig:opvect-helmholtz-speedup-phi}
-\end{figure}
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/diffusion-normalized-opvect.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Diffusion kernel on the Sandy Bridge. CM refers to where the cost model has been used to determine the sequence of code transformations.}
-\label{fig:opvect-diffusion-speedup}
-\end{figure}
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/diffusion-normalized-opvect-phi.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Diffusion kernel on the Xeon Phi. CM refers to where the cost model has been used to determine the sequence of code transformations.}
-\label{fig:opvect-diffusion-speedup-phi}
+	\centering
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/diffusion-normalized-opvect.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/diffusion-normalized-opvect-phi.pdf}}
+	\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Diffusion kernel. CM refers to where the cost model has been used to determine the sequence of code transformations.}
+	\label{fig:opvect-diffusion-speedup}
 \end{figure}
 
 %for which efficient register allocation can be already guaranteed
 
 \subsection{Impact of Expression Splitting}
 \label{sec:perf-results-split}
-Expression splitting relieves the register pressure when the element matrix evaluation reads from a large number of arrays, at the price of increasing accesses to the element matrix itself and potentially affecting data locality, as detailed in Section~\ref{sec:expr-split}. It is not particularly useful, therefore, for Helmholtz and Diffusion, where only between 4 and 8 basis functions or temporaries need to be read at every iteration. Slow downs up to 1.4$\times$ and up to 1.6$\times$ were observed, respectively, on the Sandy Bridge and the Xeon Phi. The cost model, however, prevents the adoption of the transformation: the \texttt{while} statement at line 5 in Figure~\ref{algo:applyCostModel} is indeed never entered. For the Burgers kernel, \emph{split} has a key role on the Sandy Bridge, whereas it has only a minimal impact on the Xeon Phi. Figure~\ref{fig:split-burgers-speedup} and~\ref{fig:split-burgers-speedup-phi} show the improvement due to using \emph{split} over the fastest implementation between \emph{licm} and \emph{licm-ap}. On the Sandy Bridge, in almost all test cases, a split factor of 1, meaning that the original expression was divided into two parts, ensured close-to-peak perforance. The transformation negligibly affected register locality. On the contrary, the larger number of vector units present on the Xeon Phi relieve register spilling, making \emph{split} only marginally useful for loop unrolling. 
+Expression splitting relieves the register pressure when the element matrix evaluation reads from a large number of arrays, at the price of increasing accesses to the element matrix itself and potentially affecting data locality, as detailed in Section~\ref{sec:expr-split}. It is not particularly useful, therefore, for Helmholtz and Diffusion, where only between 4 and 8 basis functions or temporaries need to be read at every iteration. Slow downs up to 1.4$\times$ and up to 1.6$\times$ were observed, respectively, on the Sandy Bridge and the Xeon Phi. The cost model, however, prevents the adoption of the transformation: the \texttt{while} statement at line 5 in Figure~\ref{algo:applyCostModel} is indeed never entered. For the Burgers kernel, \emph{split} has a key role on the Sandy Bridge, whereas it has only a minimal impact on the Xeon Phi. Figure~\ref{fig:split-burgers-speedup} shows the improvement due to using \emph{split} over the fastest implementation between \emph{licm} and \emph{licm-ap}. On the Sandy Bridge, in almost all test cases, a split factor of 1, meaning that the original expression was divided into two parts, ensured close-to-peak perforance. The transformation negligibly affected register locality. On the contrary, the larger number of vector units present on the Xeon Phi relieve register spilling, making \emph{split} only marginally useful for loop unrolling. 
 
 On the Sandy Bridge, the performance of the Burgers kernel on a prismatic mesh was 20.0 GFlop/s from $p=1$ to $p=3$, while it was 21.3 GFlop/s in the case of $p=4$. These values are notably close to the peak performance of 30.4 GFlop/s. Disabling \emph{split} makes the performance drop to 17.0 GFlop/s for $p=1, 2$, 18.2 GFlop/s for $p=3$, and 14.3 GFlop/s for $p=4$. These values are in line with the speedups shown in Figure~\ref{fig:split-burgers-speedup}. 
 
 The \emph{split} transformation was also tried in combination with \emph{op-vect} (\emph{split-op-vect}), although the cost model prevents its adoption on both platforms. Despite improvements up to 1.22$\times$, \emph{split-op-vect} never outperforms \emph{split}. This is for two reasons: for small split factors, such as 1 and 2, the data space to be tiled is still too big, and register spilling affects run-time; for higher ones, sub-expressions become so small that, as explained in Section~\ref{sec:perf-eval-opvect}, full or partial unrolling of the loop nest achieves a certain degree of register re-use by itself.
 
 \begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/burgers-normalized-split.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Burgers kernel on the Sandy Bridge. CM refers to the cases in which the cost model has been used to determine the sequence of code transformations.}
-\label{fig:split-burgers-speedup}
+	\centering
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/burgers-normalized-split.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/burgers-normalized-split-phi.pdf}}
+	\caption{Performance improvement obtained applying \emph{split} on top of \emph{licm-ap} to the Burgers kernel. CM refers to where the cost model has been used to determine the sequence of code transformations.}
+	\label{fig:split-burgers-speedup}
 \end{figure}
 
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.65]{Pictures/burgers-normalized-split-phi.pdf}
-\end{center}
-\caption{Performance improvement obtained applying \emph{op-vect} on top of \emph{licm-ap} to the Burgers kernel on the Xeon Phi. CM refers to the cases in which the cost model has been used to determine the sequence of code transformations.}
-\label{fig:split-burgers-speedup-phi}
-\end{figure}
 
 \subsection{Comparison with FEniCS Form Compiler's built-in Optimizations}
 \label{sec:perf-results-fenics}
@@ -600,7 +579,8 @@ Table~\ref{table:comparison-to-FFC-opt} summarizes the performance achieved by C
 
 \begin{table}[h]
 \begin{center}
-\tbl{Performance comparison between FEniCS (optimizations enabled) and COFFEE on the Sandy Bridge.}{
+\tbl{Performance comparison between FEniCS (optimizations enabled) and COFFEE on the Sandy Bridge}{
+\label{table:comparison-to-FFC-opt}
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Problem & Max slow down & Max speed up \\\hline
@@ -610,7 +590,6 @@ Burgers & 2.24$\times$ & 1.61$\times$ \\\hline
 \end{tabulary}
 }
 \end{center}
-\label{table:comparison-to-FFC-opt}
 \end{table}
 
 \subsection{Comparison with hand-made BLAS-based implementations}
