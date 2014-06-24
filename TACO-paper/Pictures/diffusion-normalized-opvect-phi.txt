@@ -1,4 +1,4 @@
-Baseline Tri Tri-CM Tet Tet-CM Prism Prism-CM
+Baseline Triangles Triangles-CM Tetrahedrons Tetrahedrons-CM Prisms Prism-CM
 p1 1.000 1.000 1.000 1.000 1.000 1.000
 p2 1.000 1.000 1.093 1.093 1.331 1.331
 p3 1.090 1.090 1.289 1.289 1.285 1.212
