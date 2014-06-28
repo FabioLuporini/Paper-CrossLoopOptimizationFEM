@@ -86,12 +86,21 @@ of mathematical expressions make it hard to determine a single or
 unique sequence of successful transformations. Therefore, we present
 the design and systematic evaluation of COFFEE, a domain-specific
 compiler for local assembly kernels. COFFEE manipulates abstract
-syntax trees by introducing domain-aware composable optimizations aimed at
+syntax trees generated from a high-level domain-specific language for
+PDEs by introducing domain-aware composable optimizations aimed at
 improving instruction-level parallelism, especially SIMD
 vectorization, and register locality. It then generates C code
 including vector intrinsics. Experiments using a range of
 finite-element forms of increasing complexity show that significant
 performance improvement is achieved.
+%
+%The code is generated from a high level language for PDEs. An
+%invocation of the kernel typically does tensor-like calculators over
+%relatively small matrices; e.g., triply nested loops operating on
+%about a dozen iterations. Because of the DSL context, COFFEE has a lot
+%of flexibility on how it organizes/orders the calculations to tailor
+%execution to a target architecture.
+%
 \end{abstract}
 
 \category{G.1.8}{Numerical Analysis}{Partial Differential Equations -
@@ -165,7 +174,7 @@ kernels, to the components of a mesh, such as edges, vertices, or
 cells. On standard clusters of multi-cores, typically, a kernel is
 executed sequentially by a thread, while parallelism is achieved
 partitioning the mesh and assigning each partition to a different node
-or thread. Such execution model, with minor variations, is adopted,
+or thread. Such an execution model, with minor variations, is adopted,
 for example, in \cite{pyop2isc}, \cite{Fenics},
 \cite{fluidity_manual_v4}, \cite{lizst}.
 
@@ -174,7 +183,7 @@ for example, in \cite{pyop2isc}, \cite{Fenics},
 
 The time required to apply the numerical kernels is a major issue,
 since the equation domain needs to be discretized into an extremely
-large number of cells, possibly order of trillions
+large number of cells, possibly of the order of trillions
 \cite{Rossinelli2013}, in order to obtain a satisfactory approximation
 of the PDE. For example, it has been well established that mesh
 resolution is critical in the accuracy of numerical weather
@@ -186,13 +195,13 @@ forecasts. Hence, the computational cost is a dominant problem in
 computational science simulations, especially for those based on
 finite elements, which are the subject of this paper. We address, in
 particular, the well-known problem of optimizing the local assembly
-phase of the finite element
-method~\cite{Francis},~\cite{quadrature1},~\cite{petsc-integration-gpu},~\cite{Kirby-FEM-opt},
-which can cover a significant fraction of the overall computation
-run-time, often in the range 30-60$\%$. With respect to these studies,
-we propose a novel set of composable code transformations targeting,
-for the first time, instruction-level parallelism - with emphasis on
-SIMD vectorization - and register locality.
+phase of the finite element method
+\cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, which
+can cover a significant fraction of the overall computation run-time,
+often in the range 30-60$\%$. With respect to these studies, we
+propose a novel set of composable code transformations targeting, for
+the first time, instruction-level parallelism - with emphasis on SIMD
+vectorization - and register locality.
 
 During the assembly phase, the solution of the PDE is approximated by
 executing a problem-specific kernel over all cells, or elements, in
