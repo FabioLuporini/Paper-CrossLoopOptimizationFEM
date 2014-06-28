@@ -406,9 +406,8 @@ Splitting an expression has, however, several drawbacks. Firstly, it increases t
 
 
 \section*{}
-Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}.
 
-\begin{table}[t]
+\begin{table}[h]
 \tbl{Overview of code transformations for Firedrake-generated assembly kernels.}{
 \begin{tabulary}{1.0\columnwidth}{C|C}
 \hline
@@ -425,13 +424,27 @@ Expression splitting (\emph{split}) & split point, split factor \\ \hline
 \label{table:code-transformations}
 \end{table}
 
-% mention (obvious) composability
+Table~\ref{table:code-transformations} summarizes the code transformations described so far. Given that many of these transformations depend on some parameters (e.g. tile size), we need a mechanism to prune such a large space of optimization. This aspect is treated in Section~\ref{sec:pyop2-compiler}.
+
 
 \section{Overview of COFFEE}
 \label{sec:pyop2-compiler}
 %Design and structure of the PyOP2 Compiler. Show the steps through which the IR is transformed (need to cite Firedrake here). Briefly describe a simple cost model that allows us to prune the space of code transformations.
 
 %\rule[0.2ex]{16cm}{0.5pt}
+\begin{figure}[b]
+\begin{center}
+\includegraphics[scale=0.75]{Pictures/coffee-pipeline.pdf}
+\caption{High-level view of Firedrake. COFFEE is at the core, receiving ASTs from a modified version of the FEniCS Form compiler and producing optimized C code kernels.}
+\label{fig:coffee-pipeline}
+\end{center}
+\end{figure}
+
+Firedrake users employ the Unified Form Language to write problems in a notation resembling mathematical equations. At run-time, the high-level specification is translated by a modified version of the FEniCS Form Compiler~\cite{FFC-Compiler} (FFC) into an abstract syntax tree (AST) representation of one or more finite element assembly kernels. ASTs are then passed to COFFEE, which is capable of applying the transformations described in Section~\ref{sec:code-transf}. The output of COFFEE, C code, is eventually provided to PyOP2~\cite{pyop2isc}, where just-in-time compilation and execution over the discretized domain take place. The flow is summarized in Figure~\ref{fig:coffee-pipeline}. 
+
+Because of the large number of parametric transformations, COFFEE needs a mechanism to select the most suitable optimization strategy for a given problem. Auto-tuning might be used, although it would significantly increase the run-time overhead, since the generation of ASTs occurs at run-time as soon as problem-specific data are available. Our optimization strategy, based on heuristics and a simple cost model, is described in the following, along with an overview of the compiler.
+
+The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially the AST is inspected, looking for the presence of iteration spaces and domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the outer, non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been shown to be useful in several finite volume applications~\cite{inter-kernel-vect}. Subsequently, an ordered sequence of optimization steps are executed. Application of \emph{licm} must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, loop interchange, \emph{split}, and \emph{op-vect} may be introduced. Their implementation is based on analysis and transformation of the kernel's AST. When \emph{op-vect} is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any possible corner cases are handled: for example, if \emph{op-vect} is to be applied, but the size of the iteration space is not a multiple of the vector length, then a remainder loop, amenable to auto-vectorization, is inserted.
 
 \begin{figure}[t]
 \begin{alltt}
@@ -463,19 +476,6 @@ ast.align\_data()
 \label{algo:PyOP2Compiler}
 \end{figure}
 
-Firedrake users employ the Unified Form Language to write problems in a notation resembling mathematical equations. At run-time, the high-level specification is translated by a modified version of the FEniCS Form Compiler~\cite{FFC-Compiler} (FFC) into an abstract syntax tree (AST) representation of one or more finite element assembly kernels. ASTs are then passed to COFFEE, which is capable of applying the transformations described in Section~\ref{sec:code-transf}. The output of COFFEE, C code, is eventually provided to PyOP2~\cite{pyop2isc}, where just-in-time compilation and execution over the discretized domain take place. The flow is summarized in Figure~\ref{fig:coffee-pipeline}. 
-
-Because of the large number of parametric transformations, COFFEE needs a mechanism to select the most suitable optimization strategy for a given problem. Auto-tuning might be used, although it would significantly increase the run-time overhead, since the generation of ASTs occurs at run-time as soon as problem-specific data are available. Our optimization strategy, based on heuristics and a simple cost model, is described in the following, along with an overview of the compiler.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[scale=0.75]{Pictures/coffee-pipeline.pdf}
-\caption{High-level view of Firedrake. COFFEE is at the core, receiving ASTs from a modified version of the FEniCS Form compiler and producing optimized C code kernels.}
-\label{fig:coffee-pipeline}
-\end{center}
-\end{figure}
-
-The compiler structure is outlined in Figure~\ref{algo:PyOP2Compiler}. Initially the AST is inspected, looking for the presence of iteration spaces and domain-specific information provided by the higher layer. If the kernel lacks an iteration space, then so-called inter-kernel vectorization, in which the outer, non-affine loop over mesh elements is vectorized, can be applied. This feature, currently under development, has been shown to be useful in several finite volume applications~\cite{inter-kernel-vect}. Subsequently, an ordered sequence of optimization steps are executed. Application of \emph{licm} must precede padding and data alignment, due to the introduction of temporary arrays. Based on a cost model, loop interchange, \emph{split}, and \emph{op-vect} may be introduced. Their implementation is based on analysis and transformation of the kernel's AST. When \emph{op-vect} is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any possible corner cases are handled: for example, if \emph{op-vect} is to be applied, but the size of the iteration space is not a multiple of the vector length, then a remainder loop, amenable to auto-vectorization, is inserted.
 
 All loops are interchangeable, provided that temporaries are introduced if the nest is not perfect. For the employed storage layout, the loop permutations \texttt{ijk} and \texttt{ikj} are likely to maximize performance. Conceptually, this is motivated by the fact that if the \texttt{i} loop were in an inner position, then a significantly higher number of load instructions would be required at every iteration. We tested this hypothesis in manually crafted kernels. We found that the performance loss is greater than the gain due to the possibility of accumulating increments in a register, rather than memory, along the \texttt{i} loop. The choice between \texttt{ijk} and \texttt{ikj} depends on the number of load instructions that can be hoisted out of the innermost dimension. Our compiler chooses as outermost the loop along which the number of invariant loads is smaller so that more registers remain available to carry out the computation of the element matrix.
 
