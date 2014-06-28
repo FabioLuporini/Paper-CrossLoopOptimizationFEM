@@ -1,59 +1,67 @@
-We thank our reviewers (R1-R4). We appreciate the positive feedback on our
-paper. We agree and will correct the presentation issues concerning jargon,
-applications, motivations, relationship with other (polyhedral) tools. We will 
-make the scientific computing terminology used along the paper more accessible 
-and will provide concrete and intuitive examples of applications.
+We thank our reviewers (R1-R4). We appreciate the positive feedback on
+our paper. We agree and will correct the presentation issues
+concerning jargon, applications, motivations, relationship with other
+(polyhedral) tools. We will make the scientific computing terminology
+used along the paper more accessible and will provide concrete and
+intuitive examples of applications.
 
 1.Applications (R2, R3, R4)
 
-The three chosen benchmarks are completely real examples and comprise the core
-operators in some of the most frequently encountered finite element problems in
-scientific computing.  The Helmholtz and Diffusion kernels are unsimplified
-examples of the operators which occur for diffusion and viscosity in fluids, and
-for imposing pressure in compressible fluids. For instance, Helmholtz is 
-fundamental in weather and climate models, whereas Diffusion for predicting 
-diffusion of (among the other things) heat in objects. The Burgers kernel is a 
-typical example of a first order hyperbolic conservation law, which occurs in real
-applications whenever a quantity is transported by a fluid (the momentum itself,
-in our case). We chose these kernels because they are exponents of a much larger
-class of problems (i.e. problems using same/similar differential operators), for
-which the same optimisations would be equally effective. Our claim of using
-"real-world examples" is indeed correct, and we will clarify this in the final
-paper.  The fact that the resulting local assembly kernels are small but
-computationally intensive is a consequence of the mathematical structure of the
-finite element method (FEM), not a restriction or a simplificative assumption we
-made.  Thus, this is truly realistic. 
+The three chosen benchmarks are completely real examples and comprise
+the core operators in some of the most frequently encountered finite
+element problems in scientific computing.  The Helmholtz and Diffusion
+kernels are unsimplified examples of the operators which occur for
+diffusion and viscosity in fluids, and for imposing pressure in
+compressible fluids. For instance, Helmholtz is fundamental in weather
+and climate models, whereas Diffusion for predicting diffusion of
+(among the other things) heat in objects. The Burgers kernel is a
+typical example of a first order hyperbolic conservation law, which
+occurs in real applications whenever a quantity is transported by a
+fluid (the momentum itself, in our case). We chose these kernels
+because they are exponents of a much larger class of problems
+(i.e. problems using same/similar differential operators), for which
+the same optimisations would be equally effective. Our claim of using
+"real-world examples" is indeed correct, and we will clarify this in
+the final paper.  The fact that the resulting local assembly kernels
+are small but computationally intensive is a consequence of the
+mathematical structure of the finite element method (FEM), not a
+restriction or a simplificative assumption we made.  Thus, this is
+truly realistic.
 
 2.Motivation (R2, R3)
 
-Computational cost is a critical limitation in scientific computing, especially
-for finite element simulations. To provide one particular example we are
-particularly concerned about, it has been well established that mesh resolution
-is critical in the accuracy of numerical weather forecasts. However, operational
-forecast centres have a strict time limit in which to produce a forecast (60
-minutes in the case of the UK Met Office, who are partially funding this work).
+Computational cost is a critical limitation in scientific computing,
+especially for finite element simulations. To provide one particular
+example we are particularly concerned about, it has been well
+established that mesh resolution is critical in the accuracy of
+numerical weather forecasts. However, operational forecast centres
+have a strict time limit in which to produce a forecast (60 minutes in
+the case of the UK Met Office, who are partially funding this work).
 Hence, producing simulation systems which fully exploit the available
-computational resources has a direct scientific payoff in higher resolution, and
-therefore more accurate, forecasts. Consequently, our aggressive optimization of
-local assembly, which may even take up to 60% of the overall FEM's execution
-time, directly impacts the performance of large-scale scientific simulations
-running on supercomputers.
+computational resources has a direct scientific payoff in higher
+resolution, and therefore more accurate, forecasts. Consequently, our
+aggressive optimization of local assembly, which may even take up to
+60% of the overall FEM's execution time, directly impacts the
+performance of large-scale scientific simulations running on
+supercomputers.
 
 3.Relationship with other tools (R1, R3, R4)
 
-Polyhedral and vendor compilers do not (practically: can not) apply the
-transformations automated in COFFEE because of their domain-specific and/or
-non-affine nature. For example, as explained in the paper, the generalized
-loop-invariant code motion exploits the mathematical property that the size of
-the loops may be identical to minimize pre-computation of hoisted terms.
-Vector-register tiling is tied to the particular memory access pattern
-characterizing our kernels: to the best of our knowledge, no register tiling
-technique computing outer-products using in-register shuffling has ever been
-automated in a tool. Padding is safe in our kernels, but in general is not; in
-addition, it is mostly profitable for very small arrays: so, again, no compilers 
-adopt it. Code splitting, as remarked by R1, is based on the associativity of
-sums, which breaks standard loop fission transformations reasoning on memory
-access pattern and iteration space.
+Polyhedral and vendor compilers do not (practically: can not) apply
+the transformations automated in COFFEE because of their
+domain-specific and/or non-affine nature. For example, as explained in
+the paper, the generalized loop-invariant code motion exploits the
+mathematical property that the size of the loops may be identical to
+minimize pre-computation of hoisted terms.  Vector-register tiling is
+tied to the particular memory access pattern characterizing our
+kernels: to the best of our knowledge, no register tiling technique
+computing outer-products using in-register shuffling has ever been
+automated in a tool. Padding is safe in our kernels, but in general is
+not; in addition, it is mostly profitable for very small arrays: so,
+again, no compilers adopt it. Code splitting, as remarked by R1, is
+based on the associativity of sums, which breaks standard loop fission
+transformations reasoning on memory access pattern and iteration
+space.
 
 4.Technical aspects (R1, R2, R4)
 
@@ -77,6 +85,7 @@ Intel Phi, where we have 32 registers instead of 16 as in the Sandy Bridge.
 
 5.Jargon (R1, R2, R3, R4)
 
-We are going to simplify the unclear descriptions related to the finite element
-method and give more intuition about its general structure, avoiding the use of
-technical terms that make the paper difficult to read.
+We are going to simplify the unclear descriptions related to the
+finite element method and give more intuition about its general
+structure, avoiding the use of technical terms that make the paper
+difficult to read.

@@ -1,13 +1,15 @@
 Review of pap264s2 by Reviewer 1 	top
 
  Summary and High Level Discussion
-COFFEE is a domain-specific compiler for optimizing code that does “local 
-assembly” kernels in a finite element solver. The code is generated from a high 
-level language for PDEs. An invocation of the kernel typically does tensor-like 
-calculators over relatively small matrices; e.g., triply nested loops operating 
-on about a dozen iterations. Because the DSL context, COFFEE has a lot of 
-flexibility on how it organizes/orders the calculations to tailor execution to a 
-target architecture. 
+
+COFFEE is a domain-specific compiler for optimizing code that does
+“local assembly” kernels in a finite element solver. The code is
+generated from a high level language for PDEs. An invocation of the
+kernel typically does tensor-like calculators over relatively small
+matrices; e.g., triply nested loops operating on about a dozen
+iterations. Because the DSL context, COFFEE has a lot of flexibility
+on how it organizes/orders the calculations to tailor execution to a
+target architecture.
 
 The loop-invariant code motion in section III.B is notably something that 
 programmers sometimes do but not compilers till now. III.C describes a curious 
