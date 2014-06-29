@@ -120,15 +120,16 @@ performance improvement is achieved.
   Local Assembly.}
 
 % At a minimum you need to supply the author names, year and a title.
-% IMPORTANT:
-% Full first names whenever they are known, surname last, followed by a period.
-% In the case of two authors, 'and' is placed between them.
-% In the case of three or more authors, the serial comma is used, that is, all author names
-% except the last one but including the penultimate author's name are followed by a comma,
-% and then 'and' is placed before the final author's name.
-% If only first and middle initials are known, then each initial
-% is followed by a period and they are separated by a space.
-% The remaining information (journal title, volume, article number, date, etc.) is 'auto-generated'.
+% IMPORTANT: Full first names whenever they are known, surname last,
+% followed by a period.  In the case of two authors, 'and' is placed
+% between them.  In the case of three or more authors, the serial
+% comma is used, that is, all author names except the last one but
+% including the penultimate author's name are followed by a comma, and
+% then 'and' is placed before the final author's name.  If only first
+% and middle initials are known, then each initial is followed by a
+% period and they are separated by a space.  The remaining information
+% (journal title, volume, article number, date, etc.) is
+% 'auto-generated'.
 
 \begin{bottomstuff}
 
@@ -162,8 +163,8 @@ Comp.~Sci., Louisiana State University.
 %large-scale scientific simulations running on supercomputers.
 
 \section{Introduction}
-In many fields, such as computational fluid dynamics, computational
-electromagnetics, and structural mechanics, phenomena are modelled by
+In many fields such as computational fluid dynamics, computational
+electromagnetics and structural mechanics, phenomena are modelled by
 partial differential equations (PDEs). Numerical techniques, like the
 finite volume method and the finite element method, are widely
 employed to approximate solutions of these PDEs. Unstructured meshes
@@ -171,7 +172,7 @@ are often used to discretize the equation domain, since their
 geometric flexibility allows solvers to be extremely effective. The
 solution is sought by applying suitable numerical operations, or
 kernels, to the components of a mesh, such as edges, vertices, or
-cells. On standard clusters of multi-cores, typically, a kernel is
+cells. On standard clusters of multicores, typically, a kernel is
 executed sequentially by a thread, while parallelism is achieved
 partitioning the mesh and assigning each partition to a different node
 or thread. Such an execution model, with minor variations, is adopted,
@@ -276,12 +277,13 @@ elaborated in Section~\ref{sec:real-examples}.
 
 Our experiments show that the original generated code for non-trivial
 assembly kernels, despite following state-of-the-art techniques,
-remains suboptimal in the context of modern multi-core
-architectures. Our cost-model-driven sequence of code transformations,
-aimed at improving SIMD vectorization and register data locality, can
-result in performance improvements up to 4.4$\times$ over original
-kernels, and around 70$\%$ of the test cases obtain a speed up greater
-than 2$\times$. The contributions of this paper, therefore, are
+remains suboptimal in the context of modern multicore
+architectures. Our domian-aware cost-model-driven sequence of code
+transformations, aimed at improving SIMD vectorization and register
+data locality, can result in performance improvements up to
+4.4$\times$ over original kernels, and around 70$\%$ of the test cases
+obtain a speed up greater than 2$\times$. The contributions of this
+paper, therefore, are
 \begin{enumerate}
 \item An optimization strategy for finite element local assembly. Our
   approach exploits domain knowledge and goes beyond the limits of
