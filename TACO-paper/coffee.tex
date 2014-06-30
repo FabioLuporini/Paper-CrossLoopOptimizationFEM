@@ -580,11 +580,11 @@ iteration variables. Since symbols in most of these sub-expressions
 are read-only variables, there is ample space for loop-invariant code
 motion. Vendor compilers apply this technique, although not in the
 systematic way we need for our assembly kernels. We want to overcome
-two deficiencies that both $intel$ and $gnu$ compilers exhibit. First,
+two deficiencies that both Intel and GNU compilers exhibit. First,
 they only identify sub-expressions that are invariant with respect to
 the innermost loop. This is an issue for sub-expressions depending on
 \texttt{i}-\texttt{k}, which are not automatically lifted in the loop
-order \texttt{ijk}. Second, the hoisted code is scalar, i.e., it is not
+order \texttt{ijk}. Second, the hoisted code is scalar and therefore not
 subjected to auto-vectorization.
 
 We work around these limitations with source-level loop-invariant code
@@ -646,7 +646,7 @@ One notable problem of assembly kernels concerns register allocation
 and register locality. The critical situation occurs when loop trip
 counts and the variables accessed are such that the vector-register
 pressure is high. Since the kernel's working set fits the L1 cache, it
-is remarkably important to optimize register management. Standard
+is particularly important to optimize register management. Standard
 optimizations, such as loop interchange, unroll, and unroll-and-jam,
 can be employed to deal with this problem. In COFFEE, these
 optimizations are supported either by means of explicit code
@@ -665,25 +665,25 @@ abstractly expressible as
 A_{jk} = \sum_{\substack{
   x \in B' \subseteq B \\
   y \in B'' \subseteq B}}
-x_j\cdot y_k ~~~~~~ j,k = 0,...,3
+x_j\cdot y_k ~~~~~~ j,k = 0,...,2
 \end{equation}
 where $B$ is the set of all basis functions (or temporary variables,
 e.g., \texttt{LI$\_$0}) accessed in the kernel, whereas $B'$ and $B''$
 are generic problem-dependent subsets. Regardless of the specific
 input problem, by abstracting from the presence of all variables
 independent of both \texttt{j} and \texttt{k}, the element matrix
-computation is always reducible to this
-form. Figure~\ref{fig:vect-by-vect} illustrates how we can evaluate 16
-entries ($j,k=0,...,3$) of the element matrix using just 2 vector
-registers, which represent a 4$\times$4 tile, assuming $\vert B' \vert
-= \vert B'' \vert = 1$. Values in a register are shuffled each time a
-product is performed. Standard compiler auto-vectorization ($gnu$ and
-$intel$), instead, executes 4 broadcast operations (i.e., ``splat'' of
-a value over all of the register locations) along the outer dimension
-to perform the calculation. In addition to incurring in larger number
-of cache accesses, it needs to keep between $f=1$ and $f=3$ extra
-registers to perform the same 16 evaluations when unroll-and-jam is
-used, with $f$ being the unroll-and-jam factor.
+computation is always reducible to this form.
+Figure~\ref{fig:vect-by-vect} illustrates how we can evaluate 16 entries
+($j,k=0,...,3$) of the element matrix using just 2 vector registers,
+which represent a 4$\times$4 tile, assuming $\vert B' \vert = \vert B''
+\vert = 1$. Values in a register are shuffled each time a product is
+performed. Standard compiler auto-vectorization for both GNU and Intel
+compilers, instead, executes 4 broadcast operations (i.e., ``splat'' of
+a value over all of the register locations) along the outer dimension to
+perform the calculation. In addition to incurring a larger number of
+cache accesses, it needs to keep between $f=1$ and $f=3$ extra registers
+to perform the same 16 evaluations when unroll-and-jam is used, with $f$
+being the unroll-and-jam factor.
 
 %More importantly, we avoid using $\mbox{\texttt{VL}}$-1 registers per each
 %outer-loop-dependent variable (i.e., all $x$ terms in
@@ -800,42 +800,37 @@ In complex kernels, like Burgers in Listing~\ref{code:burgers}, and on
 certain architectures, achieving effective register allocation can be
 challenging. If the number of variables independent of the
 innermost-loop dimension is close to or greater than the number of
-available CPU registers, poor register reuse is likely to be
-obtained. This usually happens when the number of basis function
-arrays, temporaries introduced by generalized loop-invariant code
-motion, and problem constants is large. For example, applying
-loop-invariant code motion to Burgers on a 3D mesh requires 24
-temporaries for the \texttt{ijk} loop order. This can make hoisting of
-the invariant loads out of the \texttt{k} loop inefficient on
-architectures with a relatively low number of registers. One potential
-solution to this problem consists of suitably ``splitting'' the
-computation of the element matrix $A$ into multiple sub-expressions;
-an example, for the Helmholtz problem, is given in
+available CPU registers, poor register reuse is likely. This usually
+happens when the number of basis function arrays, temporaries introduced
+by generalized loop-invariant code motion, and problem constants is
+large. For example, applying loop-invariant code motion to Burgers on a
+3D mesh requires 24 temporaries for the \texttt{ijk} loop order. This
+can make hoisting of the invariant loads out of the \texttt{k} loop
+inefficient on architectures with a relatively low number of registers.
+One potential solution to this problem consists of suitably
+``splitting'' the computation of the element matrix $A$ into multiple
+sub-expressions; an example, for the Helmholtz problem, is given in
 Listing~\ref{code:helmholtz-split}. The transformation can be regarded
-as a special case of classic loop fission, in which sum's
-associativity is exploited to distribute the expression across
-multiple loops. To the best of our knowledge, expression splitting is
-not supported by available compilers.
+as a special case of classic loop fission, in which associativity of the
+sum is exploited to distribute the expression across multiple loops. To
+the best of our knowledge, expression splitting is not supported by
+available compilers.
 
 Splitting an expression has, however, several drawbacks. Firstly, it
 increases the number of accesses to $A$ proportionally to the ``split
 factor'', which is the number of sub-expressions produced. Also,
 depending on how the split is executed, it can lead to redundant
-computation; for example, the times the product $det*W3[i]$ is
-performed is proportional to the number of sub-expressions, as shown
-in the code snippet. Further, it increases loop overhead (e.g. branch
-instructions). Finally, it might affect register locality: for
-instance, the same array could be accessed in different
-sub-expressions, requiring a proportional number of loads be
-performed. This is not the case of the Helmholtz
-example. Nevertheless, as shown in Section~\ref{sec:perf-results}, the
-performance gain from improved register reuse along inner dimensions
-can still be greater, especially if the split factor and the splitting
-itself use heuristics to minimize the aforementioned issues.
-
-
-
-\section*{}
+computation. For example, the number of times the product $det*W3[i]$ is
+performed is proportional to the number of sub-expressions, as shown in
+the code snippet. Further, it increases loop overhead, for example
+through additional branch instructions. Finally, it might affect
+register locality: for instance, the same array could be accessed in
+different sub-expressions, requiring a proportional number of loads be
+performed. This is not the case for the Helmholtz example. Nevertheless,
+as shown in Section~\ref{sec:perf-results}, the performance gain from
+improved register reuse along inner dimensions can still be greater,
+especially if the split factor and the splitting itself use heuristics
+to minimize the aforementioned issues.
 
 \begin{table}[h]
 \tbl{Overview of code transformations for Firedrake-generated assembly kernels.}{
@@ -857,7 +852,7 @@ Expression splitting (\emph{split}) & split point, split factor \\ \hline
 Table~\ref{table:code-transformations} summarizes the code
 transformations described so far. Given that many of these
 transformations depend on some parameters (e.g. tile size), we need a
-mechanism to prune such a large space of optimization. This aspect is
+mechanism to prune such a large optimization space. This aspect is
 treated in Section~\ref{sec:pyop2-compiler}.
 
 
