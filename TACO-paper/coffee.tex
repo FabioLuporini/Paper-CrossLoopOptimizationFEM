@@ -863,6 +863,7 @@ treated in Section~\ref{sec:pyop2-compiler}.
 %describe a simple cost model that allows us to prune the space of
 %code transformations.
 
+% FIXME: ``mesh used to discretize''
 %\rule[0.2ex]{16cm}{0.5pt}
 \begin{figure}[b]
 \begin{center}
@@ -874,17 +875,16 @@ treated in Section~\ref{sec:pyop2-compiler}.
 \end{center}
 \end{figure}
 
-Firedrake users employ the Unified Form Language to write problems in
+Firedrake users employ the Unified Form Language to express problems in
 a notation resembling mathematical equations. At run-time, the
 high-level specification is translated by a modified version of the
-FEniCS Form Compiler~\cite{FFC-Compiler} (FFC) into an abstract syntax
+FEniCS Form Compiler (FFC)~\cite{FFC-Compiler} into an abstract syntax
 tree (AST) representation of one or more finite element assembly
-kernels. ASTs are then passed to COFFEE, which is capable of applying
-the transformations described in Section~\ref{sec:code-transf}. The
-output of COFFEE, C code, is eventually provided to
-PyOP2~\cite{pyop2isc}, where just-in-time compilation and execution
-over the discretized domain take place. The flow is summarized in
-Figure~\ref{fig:coffee-pipeline}.
+kernels. ASTs are then passed to COFFEE to apply the transformations
+described in Section~\ref{sec:code-transf}. The output of COFFEE, C
+code, is eventually provided to PyOP2~\cite{pyop2ws,pyop2isc}, where
+just-in-time compilation and execution over the discretized domain take
+place. The flow is summarized in Figure~\ref{fig:coffee-pipeline}.
 
 Because of the large number of parametric transformations, COFFEE
 needs a mechanism to select the most suitable optimization strategy
@@ -918,9 +918,10 @@ remainder loop, amenable to auto-vectorization, is inserted.
 \begin{figure}[t]
 \begin{alltt}
 \footnotesize
-\textbf{Input:} ast: abstract syntax tree of a local assembly kernel
-produced by FFC wrapper: the function within which the kernel is
-invoked isa: represents the SIMD Instruction Set Architecture
+\textbf{Input:}
+ast: abstract syntax tree of a local assembly kernel produced by FFC
+wrapper: the function within which the kernel is invoked
+isa: represents the SIMD Instruction Set Architecture
 \textbf{Output:} assembly code (C string)
 \textbf{// Analyze ast and build optimization plan }
 it\_space = analyze(ast) 
@@ -973,7 +974,7 @@ versions of the Intel compiler estimate close-to-optimal unroll
 factors when the loops are affine and their bounds are small and known
 at compile-time, which is the case of our kernels. We therefore leave
 the backend compiler in charge of selecting unroll factors. This
-choice also simplifies the COFFEE's cost model. The only situation in
+choice also simplifies COFFEE's cost model. The only situation in
 which we explicitly unroll-and-jam a loop is when \emph{op-vect} is
 used, since the transformed code prevents the Intel compiler from
 applying this optimization, even if specific pragmas are added.
@@ -1008,10 +1009,10 @@ permute = n\_outer\_arrays > n\_inner\_arrays
 
 The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes
 into account the number of available logical vector registers,
-\emph{n\_regs}, and the number of unique variables accessed:
-\emph{n\_consts} counts variables independent of both \texttt{j} and
-\texttt{k} loops and temporary registers, \emph{n\_outer\_arrays}
-counts \texttt{j}-dependent variables, and \emph{n\_inner\_arrays}
+\texttt{n\_regs}, and the number of unique variables accessed:
+\texttt{n\_consts} counts variables independent of both \texttt{j} and
+\texttt{k} loops and temporary registers, \texttt{n\_outer\_arrays}
+counts \texttt{j}-dependent variables, and \texttt{n\_inner\_arrays}
 counts \texttt{k}-dependent variables, assuming the \texttt{ijk} loop
 order. These values are used to estimate unroll-and-jam and split
 factors for \emph{op-vect} and \emph{split}. If a factor is 0, then
