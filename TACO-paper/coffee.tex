@@ -75,24 +75,24 @@ Paul H.J. Kelly
 
 \begin{abstract}
 The numerical solution of partial differential equations using the
-finite element method is one of the key applications of high
-performance computing. Local assembly is its characteristic
-operation. This entails the execution of a problem-specific kernel for
-each element in the discretized problem domain. Since the domain size
-can be huge, executing efficient kernels is fundamental. Their
-optimization is, however, a challenging issue. Even though affine loop
-nests are generally present, the short trip counts and the complexity
-of mathematical expressions make it hard to determine a single or
-unique sequence of successful transformations. Therefore, we present
-the design and systematic evaluation of COFFEE, a domain-specific
-compiler for local assembly kernels. COFFEE manipulates abstract
-syntax trees generated from a high-level domain-specific language for
-PDEs by introducing domain-aware composable optimizations aimed at
-improving instruction-level parallelism, especially SIMD
-vectorization, and register locality. It then generates C code
-including vector intrinsics. Experiments using a range of
-finite-element forms of increasing complexity show that significant
-performance improvement is achieved.
+finite element method is one of the key applications of high performance
+computing. Local assembly is its characteristic operation. This entails
+the execution of a problem-specific kernel to numerically evaluate an
+integral for each element in the discretized problem domain. Since the
+domain size can be huge, executing efficient kernels is fundamental.
+Their optimization is, however, a challenging issue. Even though affine
+loop nests are generally present, the short trip counts and the
+complexity of mathematical expressions make it hard to determine a
+single or unique sequence of successful transformations. Therefore, we
+present the design and systematic evaluation of COFFEE, a
+domain-specific compiler for local assembly kernels. COFFEE manipulates
+abstract syntax trees generated from a high-level domain-specific
+language for PDEs by introducing domain-aware composable optimizations
+aimed at improving instruction-level parallelism, especially SIMD
+vectorization, and register locality. It then generates C code including
+vector intrinsics. Experiments using a range of finite-element forms of
+increasing complexity show that significant performance improvement is
+achieved.
 %
 %The code is generated from a high level language for PDEs. An
 %invocation of the kernel typically does tensor-like calculators over
@@ -350,12 +350,12 @@ e.g. velocity)
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Object name & Type & Variable name(s) \\\hline
-Determinant of the Jacobian matrix & double & det  \\ 
-Inverse of the Jacobian matrix & double & K1, K2, ... \\ 
-Coordinates & double** & coords\\ 
-Fields & double** & w \\ 
-Numerical integration weights & double[] & W \\ 
-Basis functions (and derivatives) & double[][] & X, Y, X1, ... \\ 
+Determinant of the Jacobian matrix & double & det  \\
+Inverse of the Jacobian matrix & double & K1, K2, ... \\
+Coordinates & double** & coords\\
+Fields & double** & w \\
+Numerical integration weights & double[] & W \\
+Basis functions (and derivatives) & double[][] & X, Y, X1, ... \\
 Element matrix & double[][] & A\\ \hline
 \end{tabulary}
 }
@@ -837,12 +837,12 @@ to minimize the aforementioned issues.
 \begin{tabulary}{1.0\columnwidth}{C|C}
 \hline
 Name (Abbreviation) & Parameter \\\hline
-Generalized loop-invariant code motion (\emph{licm}) &   \\ 
-Padding &  \\ 
-Data Alignment & \\ 
-Loop interchange      & loops  \\ 
-Loop unrolling  & unroll factor \\ 
-Outer-product vectorization (\emph{op-vect}) & tile size \\ 
+Generalized loop-invariant code motion (\emph{licm}) &   \\
+Padding &  \\
+Data Alignment & \\
+Loop interchange      & loops  \\
+Loop unrolling  & unroll factor \\
+Outer-product vectorization (\emph{op-vect}) & tile size \\
 Expression splitting (\emph{split}) & split point, split factor \\ \hline
 \end{tabulary}
 }
@@ -924,21 +924,21 @@ wrapper: the function within which the kernel is invoked
 isa: represents the SIMD Instruction Set Architecture
 \textbf{Output:} assembly code (C string)
 \textbf{// Analyze ast and build optimization plan }
-it\_space = analyze(ast) 
+it\_space = analyze(ast)
 \textbf{if not} it\_space
   ast.apply\_inter\_kernel\_vectorization(wrapper, isa)
   \textbf{return} wrapper + ast.from\_ast\_to\_c()
-plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs) 
+plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs)
 \textbf{// Optimize ast based on plan}
 ast.licm()
-ast.padding() 
+ast.padding()
 ast.align\_data()
 \textbf{if} plan.permute
   ast.permute\_assembly\_loops()
 \textbf{if} plan.split\_factor
   ast.split(plan.split\_factor)
 \textbf{if} plan.uaj\_factor
-  uaj = MIN(plan.uaj\_factor, it\_space.j.size/isa.vf) 
+  uaj = MIN(plan.uaj\_factor, it\_space.j.size/isa.vf)
   ast.op\_vect(uaj)
 \textbf{return} wrapper + ast.from\_ast\_to\_c()
 \end{alltt}
@@ -988,11 +988,11 @@ applying this optimization, even if specific pragmas are added.
 \begin{alltt}\footnotesize\internallinenumbers
 \textbf{Input:} n\_outer\_arrays, n\_inner\_arrays, n\_consts, n\_regs
 \textbf{Output:} uaj\_factor, split\_factor
-n\_outer\_regs = n\_regs / 2 
-split\_factor = 0 
+n\_outer\_regs = n\_regs / 2
+split\_factor = 0
 \textbf{// Compute spltting factor }
 \textbf{while} n\_outer\_arrays > n\_outer\_regs
-  n\_outer\_arrays = n\_outer\_arrays / 2 
+  n\_outer\_arrays = n\_outer\_arrays / 2
   split\_factor = split\_factor + 1
 \textbf{// Compute unroll-and-jam factor for \emph{op-vect}}
 n\_regs\_avail = n\_regs - (n\_outer\_arrays + n\_consts)
