@@ -1057,36 +1057,34 @@ based on the following PDEs
 \item Advection-Diffusion
 \item Burgers
 \end{enumerate}
-The three chosen benchmarks are \emph{real-life kernels} and comprise
-the core differential operators in some of the most frequently
-encountered finite element problems in scientific computing. The
-Helmholtz and Diffusion kernels are archetypal second order elliptic
-operators. They are complete and unsimplified examples of the
-operators occurring for diffusion and viscosity in fluids, and for
-imposing pressure in compressible fluids. As such, they are both
-extensively used in climate and ocean modeling. Very similar
+The three chosen benchmarks comprise the core differential operators in
+some of the most frequently encountered finite element problems in
+scientific computing. The Helmholtz and Diffusion kernels are archetypal
+second order elliptic operators. They are complete and unsimplified
+examples of the operators used to model diffusion and viscosity in
+fluids, and for imposing pressure in compressible fluids. As such, they
+are both extensively used in climate and ocean modeling. Very similar
 operators, for which the same optimisations are expected to be equally
-effective, apply to elasticity problems, which are at the base of
+effective, apply to elasticity problems, which are a foundation of
 computational structural mechanics. The Burgers kernel is a typical
 example of a first order hyperbolic conservation law, which occurs in
 real applications whenever a quantity is transported by a fluid (the
-momentum itself, in our case). We chose this particular kernel since
-it applies to a vector-valued quantity, while the elliptic operators
-apply to scalar quantities; this impacts the generated code, as
-explained next. In this way, the operators we have selected are
-characteristic of both the second and first order operators that
-dominate in fluids and solids simulations, and a wide variety on local
-assembly codes can be tested.
+momentum itself, in our case). We chose this particular kernel since it
+applies to a vector-valued quantity, while the elliptic operators apply
+to scalar quantities. This impacts the generated code, as explained
+next. The operators we have selected are characteristic of both the
+second and first order operators that dominate simulations in fluids and
+solids, and a wide variety of local assembly codes can be tested.
 
-The benchmarks were written in UFL (code available at~\cite{ufl-code})
+The benchmarks, available at~\cite{ufl-code}, were written in UFL
 and executed over real unstructured meshes through Firedrake. The
 Helmholtz code has already been shown in
-Listing~\ref{code:helmholtz}. For Advection-Diffusion, the Diffusion
+Listing~\ref{code:helmholtz}. For advection-diffusion, the diffusion
 equation, which uses the same differential operators as Helmholtz, is
-considered. In the Diffusion kernel code, the main differences with
+considered. In the diffusion kernel code, the main differences with
 respect to Helmholtz are the absence of the $Y$ array and the presence
-of a few more constants for computing the element matrix. Burgers is a
-non-linear problem employing differential operators different from
+of additional constants for computing the element matrix. Burgers is a
+nonlinear problem employing differential operators different from
 those of Helmholtz and relying on vector-valued quantities, which has
 a major impact on the generated assembly code (see
 Listing~\ref{code:burgers}), where a larger number of basis function
@@ -1095,9 +1093,9 @@ arrays ($X1$, $X2$, ...) and constants ($F0$, $F1$, ..., $K0$, $K1$,
 
 These problems were studied varying both the shape of mesh elements
 and the polynomial order $p$ of the method, whereas the element
-family, Lagrange, is fixed. As might be expected, the larger the
+family, Lagrange, is fixed. As expected, the larger the
 element shape and $p$, the larger the iteration space. Triangles,
-tetrahedron, and prisms were tested as element shape. For instance, in
+tetrahedra, and prisms were tested as element shape. For instance, in
 the case of Helmholtz with $p=1$, the size of the \texttt{j} and
 \texttt{k} loops for the three element shapes is, respectively, $3$,
 $4$, and $6$. Moving to bigger shapes has the effect of increasing the
@@ -1105,20 +1103,23 @@ number of basis function arrays, since, intuitively, the behavior of
 the equation has now to be approximated also along a third axis. On
 the other hand, the polynomial order affects only the problem size
 (the three loops \texttt{i}, \texttt{j}, and \texttt{k}, and, as a
-consequence, the size of $X$ and $Y$ arrays). A range of polynomial
-orders from $p=1$ to $p=4$ were tested; higher polynomial orders are
+consequence, the size of the $X$ and $Y$ arrays). A range of polynomial
+orders from $p=1$ to $p=4$ were tested. Higher polynomial orders are
 excluded from the study because of current Firedrake limitations. In
 all these cases, the size of the element matrix rarely exceeds
 30$\times$30, with a peak of 105$\times$105 in Burgers with prisms and
 $p=4$.
 
+% FIXME: weren't those FIAT limitations?
+
 \subsection{Loop permutation}
+
 In the following, only results for the loop order \texttt{ijk} are
 shown. For the considerations exposed in
-Section~\ref{sec:pyop2-compiler}, loop interchanges having an inner
-loop along \texttt{i} caused slow downs; also, interchanging
-\texttt{j} and \texttt{k} loops while keeping \texttt{i} as outermost
-loop did not provide any benefits.
+Section~\ref{sec:pyop2-compiler}, loop interchanges having an inner loop
+along \texttt{i} caused slow downs; also, interchanging \texttt{j} and
+\texttt{k} loops while keeping \texttt{i} as outermost loop did not
+provide any benefits.
 
 \subsection{Impact of Generalized Loop-invariant Code Motion}
 \label{licm-impact}
@@ -1154,7 +1155,7 @@ loop did not provide any benefits.
 \end{table*}
 Table~\ref{table:perf-results-licm} illustrates the performance
 improvement obtained when \emph{licm} is applied. In general, the
-speed ups are notable. The main reasons were anticipated in
+speedups are notable. The main reasons were anticipated in
 Section~\ref{sec:code-transf-licm}: in the original code, 1)
 sub-expressions invariant to outer loops are not automatically
 hoisted, while 2) sub-expressions invariant to the innermost loop are
@@ -1164,17 +1165,17 @@ compiler.
 
 The gain tends to grow with the computational cost of the kernels:
 bigger loop nests (i.e., larger element shapes and polynomial orders)
-usually benefit from the reduction in redundant computation, even
-though extra memory for the temporary arrays is required. Some
-discrepancies to this trend are due to a less effective
-auto-vectorization. For instance, on the Sandy Bridge, the improvement
-at $p=3$ is larger than that at $p=4$ because, in the latter case, the
-size of the innermost loop is not a multiple of the vector length, and
-a reminder scalar loop is introduced at compile time. Since the loop
-nest is small, the cost of executing the extra scalar iterations can
-have a significant impact. The reminder loop overhead is more
-pronounced on the Xeon Phi, where the vector length is twice as big,
-which leads to proportionally larger scalar reminder loops.
+usually benefit from the reduction in redundant computation, even though
+extra memory for the temporary arrays is required.  Exceptions to this
+trend are due to a less effective auto-vectorization. For instance, on
+the Sandy Bridge, the improvement at $p=3$ is larger than that at $p=4$
+because, in the latter case, the size of the innermost loop is not a
+multiple of the vector length, and a remainder scalar loop is introduced
+at compile time. Since the loop nest is small, the cost of executing the
+extra scalar iterations can have a significant impact. The remainder
+loop overhead is more pronounced on the Xeon Phi, where the vector
+length is twice as big, which leads to proportionally larger scalar
+remainder loops.
 
 
 \subsection{Impact of Padding and Data Alignment}
@@ -1210,20 +1211,21 @@ which leads to proportionally larger scalar reminder loops.
 \end{table*}
 
 Table~\ref{table:perf-results-licmap} shows the cumulative impact of
-\emph{licm}, data alignment, and padding over the original code. In
-the following, this version of the code is referred to as
-\emph{licm-ap}. Padding, which avoids the introduction of a reminder
-loop as described in Section~\ref{licm-impact}, as well as data
-alignment, enhance the quality of auto-vectorization. Occasionally the
-run-time of \emph{licm-ap} is close to that of \emph{licm}, since the
-non-padded element matrix size is already a multiple of the vector
-length. Rarely \emph{licm-ap} is slower than \emph{licm} (e.g. in
-Burgers $p=3$ on the Sandy Bridge). One possible explanation is that
-the number of aligned temporaries introduced by \emph{licm} is so
-large to induce cache associativity conflicts.
+\emph{licm}, data alignment, and padding over the original code. In the
+following, this version of the code is referred to as \emph{licm-ap}.
+Padding, which avoids the introduction of a remainder loop as described
+in Section~\ref{licm-impact}, as well as data alignment, enhance the
+quality of auto-vectorization. Occasionally the run-time of
+\emph{licm-ap} is close to that of \emph{licm}, since the non-padded
+element matrix size is already a multiple of the vector length. In rare
+cases \emph{licm-ap} is slower than \emph{licm} (e.g. in Burgers $p=3$
+on the Sandy Bridge). One possible explanation is that the number of
+aligned temporaries introduced by \emph{licm} is so large to induce
+cache associativity conflicts.
 
 \subsection{Impact of Vector-register Tiling}
 \label{sec:perf-eval-opvect}
+
 In this section, we evaluate the impact of vector-register tiling. We
 compare two versions: the baseline, \emph{licm-ap}; and
 vector-register tiling on top of \emph{licm-ap}, which in the
@@ -1242,9 +1244,9 @@ factors were tried; the other shows the speed up when the
 unroll-and-jam factor was retrieved via the cost model. In a plot
 legend, cost model bars are suffixed with ``CM''.
 
-It is worth noticing that, in most cases, the cost model successfully
+It is worth noting that, in most cases, the cost model successfully
 determines how to transform a kernel to maximize its performance. This
-is chiefly because assembly kernels fit the L1 cache, so, within a
+is chiefly because assembly kernels fit the L1 cache, such that, with a
 certain degree of confidence, it is possible to predict how to obtain
 a fast implementation by simply reasoning on the register
 pressure. For each problem, the cost model stated to use the default
@@ -1269,7 +1271,7 @@ from 1.71$\times$ to 2.42$\times$).
 
 Using the Intel Architecture Code Analyzer tool~\cite{IACA} on the
 Sandy Bridge, we confirmed that speed ups are a consequence of
-increased register re-use. In Helmholtz $p=4$, for example, the tool
+improved register re-use. In Helmholtz $p=4$, for example, the tool
 showed that when using \emph{op-vect} the number of clock cycles to
 execute one iteration of the \texttt{j} loop decreases by roughly
 17$\%$, and that this is a result of the relieved pressure on both of
@@ -1320,24 +1322,24 @@ discussed in the next section.
 
 \subsection{Impact of Expression Splitting}
 \label{sec:perf-results-split}
-Expression splitting relieves the register pressure when the element
-matrix evaluation needs to read from a large number of basis function
-arrays. As detailed in Section~\ref{sec:expr-split}, in the price to
-pay for this optimazion, there are an increased number of accesses to
-the element matrix and, potentially, redundant computation. Similarly
-to the analysis of vector-register tiling, we compare two versions:
-the baseline, \emph{licm-ap}; and expression splitting on top of
-\emph{licm-ap}, which, for simplicity, in the following is referred to
-as \emph{split}.
 
-For the Helmholtz and Diffusion kernels, in which only between 4 and 8
+Expression splitting relieves the register pressure when the element
+matrix evaluation needs to be read from a large number of basis function
+arrays. As detailed in Section~\ref{sec:expr-split}, the price to pay
+for this optimazion is an increased number of accesses to the element
+matrix and, potentially, redundant computation. Similarly to the
+analysis of vector-register tiling, we compare two versions: the
+baseline, \emph{licm-ap}; and expression splitting on top of
+\emph{licm-ap}, which, for simplicity, is referred to as \emph{split} in
+the following.
+
+For the Helmholtz and diffusion kernels, in which only between 4 and 8
 temporaries are read at every loop iteration, \texttt{split} tends to
-slow down the computation, because of the aforementioned
-drawbacks. Slow downs up to 1.4$\times$ and up to 1.6$\times$ were
-observed, respectively, on the Sandy Bridge and the Xeon Phi. Note
-that the cost model prevents the adoption of the transformation: the
-\texttt{while} statement in Figure~\ref{algo:applyCostModel} is indeed
-never entered.
+slow down the computation, because of the aforementioned drawbacks. Slow
+downs up to 1.4$\times$ and up to 1.6$\times$ respectively were observed
+on the Sandy Bridge and the Xeon Phi. Note that the cost model prevents
+the adoption of the transformation: the \texttt{while} statement in
+Figure~\ref{algo:applyCostModel} is indeed never entered.
 
 In the Burgers kernels, between 12 and 24 temporaries are accessed at
 every loop iteration, so \emph{split} plays a key role on the Sandy
@@ -1349,10 +1351,10 @@ was divided into two parts, ensured close-to-peak perforance. The
 transformation negligibly affected register locality, so speed ups up
 to 1.5$\times$ were observed. For instance, on the Sandy Bridge, when
 $p=4$ and a prismatic mesh is employed, the overall performance
-improvement (i.e., the one over the original code) increases from
-1.44$\times$ to 2.11$\times$. On the Xeon Phi, the impact of
-\emph{split} is only marginal, since register spilling is limited by
-the presence of 32 logical vector units.
+improvement over the original code increases from 1.44$\times$ to
+2.11$\times$. On the Xeon Phi, the impact of \emph{split} is only
+marginal, since register spilling is limited by the presence of 32
+logical vector units.
 
 On the Sandy Bridge, the performance of the Burgers kernel on a
 prismatic mesh was 20.0 GFlop/s from $p=1$ to $p=3$, while it was 21.3
@@ -1366,9 +1368,9 @@ The \emph{split} transformation was also tried in combination with
 \emph{op-vect} (\emph{split-op-vect}), although the cost model
 prevents its adoption on both platforms. Despite improvements up to
 1.22$\times$, \emph{split-op-vect} never outperforms
-\emph{split}. This is motivated by two factors: for small split
+\emph{split}. This is explained by two factors: for small split
 factors, such as 1 and 2, the data space to be tiled is still too big,
-and register spilling affects run-time; for higher ones,
+and register spilling affects run-time. For higher factors,
 sub-expressions become so small that, as explained in
 Section~\ref{sec:perf-eval-opvect}, extensive unrolling already allows
 to achieve a certain degree of register re-use.
@@ -1386,22 +1388,23 @@ to achieve a certain degree of register re-use.
 
 \subsection{Comparison with FEniCS Form Compiler's built-in Optimizations}
 \label{sec:perf-results-fenics}
+
 We have modified the FEniCS Form Compiler (FFC) to return an abstract
-syntax tree representation of a local assembly kernel, rather than
-plain C++ code, so as to enable code transformations in
-COFFEE. Besides Firedrake, FFC is used in the FEniCS
-project~\cite{Fenics}. In FEniCS, FFC can apply its own model-driven
-optimizations to local assembly kernels~\cite{quadrature1}, which
-mainly consist of loop-invariant code motion and elimination, at code
+syntax tree representation of a local assembly kernel, rather than plain
+C++ code to enable code transformations in COFFEE. In the FEniCS
+project~\cite{Fenics}, FFC's role is generating an optimized C++ code
+string confirming to the UFC interface. The model-driven optimizations
+to local assembly kernels~\cite{quadrature1} supported by FFC mainly
+consist of loop-invariant code motion and elimination, at code
 generation time, of floating point operations involving zero-valued
 entries in basis function arrays.
 
 The FEniCS Form Compiler's loop-invariant code motion is different
 from COFFEE's. It is based on expansion of arithmetic operations, for
 example applying distributivity and associativity to products and sums
-at code generation time, to identify terms that are invariant of the
+at code generation time to identify terms that are invariant of the
 whole loop nest. Depending on the way expansion is performed,
-operation count may not decrease significantly.
+operation counts may not decrease significantly.
 
 Elimination of zero-valued terms, which are the result of using
 vector-valued quantities in the finite element problem, has the effect
@@ -1414,20 +1417,20 @@ fewer zero-valued contributions.
 Table~\ref{table:comparison-to-FFC-opt} summarizes the performance
 achieved by COFFEE over the \emph{fastest} FEniCS (FFC) implementation
 on the Sandy Bridge for the Burgers, Helmholtz and Diffusion
-kernels. Burgers' slow downs occur in presence of a small iteration
-space (triangular mesh, $p \in [1, 2]$; tetrahedral mesh, $p \in [1,
-  2]$; prismatic mesh, $p = 1$). The result shown represents the worst
-slow down, which was obtained with a triangular mesh and $p = 1$. This
-is a result of removing zero-valued entries in FEniCS' basis function
-arrays: some operations are avoided, but indirection arrays prevent
-auto-vectorization, which significantly impacts performance as soon as
-the element matrix becomes bigger than 12$\times$12. However, with the
-forthcoming zero-removal optimization in COFFEE, we expect to
-outperform FEniCS in all problems. In the cases of Helmholtz and
-Diffusion, the minimum improvements are, respectively, 1.10$\times$
-and 1.18$\times$ (2D mesh, $p=1$), which tend to increase with
-polynomial order and element shape up to the values illustrated in the
-table.
+kernels. Slow downs in the Burgers benchmark occur in presence of a
+small iteration space (triangular mesh, $p \in [1, 2]$; tetrahedral
+mesh, $p \in [1, 2]$; prismatic mesh, $p = 1$). The result shown
+represents the worst slow down, which was obtained with a triangular
+mesh and $p = 1$. This is a result of removing zero-valued entries in
+basis function arrays: some operations are avoided, but indirection
+arrays prevent auto-vectorization, which significantly impacts
+performance as soon as the element matrix becomes bigger than
+12$\times$12. However, with the forthcoming zero-removal optimization in
+COFFEE, we expect to outperform FEniCS in all problems. In the cases of
+Helmholtz and Diffusion, the minimum improvements are, respectively,
+1.10$\times$ and 1.18$\times$ (2D mesh, $p=1$), which tend to increase
+with polynomial order and element shape up to the values illustrated in
+the table.
 
 \begin{table}[h]
 \tbl{Performance comparison between FEniCS and COFFEE on the Sandy Bridge.}{
@@ -1444,6 +1447,7 @@ Burgers & 2.24$\times$ & 1.61$\times$ \\\hline
 
 \subsection{Comparison with hand-made BLAS-based implementations}
 \label{sec:perf-eval-blas}
+
 For the Helmholtz problem on a tetrahedral mesh, manual
 implementations based on \texttt{Intel MKL BLAS} were tested on the
 Sandy Bridge. This particular kernel can be easily reduced to a
