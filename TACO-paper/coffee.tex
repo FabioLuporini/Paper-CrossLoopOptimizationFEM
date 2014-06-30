@@ -1469,43 +1469,43 @@ work.
 
 \section{Related Work}
 \label{sec:related-work}
+
 The finite element method is extensively used to approximate solutions
 of PDEs. Well-known frameworks and applications include
 nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics},
-Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical
-integration is usually employed to implement the local assembly
-phase. The recent introduction of domain specific languages (DSLs) to
-decouple the finite element specification from its underlying
-implementation facilitated, however, the development of novel
-approaches. Methods based on tensor contraction~\cite{FFC-Compiler}
-and symbolic manipulation~\cite{Francis} have been implemented. We
-have designed COFFEE to specifically target numerical integration
-because it has been demonstrated that it remains the optimal choice
-for a wide class of problems~\cite{quadrature1}.
+Fluidity~\cite{fluidity_manual_v4}. Numerical integration is usually
+employed to implement the local assembly phase. The recent introduction
+of domain-specific languages (DSLs) to decouple the finite element
+specification from its underlying implementation facilitated the
+development of novel approaches. Methods based on tensor
+contraction~\cite{FFC-Compiler} and symbolic manipulation~\cite{Francis}
+have been implemented. We have designed COFFEE to specifically target
+numerical integration because it has been demonstrated that it remains
+the optimal choice for a wide class of problems~\cite{quadrature1}.
 
 Optimization of local assembly using numerical integration for CPU
-platforms has been addressed in FEniCS~\cite{quadrature1}. The
-comparison between COFFEE and this work is presented in
+platforms has been addressed in FEniCS~\cite{quadrature1} and a
+comparison to COFFEE is presented in
 Section~\ref{sec:perf-results-fenics}. In~\cite{Markall20101815}, and
-more recently in~\cite{petsc-integration-gpu}, the problem has been
-studied for GPU architectures. In~\cite{assembly-opencl}, variants of
-the standard numerical integration algorithm have been specialized and
-evaluated for the PowerXCell processor, but an exhaustive study from
-the compiler viewpoint - like ours - is missing, and none of the
-optimizations presented in Section~\ref{sec:code-transf} are
-mentioned. Among these efforts, to the best of our knowledge, COFFEE
-is the first work targeting low-level optimizations through a real
-compiler approach.
+more recently in~\cite{petsc-integration-gpu}, numerical integration has
+been studied for GPU architectures. In~\cite{assembly-opencl}, variants
+of the standard numerical integration algorithm have been specialized
+and evaluated for the PowerXCell processor, but an exhaustive study from
+the compiler viewpoint --- like ours --- is missing, and none of the
+optimizations presented in Section~\ref{sec:code-transf} are mentioned.
+Among these efforts, to the best of our knowledge, COFFEE is the first
+work targeting low-level optimizations through a real compiler approach.
 
 Our compiler-based optimization approach is made possible by the
 top-level DSL, which enables automated code generation. DSLs have been
 proven successful in auto-generating optimized code for other domains:
-Spiral~\cite{Pueschel:05} for digital signal processing numerical
-algorithms, ~\cite{Spampinato:14} for dense linear algebra, or
+Spiral~\cite{Pueschel:05} for digital signal processing algorithms,
+~\cite{Spampinato:14} for dense linear algebra, or
 Pochoir~\cite{pochoir} and SDSL~\cite{stencil-compiler} for image
 processing and finite difference stencils. Similarly, PyOP2 is used by
 Firedrake to express iteration over unstructured meshes in scientific
-codes. COFFEE improves automated code generation in Firedrake.
+codes. COFFEE improves the efficiency of automatically generated kernels
+in Firedrake.
 
 Many code generators, like those based on the Polyhedral
 model~\cite{PLUTO} and those driven by
