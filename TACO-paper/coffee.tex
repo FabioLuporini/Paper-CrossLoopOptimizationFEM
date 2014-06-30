@@ -332,11 +332,14 @@ priorities for future work.
 
 \begin{figure}
 \begin{alltt}
-\footnotesize \textbf{Input:} element matrix (2D array, initialized to
+\footnotesize
+\textbf{Input:} element matrix (2D array, initialized to
 0), element coordinates (array), coefficient fields (array,
-e.g. velocity) \textbf{Output:} element matrix (2D array) - Compute
-Jacobian from coordinates - Define basis functions - Compute element
-matrix in an affine loop nest
+e.g. velocity)
+\textbf{Output:} element matrix (2D array)
+- Compute Jacobian from coordinates
+- Define basis functions
+- Compute element matrix in an affine loop nest
 \end{alltt}
 \caption{Structure of a local assembly kernel}
 \label{code:general-structure}
@@ -359,23 +362,24 @@ Element matrix & double[][] & A\\ \hline
 \label{table:map-name-letters}
 \end{table}
 
-Local assembly is the computation of contributions of a specific cell
-in the discretized domain to the PDE solution. The process consists of
-numerically evaluating problem-specific integrals to produce a matrix
-and a vector (\cite{quadrature1}, \cite{fluidity_manual_v4}), whose
-sizes depend on the order of the method. This operation is applied to
-all cells in the discretized domain. In this work we focus on local
-matrices, or ``element matrices,'' which are more costly to compute
-than element vectors.
+Local assembly is the computation of contributions of a specific cell in
+the discretized domain to the linear system which yields the PDE
+solution. The process consists of numerically evaluating
+problem-specific integrals to produce a matrix and a vector
+\cite{quadrature1,fluidity_manual_v4}, whose sizes depend on the order
+of the method. This operation is applied to all cells in the discretized
+domain. In this work we focus on local matrices, or ``element
+matrices'', which are more costly to compute than element vectors.
 
 Given a finite element description of the input problem, expressed
-through the domain-specific Unified Form Language~\cite{ufl} (UFL),
-Firedrake generates a C-code kernel implementing assembly using a
-numerical integration algorithm. This kernel can be applied to any
-element in the mesh: this descends from the mathematical formulation
-of assembly, which states that the evaluation of a local matrix can be
-reduced to integrating on a fixed ``reference'' element---a special
-element that does not belong to the domain---after a suitable change
+through the domain-specific Unified Form Language (UFL)~\cite{ufl},
+Firedrake employs the FEniCS form compiler (FFC)~\cite{FFC-Compiler} to
+generate a C-code kernel implementing assembly using a
+numerical quadrature. This kernel can be applied to any
+element in the mesh, which follows from a mathematical property of the
+finite element method. The evaluation of a local matrix can be
+reduced to integration on a fixed ``reference'' element --- a special
+element that does not belong to the domain --- after a suitable change
 of coordinates. Firedrake triggers the compilation of an assembly
 kernel using an available vendor compiler, and manages its (parallel)
 execution over all elements in the mesh. As already explained, the
@@ -392,17 +396,22 @@ two dimensional array used to store the element matrix, the element's
 coordinates in the discretized domain, and coefficient fields, for
 instance indicating the values of velocity or pressure in the
 element. The output is the evaluated element matrix. The kernel body
-can be logically split into three parts: 1) calculation of the
-Jacobian matrix, its determinant and its inverse: required for the
-aforementioned change of coordinates, from the reference element to
-the one being computed; 2) definition of basis functions: used,
-intuitively, to interpolate the contribution to the PDE solution over
-the element. The choice of the basis functions is expressed in UFL
-directly by users. In the generated code, they are represented as
-global read-only two dimensional arrays (i.e., using \texttt{static
-  const} in C) of double precision floats; 3) evaluation of the
-element matrix in an affine loop nest, in which the integration is
-performed. Table~\ref{table:map-name-letters} shows the variable names
+can be logically split into three parts:
+\begin{enumerate}
+  \item Calculation of the Jacobian matrix, its determinant and its
+    inverse required for the aforementioned change of coordinates from
+    the reference element to the one being computed.
+  % FIXME: this rather hand-wavy and not technically correct
+  \item Definition of basis functions used, intuitively, to interpolate
+    the contribution to the PDE solution over the element. The choice of
+    basis functions is expressed in UFL directly by users. In the
+    generated code, they are represented as global read-only two
+    dimensional arrays (i.e., using \texttt{static const} in C) of
+    double precision floats.
+  \item Evaluation of the element matrix in an affine loop nest, in which
+    the integration is performed.
+\end{enumerate}
+Table~\ref{table:map-name-letters} shows the variable names
 we will use in the upcoming code snippets to refer to the various
 kernel objects.
 
@@ -469,31 +478,31 @@ $\rbrace$
 ~~~~~~~~~*det*W[i]);\\
 ~~$\rbrace$ \\
 $\rbrace$
-\caption{Local assembly code generated by Firedrake for a Burgers problem on a 3D tetrahedral mesh using Lagrange $p=1$ elements.}
+\caption{Local assembly code generated by Firedrake for a Burgers
+problem on a 3D tetrahedral mesh using Lagrange $p=1$ elements.}
 \label{code:burgers}
 \end{algorithm}
 
 The actual complexity of a local assembly kernel depends on the finite
 element problem being solved. In simpler cases, the loop nest is
-perfect, it has short trip counts (in the range 3--15), and the
-computation reduces to a summation of a few products involving basis
-functions. An example is provided in Listing~\ref{code:helmholtz},
-which shows the assembly kernel for a Helmholtz problem using Lagrange
-basis functions on 2D elements with polynomial order $p=1$. In other
-scenarios, for instance when solving the Burgers equation, whose
-assembly code is given in Listing~\ref{code:burgers}, the number of
-arrays involved in the computation of the element matrix can be much
-larger: in this case, 14 unique arrays are accessed, and the same
-array can be referenced multiple times within the expression. This may
-also require the evaluation of constants in outer loops (called $F$ in
-the code) to act as scaling factors of arrays; trip counts can be
-larger (proportionally to the order of the method); and arrays may be
-block-sparse. In addition to a larger number of operations, more
-complex cases like the Burgers equation are characterized by high
-register pressure.
+perfect, has short trip counts (in the range 3--15), and the computation
+reduces to a summation of a few products involving basis functions. An
+example is provided in Listing~\ref{code:helmholtz}, which shows the
+assembly kernel for a Helmholtz problem using Lagrange basis functions
+on 2D elements with polynomial order $p=1$. In other scenarios, for
+instance when solving the Burgers equation, the number of arrays
+involved in the computation of the element matrix can be much larger.
+The assembly code is given in Listing~\ref{code:burgers} and contains 14
+unique arrays that are accessed, where the same array can be referenced
+multiple times within the same expression. This may also require the
+evaluation of constants in outer loops (called $F$ in the code) to act
+as scaling factors of arrays. Trip counts grow proportionally to the
+order of the method and arrays may be block-sparse. In addition to a
+larger number of operations, more complex cases like the Burgers
+equation are characterized by high register pressure.
 
-The Helmholtz and Burgers equations are exponents of a large class of
-problems and, as such, will constitute our benchmark, along with the
+The Helmholtz and Burgers equations exemplify a large class of problems
+and, as such, will constitute our benchmark problems, along with the
 Diffusion equation. We carefully motivate this choice in
 Section~\ref{sec:real-examples}.
 
@@ -501,7 +510,7 @@ Despite the infinite variety of assembly kernels which Firedrake can
 generate, it is still possible to identify common domain-specific
 traits that can be exploited for effective code transformations and
 SIMD vectorization. These include: 1) memory accesses along the three
-loop dimensions are always stride-1; 2) the \texttt{j} and \texttt{k}
+loop dimensions are always unit stride; 2) the \texttt{j} and \texttt{k}
 loops are interchangeable, whereas interchanges involving the $i$ loop
 require pre-computation of values (e.g. the $F$ values in Burgers) and
 introduction of temporary arrays, as explained in
