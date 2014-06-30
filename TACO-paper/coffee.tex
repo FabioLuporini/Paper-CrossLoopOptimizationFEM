@@ -163,17 +163,18 @@ Comp.~Sci., Louisiana State University.
 %large-scale scientific simulations running on supercomputers.
 
 \section{Introduction}
+
 In many fields such as computational fluid dynamics, computational
 electromagnetics and structural mechanics, phenomena are modelled by
 partial differential equations (PDEs). Numerical techniques, like the
 finite volume method and the finite element method, are widely
 employed to approximate solutions of these PDEs. Unstructured meshes
-are often used to discretize the equation domain, since their
-geometric flexibility allows solvers to be extremely effective. The
+are often used to discretize the computational domain, since they
+allow an accurate representation of complex geometries. The
 solution is sought by applying suitable numerical operations, or
-kernels, to the components of a mesh, such as edges, vertices, or
+kernels, to the entities of a mesh, such as edges, vertices, or
 cells. On standard clusters of multicores, typically, a kernel is
-executed sequentially by a thread, while parallelism is achieved
+executed sequentially by a thread, while parallelism is achieved by
 partitioning the mesh and assigning each partition to a different node
 or thread. Such an execution model, with minor variations, is adopted,
 for example, in \cite{pyop2isc}, \cite{Fenics},
@@ -188,45 +189,46 @@ for example, in \cite{pyop2isc}, \cite{Fenics},
 %allocated supercomputing units or the direct financial cost of cloud
 %time)
 
+% FIXME: citation for Met Office?
+
 The time required to apply the numerical kernels is a major issue,
 since the equation domain needs to be discretized into an extremely
-large number of cells, possibly of the order of trillions
-\cite{Rossinelli2013}, in order to obtain a satisfactory approximation
-of the PDE. For example, it has been well established that mesh
+large number of cells to obtain a satisfactory approximation
+of the PDE, possibly of the order of trillions
+\cite{Rossinelli2013}. For example, it has been well established that mesh
 resolution is critical in the accuracy of numerical weather
-forecasts. However, operational forecast centres have a strict time
+forecasts. However, operational forecast centers have a strict time
 limit in which to produce a forecast - 60 minutes in the case of the
-UK Met Office - so producing efficient kernels has a direct scientific
+UK Met Office. Producing efficient kernels has a direct scientific
 payoff in higher resolution, and therefore more accurate,
-forecasts. Hence, the computational cost is a dominant problem in
+forecasts. Computational cost is a dominant problem in
 computational science simulations, especially for those based on
 finite elements, which are the subject of this paper. We address, in
 particular, the well-known problem of optimizing the local assembly
 phase of the finite element method
 \cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, which
-can cover a significant fraction of the overall computation run-time,
-often in the range 30-60$\%$. With respect to these studies, we
-propose a novel set of composable code transformations targeting, for
+can be responsible for a significant fraction of the overall computation
+run-time, often in the range 30-60$\%$. With respect to these studies,
+we propose a novel set of composable code transformations targeting, for
 the first time, instruction-level parallelism - with emphasis on SIMD
 vectorization - and register locality.
 
 During the assembly phase, the solution of the PDE is approximated by
-executing a problem-specific kernel over all cells, or elements, in
-the discretized domain. In this work, we focus on relatively low order
+executing a problem-specific kernel over all cells, or elements, in the
+discretized domain. In this work, we focus on relatively low order
 finite element methods, in which an assembly kernel's working set is
 usually small enough to fit the L1 cache. Low order methods are by no
 means exotic: they are employed in a wide variety of fields, including
-climate and ocean modeling, computational fluid dynamics, and
-structural mechanics. High order methods are often based upon special
-formulations of the finite element method, which result in the
-adoption of different sets of algorithms to solve PDEs~\cite{SPENCER},
-and therefore are excluded from our study.
+climate and ocean modeling, computational fluid dynamics, and structural
+mechanics. High order methods such as the spectral element method
+\cite{SPENCER} commonly require different algorithms to solve PDEs and
+therefore are excluded from our study.
 
 An assembly kernel is characterized by the presence of an affine,
 often non-perfect loop nest, in which individual loops are rather
 small: their trip count rarely exceeds 30, and may be as low as 3 for
 low order methods. In the innermost loop, a problem-specific,
-flops-intensive expression evaluates a two dimensional array,
+compute intensive expression evaluates a two dimensional array,
 representing the result of local assembly in an element of the
 discretized domain. With such a kernel structure, we focus on aspects
 like minimization of floating-point operations, register allocation
@@ -237,35 +239,35 @@ Achieving high-performance is non-trivial. The complexity of the
 mathematical expressions, often characterized by a large number of
 operations on constants and small matrices, makes it hard to determine
 a single or specific sequence of transformations that is successfully
-applicable to all problems. The variation in loop trip counts and
-their typically small value further exacerbates the issue. A
+applicable to all problems. Loop trip counts are typically small and can
+vary significantly, which further exacerbates the issue. A
 compiler-based approach is, therefore, the only reasonable option to
 obtain close-to-peak performance in a wide range of different local
 assembly kernels. Optimizations like padding, generalized
 loop-invariant code motion, vector-register tiling, and expression
-splitting, as well as their composition, are essential, but none are
+splitting, as well as their composition, are essential. but none are
 supported by state-of-the-art polyhedral and vendor compilers. BLAS
 routines could theoretically be employed, although a fairly
-complicated control- and data-flow analysis would be required to
+complicated control and data flow analysis would be required to
 automate identification and extraction of matrix-matrix multiplies. In
 addition, as detailed in Section~\ref{sec:perf-eval-blas}, the small
 dimension of the matrices involved and the potential loss in data
 locality can limit or eliminate the performance gain of this approach.
 
 In order to overcome the constraints of the available compilers and
-specialized linear-algebra libraries, we have automated a set of
-generic and model-driven code transformations in
-COFFEE\footnote{COFFEE stands for COmpiler For FinitE Element local
-  assembly.}, a compiler for optimizing local assembly kernels. COFFEE
-is integrated with Firedrake~\cite{firedrake-code}, a system for
-solving PDEs through the finite element method based on the PyOP2
-abstraction~\cite{pyop2isc}. It supports all problems expressible with
-this framework, including equations that can be found at the core of
-real-world simulations, such as those used in our performance
-evaluation. In evaluating our code transformations in a range of
-notable problems, we also vary two key parameters that impact solution
-accuracy and kernel cost: the polynomial order of the method (we
-investigate from $p=1$ to $p=4$) and the geometry of elements in the
+specialized linear algebra libraries, we have automated a set of generic
+and model-driven code transformations in COFFEE\footnote{COFFEE stands
+for COmpiler For FinitE Element local assembly.}, a compiler for
+optimizing local assembly kernels. COFFEE is integrated with
+Firedrake~\cite{firedrake-code}, a system for solving PDEs through the
+finite element method based on the PyOP2
+abstraction~\cite{pyop2ws,pyop2isc}. All problems expressible with this
+framework are supported by COFFEE, including equations that can be found
+at the core of real-world simulations, such as those used in our
+performance evaluation. In evaluating our code transformations for a
+range of relevant problems, we vary two key parameters that impact
+solution accuracy and kernel cost: the polynomial order of the method
+(we investigate from $p=1$ to $p=4$) and the geometry of elements in the
 discretized domain (2D triangle, 3D tetrahedron, 3D prism). From the
 point of view of the generated code, these two parameters directly
 impact the size of both loop nests and mathematical expressions, as
@@ -277,33 +279,34 @@ elaborated in Section~\ref{sec:real-examples}.
 
 Our experiments show that the original generated code for non-trivial
 assembly kernels, despite following state-of-the-art techniques,
+% FIXME: what are these state-of-the-art techniques?
 remains suboptimal in the context of modern multicore
-architectures. Our domian-aware cost-model-driven sequence of code
+architectures. Our domain-aware cost-model-driven sequence of code
 transformations, aimed at improving SIMD vectorization and register
 data locality, can result in performance improvements up to
 4.4$\times$ over original kernels, and around 70$\%$ of the test cases
 obtain a speed up greater than 2$\times$. The contributions of this
-paper, therefore, are
+paper are
 \begin{enumerate}
-\item An optimization strategy for finite element local assembly. Our
-  approach exploits domain knowledge and goes beyond the limits of
-  both vendor and research compilers.
-\item Design and implementation of a compiler that automates the
+\item An optimization strategy for finite element local assembly that
+  exploits domain knowledge and goes beyond the limits of both vendor
+  and research compilers.
+\item The design and implementation of a compiler that automates the
   proposed code transformations for any problems expressible in
   Firedrake.
-\item Systematic analysis using a suite of examples of real-world
-  importance, and evidence of significant performance improvements on
+\item A systematic analysis using a suite of examples of real-world
+  importance that is evidence of significant performance improvements on
   two Intel architectures, a Sandy Bridge CPU and the Xeon Phi.
 \end{enumerate}
 
 The paper is organized as follows. In Section~\ref{sec:background} we
-provide some background on local assembly, showing code generated by
-Firedrake and emphasizing the critical computational
+provide some background on local assembly, show code generated by
+Firedrake and emphasize the critical computational
 aspects. Section~\ref{sec:code-transf} describes the various code
-transformations, highlighting when and how domain-knowledge has been
+transformations, highlighting when and how domain knowledge has been
 exploited. The design and implementation of our compiler is discussed
 in Section~\ref{sec:pyop2-compiler}. Section~\ref{sec:perf-results}
-shows performance results. Related work is illustrated in
+shows performance results. Related work is described in
 Section~\ref{sec:related-work}, while Section~\ref{sec:conclusions}
 reviews our contributions in the light of our results, and identifies
 priorities for future work.
