@@ -1527,12 +1527,12 @@ steer the optimization process.
 \section{Conclusions}
 \label{sec:conclusions}
 
-In this paper, we have presented design, optimizations and systematic
+In this paper, we have presented the design, optimizations and systematic
 performance evaluation of COFFEE, a compiler for finite element local
 assembly. In this context, to the best of our knowledge, COFFEE is the
 first compiler capable of introducing low-level optimizations to
 maximize instruction-level parallelism, register locality and SIMD
-vectorization. Assembly kernels have peculiar characteristics. Their
+vectorization. Assembly kernels have particular characteristics. Their
 iteration space is usually very small, with the size depending on
 aspects like the degree of accuracy one wants to reach (polynomial
 order of the method) and the mesh discretization employed. The data
@@ -1546,10 +1546,10 @@ needs to be reached. The various optimizations overcome limitations of
 current vendor and research compilers. The exploitation of domain
 knowledge allows some of them to be particularly effective, as
 demonstrated by our experiments on two state-of-the-art Intel
-platforms. Further work include a comprehensive study about
+platforms. Further work includes a comprehensive study about
 feasibility and constraints on transforming kernels into a sequence of
 calls to external linear algebra libraries. COFFEE supports all of the
-problems expressible in Firedrake, and it is already integrated with
+problems expressible in Firedrake, and is already integrated with
 this framework.
 
 
