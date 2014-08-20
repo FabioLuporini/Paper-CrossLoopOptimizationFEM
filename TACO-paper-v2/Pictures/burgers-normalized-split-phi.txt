@@ -1,0 +1,5 @@
+Baseline Triangles Triangles-CM Tetrahedrons Tetrahedrons-CM Prisms Prisms-CM
+p1 1.000 1.000 1.040 1.000 1.105 1.000
+p2 0.976 0.954 1.030 1.000 1.038 1.000
+p3 1.081 0.921 1.066 1.000 0.992 1.000
+p4 1.090 0.903 1.021 1.000 1.011 1.000
