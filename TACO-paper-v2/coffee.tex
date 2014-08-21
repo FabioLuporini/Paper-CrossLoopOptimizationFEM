@@ -245,8 +245,8 @@ compiler-based approach is, therefore, the only reasonable option to
 obtain close-to-peak performance in a wide range of different local
 assembly kernels. Optimizations like padding, generalized
 loop-invariant code motion, vector-register tiling, and expression
-splitting, as well as their composition, are essential. but none are
-supported by state-of-the-art polyhedral and vendor compilers. BLAS
+splitting, as well as their composition, are essential, but very limited is
+the support of state-of-the-art polyhedral and vendor compilers, if any. BLAS
 routines could theoretically be employed, although a fairly
 complicated control and data flow analysis would be required to
 automate identification and extraction of matrix-matrix multiplies. In
@@ -548,7 +548,7 @@ architectures.
 \subsection{Padding and Data Alignment}
 The absence of stencils renders the element matrix computation easily
 auto-vectorizable by a vendor compiler. Nevertheless,
-auto-vectorization is not efficient if data are not aligned and if the
+auto-vectorization is not efficient if data are not aligned to cache-line boundaries and if the
 length of the innermost loop is not a multiple of the vector length
 $\mbox{\texttt{VL}}$, especially when the loops are small as in local assembly.
 
@@ -557,10 +557,11 @@ allocated to addresses that are multiples of $\mbox{\texttt{VL}}$. Then, two
 dimensional arrays are padded by rounding the number of columns to the
 nearest multiple of $\mbox{\texttt{VL}}$. For instance, assume the original size of a
 basis function array is 3$\times$3 and $\mbox{\texttt{VL}}=4$ (e.g. AVX processor,
-with 256 bit long vector registers and 64-bit double-precision
+with 256-bit long vector registers and 64-bit double-precision
 floats). In this case, a padded version of the array will have size
-3$\times$4. The compiler is explicitly informed about data alignment
-using a suitable pragma.
+3$\times$4. The compiler is explicitly told about data alignment
+using suitable pragmas; for example, in the case of the Intel compiler, the annotation \texttt{$\#$pragma vector aligned} is added over a loop
+(as shown in later figures) to inform that all of the memory accesses in the loop body will be properly aligned. This allows the compiler to issue aligned load and store instructions, which are notably faster than unaligned ones.
 
 Padding of all two dimensional arrays involved in the evaluation of
 the element matrix also allows to safely round the loop trip count to
@@ -568,7 +569,7 @@ the nearest multiple of $\mbox{\texttt{VL}}$. This avoids the introduction of a
 remainder (scalar) loop from the compiler, which would render
 vectorization less efficient. These extra iterations only write to the
 padded region of the element matrix, and therefore have no side
-effects on the final result.
+effects on the final result. 
 
 % Autovectorizable LICM -> show code snippet?
 \subsection{Generalized Loop-invariant Code Motion}
@@ -946,7 +947,7 @@ ast.align\_data()
 \label{algo:PyOP2Compiler}
 \end{figure}
 
-
+\paragraph{Loop interchange}
 All loops are interchangeable, provided that temporaries are
 introduced if the nest is not perfect. For the employed storage
 layout, the loop permutations \texttt{ijk} and \texttt{ikj} are likely
@@ -966,15 +967,19 @@ carry out the computation of the element matrix.
 % "vendor compilers such as Intel's" is awkward and unclear. If Intel
 % is the only one you have looked at, then say "the Intel compiler",
 % otherwise name the ones for which you know this to be true.
+\paragraph{Loop unrolling}
 Loop unroll (or unroll-and-jam of outer loops) is fundamental to the
-exposure of instruction-level parallelism, and tuning the unroll
-factor is particularly important. However, we noticed, by comparison
-with implementations having manually-unrolled loops, that recent
-versions of the Intel compiler estimate close-to-optimal unroll
-factors when the loops are affine and their bounds are small and known
-at compile-time, which is the case of our kernels. We therefore leave
+exposure of instruction-level parallelism, and tuning unroll
+factors is particularly important. 
+
+We first observe that manual full (or extensive) unrolling is unlikely to be effective. The \texttt{ijk} loop nest would need to be small enough such that the unrolled instructions do not exceed the instruction cache, which is rarely the case: it is true that in a local assembly kernel the minimum size of the \texttt{ijk} loop nest is 3$\times$3$\times$3 (triangular mesh and polynomial order 1), but this increases rapidly with the polynomial order of the method and the discretization employed (e.g. tetrahedral meshes imply larger loop nests than triangular ones), so sizes greater than 10$\times$10$\times$10, for which extensive unrolling would already be harmful, are in practice very common. In addition, manual unrolling is dangerous because it may compromise compiler auto-vectorization by either removing loops (most compilers search for vectorizable loops) or losing spatial locality within a vector register. 
+
+By comparison with implementations characterized by manually-unrolled loops, we noticed that recent
+versions of compilers like GNU's and Intel's estimate close-to-optimal unroll
+factors when the loops are affine and their bounds are relatively small and known
+at compile-time, which is the case of our kernels. Our choice, therefore, is to leave
 the backend compiler in charge of selecting unroll factors. This
-choice also simplifies COFFEE's cost model. The only situation in
+also simplifies the COFFEE's cost model, described next. The only situation in
 which we explicitly unroll-and-jam a loop is when \emph{op-vect} is
 used, since the transformed code prevents the Intel compiler from
 applying this optimization, even if specific pragmas are added.
@@ -1007,6 +1012,7 @@ permute = n\_outer\_arrays > n\_inner\_arrays
 \label{algo:applyCostModel}
 \end{figure}
 
+\paragraph{Cost model}
 The cost model is shown in Figure~\ref{algo:applyCostModel}. It takes
 into account the number of available logical vector registers,
 \texttt{n\_regs}, and the number of unique variables accessed:
@@ -1041,7 +1047,8 @@ Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB
 L2 cache) and a Xeon Phi (5110P, running at 1.05Ghz in native mode,
 32KB L1 cache and 512KB L2 cache). We have chosen these two
 architectures because of the differences in the number of logical
-registers and SIMD lanes, which can impact the effectiveness of the
+registers and SIMD lanes (16 256-bit registers in the Sandy Bridge, 
+and 32 512-bit registers in the Xeon Phi), which can impact the 
 optimization strategy. The \texttt{icc 13.1} compiler was used. On the
 Sandy Bridge, the compilation flags used were \texttt{-O2} and
 \texttt{-xAVX} for auto-vectorization. On the Xeon Phi, optimization
