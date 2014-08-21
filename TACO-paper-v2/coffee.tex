@@ -1055,7 +1055,20 @@ Sandy Bridge, the compilation flags used were \texttt{-O2} and
 level \texttt{-O3} was used. Other optimization levels performed, in
 general, slightly worse.
 
-\subsection{The Helmholtz, Diffusion, and Burgers equations}
+We present two studies. Firstly, in Section~\ref{sec:analysis-code-transf}, we
+analyze the impact of the proposed code transformations, and their interplay,
+in three real-world equations. We quantify the speed ups achievable at
+the level of the local assembly kernel, i.e. by excluding from the measurements
+the other sections of the computation. Then, in Section~\ref{sec:full-app}, we
+provide a full-application investigation. Here, we use another equation (so as to 
+bring the total number of examined problems to four) to demonstrate that COFFEE's
+optimizations actually allow a significant reduction in the overall computation run-time 
+to be achieved, which practically motivates our research.
+
+\subsection{Impact of Code Transformations}
+\label{sec:analysis-code-transf}
+
+\subsubsection{The Helmholtz, Diffusion, and Burgers equations}
 \label{sec:real-examples}
 Our code transformations were evaluated in three real-world problems
 based on the following PDEs
@@ -1108,7 +1121,7 @@ tetrahedron, and prisms were tested as element shape. For instance, in
 the case of Helmholtz with $p=1$, the size of the \texttt{j} and
 \texttt{k} loops for the three element shapes is, respectively, $3$,
 $4$, and $6$. Moving to bigger shapes has the effect of increasing the
-number of basis function arrays, since, intuitively, the behavior of
+number of basis function arrays, since, intuitively, the behaviour of
 the equation has now to be approximated also along a third axis. On
 the other hand, the polynomial order affects only the problem size
 (the three loops \texttt{i}, \texttt{j}, and \texttt{k}, and, as a
@@ -1119,7 +1132,7 @@ all these cases, the size of the element matrix rarely exceeds
 30$\times$30, with a peak of 105$\times$105 in Burgers with prisms and
 $p=4$.
 
-\subsection{Loop permutation}
+\subsubsection{Loop interchange}
 In the following, only results for the loop order \texttt{ijk} are
 shown. For the considerations exposed in
 Section~\ref{sec:pyop2-compiler}, loop interchanges having an inner
@@ -1127,7 +1140,7 @@ loop along \texttt{i} caused slow downs; also, interchanging
 \texttt{j} and \texttt{k} loops while keeping \texttt{i} as outermost
 loop did not provide any benefits.
 
-\subsection{Impact of Generalized Loop-invariant Code Motion}
+\subsubsection{Impact of Generalized Loop-invariant Code Motion}
 \label{licm-impact}
 
 \newcommand{\licmresultsnorms}{
@@ -1184,7 +1197,7 @@ pronounced on the Xeon Phi, where the vector length is twice as big,
 which leads to proportionally larger scalar reminder loops.
 
 
-\subsection{Impact of Padding and Data Alignment}
+\subsubsection{Impact of Padding and Data Alignment}
 
 \newcommand{\licmapresultsnorms}{
 \begin{tabulary}{1.0\textwidth}{cccccc|cccc}
@@ -1229,7 +1242,7 @@ Burgers $p=3$ on the Sandy Bridge). One possible explanation is that
 the number of aligned temporaries introduced by \emph{licm} is so
 large to induce cache associativity conflicts.
 
-\subsection{Impact of Vector-register Tiling}
+\subsubsection{Impact of Vector-register Tiling}
 \label{sec:perf-eval-opvect}
 In this section, we evaluate the impact of vector-register tiling. We
 compare two versions: the baseline, \emph{licm-ap}; and
@@ -1325,7 +1338,7 @@ discussed in the next section.
 
 %for which efficient register allocation can be already guaranteed
 
-\subsection{Impact of Expression Splitting}
+\subsubsection{Impact of Expression Splitting}
 \label{sec:perf-results-split}
 Expression splitting relieves the register pressure when the element
 matrix evaluation needs to read from a large number of basis function
@@ -1391,7 +1404,7 @@ to achieve a certain degree of register re-use.
 	\label{fig:split-burgers-speedup}
 \end{figure}
 
-\subsection{Comparison with FEniCS Form Compiler's built-in Optimizations}
+\subsubsection{Comparison with FEniCS Form Compiler's built-in Optimizations}
 \label{sec:perf-results-fenics}
 We have modified the FEniCS Form Compiler (FFC) to return an abstract
 syntax tree representation of a local assembly kernel, rather than
@@ -1449,7 +1462,7 @@ Burgers & 2.24$\times$ & 1.61$\times$ \\\hline
 \label{table:comparison-to-FFC-opt}
 \end{table}
 
-\subsection{Comparison with hand-made BLAS-based implementations}
+\subsubsection{Comparison with hand-made BLAS-based implementations}
 \label{sec:perf-eval-blas}
 For the Helmholtz problem on a tetrahedral mesh, manual
 implementations based on \texttt{Intel MKL BLAS} were tested on the
@@ -1469,6 +1482,20 @@ matrix-matrix multiplies from static analysis of the kernel's code. A
 comprehensive study of these aspects will be addressed in further
 work.
 
+\subsection{Full-application Study}
+\label{sec:full-app}
+In this section, we investigate the performance gain for an entire finite element computation
+developed in Firedrake, a static linear elasticity problem. The source code is available at~\cite{elasticity-code}. The application simulates ... . 
+
+The execution time of a (non-explicit) finite element method is dominated by two factors: assembly and solve. Once computed, the local element matrices and vectors are respectively inserted in a ``global'' sparse matrix and a global vector; these form a linear system, which is usually solved with an iterative method (the ``solve'' phase). The amount of time spent in assembly and solve varies from problem to problem. As reiterated in the available literature, for example in~\cite{quadrature1}, the computational cost of local assembly grows with the complexity of the partial differential equation (e.g. because of larger loops, more articulated expressions), while the solve, at worst, exhibits a minimal increase (what impacts the solve are, for instance, polynomial order and mesh discretization). The complexity of an equation depends on several factors, including the number of derivatives and coefficient functions (i.e. known functions that are prescribed with the finite element specification). We study two versions of our static elasticity problem: 1) with one coefficient function ($f=1$) and 2) with two coefficient functions ($f=2$). More coefficient functions are also plausible; however, as we will see, the assembly process starts being particularly expensive already in case 1). 
+
+The application runs on a tetrahedral mesh composed of 196608 cells. In the two versions of the elasticity problem, we examine the cases of polynomial order $p=1$ and $p=2$. To run our experiments, we use a single core of the Sandy Bridge architecture described in Section~\ref{sec:perf-results}. 
+
+In Figure~\ref{fig:full-app-res}, we show the execution times for the four test cases, without and with optimizations enabled. There are four groups of two bars, each group corresponding to a specific test case; for example, the name $f_1p_1$ below the first group of bars refers to the case in which the elasticity problem has 1 coefficient function and has polynomial order 1. A stacked bar captures the time spent in the assembly phase (\texttt{assembly}), to solve the linear system (\texttt{solve}), and in the other various parts of the program (\texttt{other} - for example, setup of the problem and initialization of the coefficient functions). The cost of the insertion of the computed local element matrices (and vectors) in the global matrix (vector) is incorporated in \texttt{assembly}.
+
+We first notice that, in the scenario $f_1p_1$, the assembly is dominated by matrix insertion: despite the application of generalized loop-invariant code motion, data alignment and padding, there is only a minimal performance gain. This changes instantly moving to $p=2$ and $f=2$. In these scenarios, not only the cost of \texttt{assembly} becomes larger with respect to \texttt{solve}, but also does it make insertion cost negligible. The transformations automatically applied by COFFEE successfully decrease the impact of \texttt{assembly} over \texttt{solve}: this was achieved by a combined application of generalized loop-invariant code motion, alignment and padding, and expression splitting. Interesting are two facts. First, generalized loop-invariant code motion was particularly intensive: ... . Second, ... .
+
+%We conclude noting that in explicit finite element methods you would have more local assembly , more often, no solver
 
 \section{Related Work}
 \label{sec:related-work}
