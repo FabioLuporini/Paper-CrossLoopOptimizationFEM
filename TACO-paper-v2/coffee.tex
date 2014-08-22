@@ -48,10 +48,11 @@
 \begin{document}
 
 % Page heads
-\markboth{F. Luporini et al.}{COFFEE: an Optimizing Compiler for Finite Element Local Assembly}
+\markboth{F. Luporini et al.}{Cross-Loop Optimization of Arithmetic Intensity for Finite Element Local Assembly}
+% TODO: "...Intensity for Finite..." OR rather "...Intensity in Finite..."
 
 % Title portion
-\title{COFFEE: an Optimizing Compiler for Finite Element Local Assembly}
+\title{Cross-Loop Optimization of Arithmetic Intensity for Finite Element Local Assembly}
 \author{Fabio Luporini
 \affil{Imperial College London}
 Ana Lucia Varbanescu
@@ -74,33 +75,24 @@ Paul H.J. Kelly
 %       currently affiliated with NASA.
 
 \begin{abstract}
-The numerical solution of partial differential equations using the
-finite element method is one of the key applications of high performance
-computing. Local assembly is its characteristic operation. This entails
-the execution of a problem-specific kernel to numerically evaluate an
-integral for each element in the discretized problem domain. Since the
-domain size can be huge, executing efficient kernels is fundamental.
-Their optimization is, however, a challenging issue. Even though affine
-loop nests are generally present, the short trip counts and the
-complexity of mathematical expressions make it hard to determine a
-single or unique sequence of successful transformations. Therefore, we
-present the design and systematic evaluation of COFFEE, a
-domain-specific compiler for local assembly kernels. COFFEE manipulates
-abstract syntax trees generated from a high-level domain-specific
-language for PDEs by introducing domain-aware composable optimizations
-aimed at improving instruction-level parallelism, especially SIMD
-vectorization, and register locality. It then generates C code including
-vector intrinsics. Experiments using a range of finite-element forms of
-increasing complexity show that significant performance improvement is
-achieved.
-%
-%The code is generated from a high level language for PDEs. An
-%invocation of the kernel typically does tensor-like calculators over
-%relatively small matrices; e.g., triply nested loops operating on
-%about a dozen iterations. Because of the DSL context, COFFEE has a lot
-%of flexibility on how it organizes/orders the calculations to tailor
-%execution to a target architecture.
-%
+We study and systematically evaluate a class of composable code 
+transformations that improve arithmetic intensity in local assembly 
+operations, which represent a significant fraction of the execution
+time in finite element methods. Their performance optimization is indeed a 
+challenging issue. Even though affine loop nests are generally present, 
+the short trip counts and the complexity of mathematical expressions, which 
+vary among different problems, make it hard to determine a single or unique 
+sequence of successful transformations. Our investigation has resulted in the 
+implementation of a compiler for local assembly kernels, fully
+integrated with a real framework for developing finite element methods. 
+The compiler manipulates abstract syntax trees generated from a domain-specific
+language for partial differential equations by introducing domain-aware optimizations,
+tailored to instruction-level parallelism and register locality. Eventually, C code including 
+vector SIMD intrinsics is produced. Experiments using a range of finite-element 
+problems of increasing complexity show that significant performance improvement 
+is achieved. The generality of the approach and the applicability of the proposed 
+code transformations to other domains is also discussed.
+
 \end{abstract}
 
 \category{G.1.8}{Numerical Analysis}{Partial Differential Equations -
@@ -116,8 +108,7 @@ achieved.
 
 \acmformat{Fabio Luporini, Ana Lucia Varbanescu, Florian Rathgeber,
   Gheorghe-Teodor Bercea, J. Ramanujam, David A. Ham, and Paul
-  H. J. Kelly, 2014. COFFEE: an Optimizing Compilerfor Finite Element
-  Local Assembly.}
+  H. J. Kelly, 2014. Cross-Loop Optimization of Arithmetic Intensity for Finite Element Local Assembly.}
 
 % At a minimum you need to supply the author names, year and a title.
 % IMPORTANT: Full first names whenever they are known, surname last,
@@ -210,8 +201,9 @@ phase of the finite element method
 can be responsible for a significant fraction of the overall computation
 run-time, often in the range 30-60$\%$. With respect to these studies,
 we propose a novel set of composable code transformations targeting, for
-the first time, instruction-level parallelism - with emphasis on SIMD
-vectorization - and register locality.
+the first time, cross-loop arithmetic intensity, with emphasis on instruction-level 
+parallelism, redundant computation, and register locality. How such transformations generalize
+to domains other than local assembly will also be discussed.
 
 During the assembly phase, the solution of the PDE is approximated by
 executing a problem-specific kernel over all cells, or elements, in the
@@ -297,8 +289,15 @@ paper are
 \item A systematic analysis using a suite of examples of real-world
   importance that is evidence of significant performance improvements on
   two Intel architectures, a Sandy Bridge CPU and the Xeon Phi.
+ \item A full-application evaluation to demonstrate that the optimization
+ strategy greatly impacts the whole finite element method.
 \end{enumerate}
-
+Our contributions also include a theoretical study involving
+\begin{enumerate}
+ \item An analysis of the generality of the proposed code transformations.
+ \item An investigation of their applicability to different computational
+ domains.  
+\end{enumerate}
 The paper is organized as follows. In Section~\ref{sec:background} we
 provide some background on local assembly, show code generated by
 Firedrake and emphasize the critical computational
@@ -307,9 +306,10 @@ transformations, highlighting when and how domain knowledge has been
 exploited. The design and implementation of our compiler is discussed
 in Section~\ref{sec:pyop2-compiler}. Section~\ref{sec:perf-results}
 shows performance results. Related work is described in
-Section~\ref{sec:related-work}, while Section~\ref{sec:conclusions}
-reviews our contributions in the light of our results, and identifies
-priorities for future work.
+Section~\ref{sec:related-work}. The generality of our optimization strategy
+and the applicability to other domains is discussed in Section~\ref{sec:generality}. 
+Finally, Section~\ref{sec:conclusions} reviews our contributions in the light 
+of our results, and identifies priorities for future work.
 
 % systematic optimization strategy -> discuss the importance of domain
 % knowledge
@@ -1505,6 +1505,9 @@ We first notice that, in the scenario $[f=1, p=1]$, the assembly is dominated by
 
 In these experiments, we observe a maximum performance improvement of 1.47$\times$ over the non-optimized local assembly code, obtained in the case $[f=2, p=2]$. However, it is notably important noting that, as we anticipated, full-application speed ups rise proportionally with the time spent in assembly and, therefore, with the complexity of the equation. Further, by increasing polynomial order and number of coefficient functions, or by simply studying a different, more complex equation, it is our experience that performance gains become increasingly more relevant.
 
+\section{Generality of the Approach and Applicability to Other Domains}
+\label{sec:generality}
+aa
 
 \section{Related Work}
 \label{sec:related-work}
