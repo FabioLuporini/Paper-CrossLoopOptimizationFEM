@@ -145,13 +145,7 @@ Comp.~Sci., Louisiana State University.
 
 \maketitle
 
-%Computational cost is a critical limitation in scientific computing,
-%especially for finite element simulations. To provide one particular
-%example we are particularly concerned about, it has been well
-%established that mesh resolution Consequently, our aggressive
-%optimization of local assembly, which may even take up to 60% of the
-%overall FEM's execution time, directly impacts the performance of
-%large-scale scientific simulations running on supercomputers.
+
 
 \section{Introduction}
 
@@ -171,17 +165,6 @@ or thread. Such an execution model, with minor variations, is adopted,
 for example, in \cite{pyop2isc}, \cite{Fenics},
 \cite{fluidity_manual_v4}, \cite{lizst}.
 
-%JUNK: , with synchronization handled at the level of the run-time
-%support Computational cost is a critical limitation in finite element
-%simulations. High resolution in time and space is critical to the
-%level of error in the simulations, but computational cost rises
-%superlinearly with resolution. The result of this is that simulations
-%are conducted at the resolution that the user can afford (wall time,
-%allocated supercomputing units or the direct financial cost of cloud
-%time)
-
-% FIXME: citation for Met Office?
-
 The time required to apply the numerical kernels is a major issue,
 since the equation domain needs to be discretized into an extremely
 large number of cells to obtain a satisfactory approximation
@@ -194,16 +177,16 @@ UK Met Office. Producing efficient kernels has a direct scientific
 payoff in higher resolution, and therefore more accurate,
 forecasts. Computational cost is a dominant problem in
 computational science simulations, especially for those based on
-finite elements, which are the subject of this paper. We address, in
-particular, the well-known problem of optimizing the local assembly
-phase of the finite element method
-\cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, which
-can be responsible for a significant fraction of the overall computation
+finite elements, which are the subject of this paper. 
+
+We address, in particular, the well-known problem of optimizing the local assembly
+phase of the finite element method \cite{Francis,quadrature1, petsc-integration-gpu, Kirby-FEM-opt}, 
+which can be responsible for a significant fraction of the overall computation
 run-time, often in the range 30-60$\%$. With respect to these studies,
 we propose a novel set of composable code transformations targeting, for
 the first time, cross-loop arithmetic intensity, with emphasis on instruction-level 
-parallelism, redundant computation, and register locality. How such transformations generalize
-to domains other than local assembly will also be discussed.
+parallelism, redundant computation, and register locality. How such transformations 
+generalize to domains other than finite element local assembly will also be discussed.
 
 During the assembly phase, the solution of the PDE is approximated by
 executing a problem-specific kernel over all cells, or elements, in the
@@ -291,11 +274,14 @@ paper are
   two Intel architectures, a Sandy Bridge CPU and the Xeon Phi.
  \item A full-application evaluation to demonstrate that the optimization
  strategy greatly impacts the whole finite element method.
+ \newcounter{enumTemp}
+ \setcounter{enumTemp}{\theenumi}
 \end{enumerate}
 Our contributions also include a theoretical study involving
 \begin{enumerate}
- \item An analysis of the generality of the proposed code transformations.
- \item An investigation of their applicability to different computational
+ \setcounter{enumi}{\theenumTemp}
+ \item An analysis of the generality of the proposed code transformations
+ and an investigation of their applicability to different computational
  domains.  
 \end{enumerate}
 The paper is organized as follows. In Section~\ref{sec:background} we
@@ -305,10 +291,10 @@ aspects. Section~\ref{sec:code-transf} describes the various code
 transformations, highlighting when and how domain knowledge has been
 exploited. The design and implementation of our compiler is discussed
 in Section~\ref{sec:pyop2-compiler}. Section~\ref{sec:perf-results}
-shows performance results. Related work is described in
-Section~\ref{sec:related-work}. The generality of our optimization strategy
+shows performance results. The generality of our optimization strategy
 and the applicability to other domains is discussed in Section~\ref{sec:generality}. 
-Finally, Section~\ref{sec:conclusions} reviews our contributions in the light 
+Related work is described in Section~\ref{sec:related-work}. Finally, 
+Section~\ref{sec:conclusions} reviews our contributions in the light 
 of our results, and identifies priorities for future work.
 
 % systematic optimization strategy -> discuss the importance of domain
