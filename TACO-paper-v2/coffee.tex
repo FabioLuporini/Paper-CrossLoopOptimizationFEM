@@ -180,7 +180,7 @@ computational science simulations, especially for those based on
 finite elements, which are the subject of this paper. 
 
 We address, in particular, the well-known problem of optimizing the local assembly
-phase of the finite element method \cite{Francis,quadrature1, petsc-integration-gpu, Kirby-FEM-opt}, 
+phase of the finite element method \cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, 
 which can be responsible for a significant fraction of the overall computation
 run-time, often in the range 30-60$\%$. With respect to these studies,
 we propose a novel set of composable code transformations targeting, for
@@ -1043,7 +1043,7 @@ general, slightly worse.
 
 We present two studies. Firstly, in Section~\ref{sec:analysis-code-transf}, we
 analyze the impact of the proposed code transformations, and their interplay,
-in three real-world equations. We quantify the speed ups achievable at
+in three real-world representative equations. We quantify the speed ups achievable at
 the level of the local assembly kernel, i.e. by excluding from the measurements
 the other sections of the computation. Then, in Section~\ref{sec:full-app}, we
 provide a full-application investigation. Here, we use another equation (so as to 
@@ -1051,10 +1051,10 @@ bring the total number of examined problems to four) to demonstrate that COFFEE'
 optimizations actually allow a significant reduction in the overall computation run-time 
 to be achieved, which practically motivates our research.
 
-\subsection{Impact of Code Transformations}
+\subsection{In-depth Performance Analysis of the Code Transformations and their Interplay}
 \label{sec:analysis-code-transf}
 
-\subsubsection{The Helmholtz, Diffusion, and Burgers equations}
+\subsubsection{Choice and Properties of the Benchmarks}
 \label{sec:real-examples}
 Our code transformations were evaluated in three real-world problems
 based on the following PDEs
@@ -1065,8 +1065,15 @@ based on the following PDEs
 \end{enumerate}
 The three chosen benchmarks are \emph{real-life kernels} and comprise
 the core differential operators in some of the most frequently
-encountered finite element problems in scientific computing. The
-Helmholtz and Diffusion kernels are archetypal second order elliptic
+encountered finite element problems in scientific computing. This is
+of crucial importance because distinct problems, possibly arising  in
+completely different fields, may employ (subsets of) the same differential
+operators of our benchmarks, which implies similarities
+and redundant patterns in the generated code. Consequently, the proposed
+code transformations have a domain of applicability that goes far beyond
+that of the three analyzed equations.
+
+The Helmholtz and Diffusion kernels are archetypal second order elliptic
 operators. They are complete and unsimplified examples of the
 operators occurring for diffusion and viscosity in fluids, and for
 imposing pressure in compressible fluids. As such, they are both
