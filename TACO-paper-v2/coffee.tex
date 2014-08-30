@@ -320,9 +320,7 @@ of our results, and identifies priorities for future work.
 \begin{figure}
 \begin{alltt}
 \scriptsize
-\textbf{Input:} element matrix (2D array, initialized to 0)
-       element coordinates (array)
-       coefficient fields (array, e.g. velocity)
+\textbf{Input:} element matrix (2D array, initialized to 0), coordinates (array), coefficients (array, e.g. velocity)
 \textbf{Output:} element matrix (2D array)
 - Compute Jacobian from coordinates
 - Define basis functions
@@ -909,9 +907,8 @@ remainder loop, amenable to auto-vectorization, is inserted.
 \begin{figure}[t]
 \begin{alltt}
 \scriptsize
-\textbf{Input:} ast: kernel abstract syntax tree
-       wrapper: function invoking the kernel
-       isa: SIMD Instruction Set Architecture
+\textbf{Input:} ast (kernel abstract syntax tree), wrapper (function invoking the kernel), 
+       isa (SIMD Instruction Set Architecture)
 \textbf{Output:} assembly code (C string)
 \textbf{// Analyze ast and build optimization plan }
 it\_space = analyze(ast)
@@ -1509,17 +1506,18 @@ We begin observing that our strategic choice was to develop COFFEE as a separate
 
 In Firedrake, COFFEE has the fundamental role of decoupling the mathematical specification of a finite element method, captured by the Unified Form Language and the FEniCS Form Compiler, from platform-specific code optimization. The starting point of our work was the mathematical formulation of a local assembly operation, expressible as follows
 
-\begin{equation*}
+\begin{equation}
+\label{eq:assembly-model}
 \scriptsize
 \forall_{i, j} ~~~ A_{ij}^K = \sum_{q=1}^{n_1} \sum_{k=1}^{n_2} \alpha_{k, q}(a, b, c, ...) \beta_{q, i, j}(a, c, d, e, ...) \gamma_{q}(f_K, g_K) 
-\end{equation*} 
+\end{equation} 
 
 The expression represents the numerical evaluation of an integral at $n_1$ points in the mesh element $K$ to compute the local element matrix $A$. Functions $\alpha$, $\beta$ and $\gamma$ are problem-specific and can be intricately complex, involving for example the evaluation of derivatives. Abstracting from the inherent structure of $\alpha$, $\beta$ and $\gamma$, a number of aspects can be highlighted
 \begin{enumerate}
 \item Expression manipulation at the mathematical layer (e.g. simplification, decomposition into sub-expressions) opens multiple semantically-equivalent code generation opportunities, characterized by different trade-offs in parallelism, redundant computation, and data locality. The basic idea is to exploit properties of arithmetic operators, like associativity and commutativity, to re-schedule the computation suitably for the underlying architecture. Loop-invariant code motion and expression splitting follow this principle, so they can be re-adapted or extended to any domain computationally similar to local assembly, like those involving tensor contractions~\cite{TCE}.
-\item In the expression above, the summations correspond to reduction loops, whereas loops over indices $i$ and $j$ are fully parallel. The various sub-expressions, such as $a$, $b$, and $c$, in general only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. Whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises.  
-\item Associative arithmetic operators are the prerequisite for expression splitting. In essence, this transformation is about resource-aware execution. It is indeed true that, in the context of COFFEE, it has been successfully applied to improve register pressure; however, the general idea is to re-schedule (re-associate) operations so as to maximize some parameters. Expression splitting could be used, for example, as a starting point to perform kernel fission; that is, dividing a kernel into multiple parts, each part characterized by memory requirements less stringent than the original kernel. An example of this, specifically about fissioning associative non-affine loops in unstructured mesh applications, is~\cite{carlolcpc}. 
-\item The quantities in the local assembly expression are known at code generation time. This means that ``good'' code can be generated, for example with explicit loop bounds (i.e. no parameters), statically-initialized constant n-dimensional arrays, and no pointer aliasing. All of these factors contribute to the effectiveness of source-to-source code transformations: by knowing iteration spaces in advance and having a clean memory access pattern, transformations such as padding, data alignment, and vector-register tiling can be automated by a compiler like COFFEE.
+\item In Equation~\ref{eq:assembly-model}, the summations correspond to reduction loops, whereas loops over indices $i$ and $j$ are fully parallel. The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises.  
+\item Associative arithmetic operators are the prerequisite for expression splitting. In essence, this transformation concerns resource-aware execution. It is indeed true that, in the context of COFFEE, expression splitting has been successfully applied to improve register pressure; however, the basic idea is to re-schedule (re-associate) operations so as to maximize some generic parameters, so it is far more general. It could be used, for example, as a starting point to perform kernel fission; that is, splitting a kernel into multiple parts, each part characterized by memory requirements less stringent than the original code (a variant of this idea for non-affine loops in unstructured mesh applications has been adopted in~\cite{carlolcpc}). In Equation~\ref{eq:assembly-model}, for instance, not only any of the functions $\alpha$, $\beta$ and $\gamma$ could be split (assuming they include associative operators), but also the evaluation of $\alpha$ in the summation over \texttt{k} could be completely extracted from the expression and evaluated in a separate kernel, allowing to save space for the allocation of $b$. 
+\item The quantities in the local assembly expression are known at code generation time. This means that ``good'' code can be generated, for example with explicit loop bounds, statically-initialized constant n-dimensional arrays, and no pointer aliasing. All of these factors contribute to the effectiveness of source-to-source code transformations: by knowing iteration spaces in advance and having a clean memory access pattern, transformations such as padding, data alignment, and vector-register tiling can be automated by a compiler like COFFEE.
 \item Compiler auto-vectorization has become effective for a variety of codes. Nevertheless, multi-loop vectorization, which involves loading and storing data along a subset of the loops characterizing the iteration space (rather than just along the innermost loop), is not supported by available general-purpose and polyhedral compilers to the best of our knowledge. However, the outer-product vectorization technique presented in this paper shows that two-loop vectorization can outperform standard auto-vectorization; more importantly, we expect the performance gain to scale with the number of vectorized loops and the vector length (as proved by the Xeon Phi results). Despite being not straightforward to automate multi-loop vectorization in a general-purpose compiler, especially if stencils are present, we believe that in specific domains this could be more easily achieved. The intuition is to map the memory access pattern on vector registers, and then relying on in-register shuffling to minimize the traffic between memory and processor.
 \end{enumerate}
 
