@@ -805,7 +805,7 @@ sum is exploited to distribute the expression across multiple loops. To
 the best of our knowledge, expression splitting is not supported by
 available compilers.
 
-Splitting an expression has, however, several drawbacks. Firstly, it
+Splitting an expression (henceforth \emph{split}) has, however, several drawbacks. Firstly, it
 increases the number of accesses to $A$ proportionally to the ``split
 factor'', which is the number of sub-expressions produced. Also,
 depending on how the split is executed, it can lead to redundant
@@ -875,24 +875,23 @@ code, is eventually provided to PyOP2~\cite{pyop2ws,pyop2isc}, where
 just-in-time compilation and execution over the discretized domain take
 place. The flow and the compiler structure are outlined in Figure~\ref{fig:coffee-pipeline}.
 
-Because of the large number of parametric transformations, COFFEE
-needs a mechanism to select the most suitable optimization strategy
-for a given problem. Auto-tuning might be used, although it would
-significantly increase the run-time overhead, since the generation of
-ASTs occurs at run-time as soon as problem-specific data are
-available. Our optimization strategy is rather based on heuristics and a simple
-cost model, as described later.
+COFFEE uses heuristics and a simple cost model to select the most suitable 
+optimization strategy for a given problem. Auto-tuning might be used, although
+it would significantly increase the  run-time overhead, since the generation of 
+ASTs occurs at run-time as soon as problem-specific data are available. 
 
-Once received an AST from FFC, an ordered sequence of optimization steps are executed. Application of
-\emph{licm} must precede padding and data alignment, due to the
-introduction of temporary arrays. Based on a cost model, loop
-interchange, \emph{split}, and \emph{op-vect} may be introduced. Their
-implementation is based on analysis and transformation of the kernel's
-AST. When \emph{op-vect} is selected, the compiler outputs AVX or
-AVX-512 intrinsics code. Any possible corner cases are handled: for
-example, if \emph{op-vect} is to be applied, but the size of the
-iteration space is not a multiple of the vector length, then a
-remainder loop, amenable to auto-vectorization, is inserted.
+The compiler executes an ordered sequence of optimization steps to the 
+ASTs received from FFC. Application of \emph{licm} must precede padding 
+and data alignment, due to the introduction of temporary arrays. These
+transformations are always performed because they are likely to improve
+the run-time performance, as demonstrated by our results in Section~\ref{sec:analysis-code-transf}.
+Based on a cost model (described later), loop interchange, \emph{split}, 
+and \emph{op-vect} may be introduced. Their implementation is centered 
+on analysis and manipulation of the kernel's AST. When \emph{op-vect}
+is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any 
+possible corner cases are handled: for example, if \emph{op-vect} is to 
+be applied, but the size of the iteration space is not a multiple of the vector 
+length, then a remainder loop, amenable to auto-vectorization, is inserted.
 
 \paragraph{Loop interchange}
 All loops are interchangeable, provided that temporaries are
