@@ -858,7 +858,7 @@ treated in Section~\ref{sec:pyop2-compiler}.
 \begin{center}
 \includegraphics[scale=0.75]{Pictures/coffee-pipeline.pdf}
 \caption{High-level view of Firedrake. COFFEE is at the core,
-  receiving ASTs from a modified version of the FEniCS Form compiler
+  receiving ASTs from a modified version of the FEniCS Form Compiler
   and producing optimized C code kernels.}
 \label{fig:coffee-pipeline}
 \end{center}
@@ -873,27 +873,17 @@ kernels. ASTs are then passed to COFFEE to apply the transformations
 described in Section~\ref{sec:code-transf}. The output of COFFEE, C
 code, is eventually provided to PyOP2~\cite{pyop2ws,pyop2isc}, where
 just-in-time compilation and execution over the discretized domain take
-place. The flow is summarized in Figure~\ref{fig:coffee-pipeline}.
+place. The flow and the compiler structure are outlined in Figure~\ref{fig:coffee-pipeline}.
 
 Because of the large number of parametric transformations, COFFEE
 needs a mechanism to select the most suitable optimization strategy
 for a given problem. Auto-tuning might be used, although it would
 significantly increase the run-time overhead, since the generation of
 ASTs occurs at run-time as soon as problem-specific data are
-available. Our optimization strategy, based on heuristics and a simple
-cost model, is described in the following, along with an overview of
-the compiler.
+available. Our optimization strategy is rather based on heuristics and a simple
+cost model, as described later.
 
-The compiler structure is outlined in
-Figure~\ref{algo:PyOP2Compiler}. Initially the AST is inspected,
-looking for the presence of iteration spaces and domain-specific
-information provided by the higher layer. If the kernel lacks an
-iteration space, then so-called inter-kernel vectorization, in which
-the outer, non-affine loop over mesh elements is vectorized, can be
-applied. This feature, currently under development, has been shown to
-be useful in several finite volume
-applications~\cite{inter-kernel-vect}. Subsequently, an ordered
-sequence of optimization steps are executed. Application of
+Once received an AST from FFC, an ordered sequence of optimization steps are executed. Application of
 \emph{licm} must precede padding and data alignment, due to the
 introduction of temporary arrays. Based on a cost model, loop
 interchange, \emph{split}, and \emph{op-vect} may be introduced. Their
@@ -903,36 +893,6 @@ AVX-512 intrinsics code. Any possible corner cases are handled: for
 example, if \emph{op-vect} is to be applied, but the size of the
 iteration space is not a multiple of the vector length, then a
 remainder loop, amenable to auto-vectorization, is inserted.
-
-
-\begin{figure}[t]
-\begin{alltt}
-\scriptsize
-\textbf{Input:} ast (kernel abstract syntax tree), wrapper (function invoking the kernel), 
-       isa (SIMD Instruction Set Architecture)
-\textbf{Output:} assembly code (C string)
-\textbf{// Analyze ast and build optimization plan }
-it\_space = analyze(ast)
-\textbf{if not} it\_space
-  ast.apply\_inter\_kernel\_vectorization(wrapper, isa)
-  \textbf{return} wrapper + ast.from\_ast\_to\_c()
-plan = cost\_model(it\_space.n\_inner\_arrays, isa.n\_regs)
-\textbf{// Optimize ast based on plan}
-ast.licm()
-ast.padding()
-ast.align\_data()
-\textbf{if} plan.permute
-  ast.permute\_assembly\_loops()
-\textbf{if} plan.split\_factor
-  ast.split(plan.split\_factor)
-\textbf{if} plan.uaj\_factor
-  uaj = MIN(plan.uaj\_factor, it\_space.j.size/isa.vf)
-  ast.op\_vect(uaj)
-\textbf{return} wrapper + ast.from\_ast\_to\_c()
-\end{alltt}
-\caption{Outline of the COFFEE architecture.}
-\label{algo:PyOP2Compiler}
-\end{figure}
 
 \paragraph{Loop interchange}
 All loops are interchangeable, provided that temporaries are
