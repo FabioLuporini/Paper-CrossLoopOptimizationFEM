@@ -1525,7 +1525,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   correct code when applying vector-register tiling (see
   Section~\ref{sec:op-vect}) and discovering redundant computation
   opportunities (see Section~\ref{sec:code-transf-licm}). Padding and data
-  alignment are spectial cases, since they could be performed at run-time if some values were not known at code generation time. Theoretically, they could also be automated by a general-purpose compiler though profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.  
+  alignment are special cases, since they could be performed at run-time if some values were not known at code generation time. Theoretically, they could also be automated by a general-purpose compiler though profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.  
 \item \textbf{Multi-loop vectorization.} Compiler auto-vectorization has
   become increasingly effective in a variety of codes. However, to the best
   of our knowledge, multi-loop vectorization involving the loading and
