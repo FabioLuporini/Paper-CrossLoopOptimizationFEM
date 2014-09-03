@@ -1553,16 +1553,17 @@ steer the optimization process.
 \section{Conclusions}
 \label{sec:conclusions}
 
-In this paper, we have presented the design, optimizations and systematic
-performance evaluation of COFFEE, a compiler for finite element local
-assembly. In this context, to the best of our knowledge, COFFEE is the
-first compiler capable of introducing low-level optimizations to
-maximize instruction-level parallelism, register locality and SIMD
-vectorization. Assembly kernels have particular characteristics. Their
-iteration space is usually very small, with the size depending on
-aspects like the degree of accuracy one wants to reach (polynomial
-order of the method) and the mesh discretization employed. The data
-space, in terms of number of arrays and scalars required to evaluate
+In this paper, we have presented the study and systematic performance 
+evaluation of a class of composable cross-loop optimizations for improving 
+arithmetic intensity in finite element local assembly kernels, and their 
+integration in a novel compiler, COFFEE. In the context of automated code 
+generation for finite element local assembly, COFFEE is the first compiler 
+capable of introducing low-level optimizations to maximize instruction-level 
+parallelism, register locality and SIMD vectorization. Assembly kernels have 
+particular characteristics. Their iteration space is usually very small, with 
+the size depending on aspects like the degree of accuracy one wants to 
+reach (polynomial order of the method) and the mesh discretization employed. 
+The data space, in terms of number of arrays and scalars required to evaluate
 the element matrix, grows proportionally with the complexity of the
 finite element problem. COFFEE has been developed taking into account
 all of these degrees of freedom, based on the idea that reducing the
