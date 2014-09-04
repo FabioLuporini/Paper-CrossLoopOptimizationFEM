@@ -119,28 +119,95 @@ Other concerns:
 comparison uses hand-crafted kernels) and 2) a comparison with the FEniCS Form 
 Compiler's built-in optimization system (which is the result of a cited paper) 
 are provided.
-- We agree it is useful to report speed ups and execution times for the whole finite element 
-  calculation. We have added a new section (Section 5.3) about a 
+- We agree it is useful to report speed ups and execution times for the whole 
+  finite element calculation. We have added a new section (Section 5.3) about a 
 full-application study, showing exactly these values.
 - At some points in the paper (introduction and related work) we cite studies 
-  concerning local assembly and GPUs. These works however deeply differ 
-from ours for a number of reasons, including the fact that they are outside of 
-the context of automated code generation, they are limited to only very 
-low-order methods (typically only polynomial order 1), and they do not try to 
-optimize for cross-loop arithmetic intensity as we do. The goal in these works 
-is rather to understand how to effectively parallelize the local assembly code (so as 
-to have multiple threads executing a single kernel, as opposed to our execution 
+  concerning local assembly and GPUs. These works however deeply differ from 
+ours for a number of reasons, including the fact that they are outside of the 
+context of automated code generation, they are limited to only very low-order 
+methods (typically only polynomial order 1), and they do not try to optimize 
+for cross-loop arithmetic intensity as we do. The goal in these works is rather 
+to understand how to effectively parallelize the local assembly code (so as to 
+have multiple threads executing a single kernel, as opposed to our execution 
 model in which we assume a single thread per kernel) in specific equations (not 
 in a possibly infinite range as we do). A critical issue when executing local 
 assembly kernels on GPUs is represented by memory requirements. We give here 
 two examples, although more problems could be discussed. First, the transfer of 
 the mesh from host to GPU may be a notable obstacle: if too big, the mesh
 will not fit the available GPU memory, and distributed execution, which is 
-marginally supported in available finite element frameworks, would be required. 
-Secondly, optimizations like generalized loop-invariant code motion further increase 
-the memory requirements due to the introduction of temporary arrays. This may 
-actually lead to poor per-thread shared memory and registers allocation. These 
-aspects suggest that the problem of executing generic, automatically-generated local 
-assembly kernels on GPUs require a separate, in-depth study. However, in the 
-new Section 6, we provide some intuitions of how we could re-adapt COFFEE's 
-transformations for execution on GPUs.
+marginally supported in available finite element frameworks, would be required.  
+Secondly, optimizations like generalized loop-invariant code motion further 
+increase the memory requirements due to the introduction of temporary arrays.  
+This may actually lead to poor per-thread shared memory and registers 
+allocation. These aspects suggest that the problem of executing generic, 
+automatically-generated local assembly kernels on GPUs require a separate, 
+in-depth study. However, in the new Section 6, we provide some intuitions of 
+how we could re-adapt COFFEE's transformations for execution on GPUs.
+
+******************************************************************************
+
+R3:
+We answer here the 5 points of the review.
+1) For what concerns execution on a GPGPU, we replicate here the same answer to 
+R2.
+2) We agree that profile-guided optimization could be used to improve the 
+performance of kernels, although this aspect is orthogonal to most of our code
+transformations, because in no way profile information could be used, for 
+example, to trigger generalized loop-invariant code motion and the avoidance of 
+redundant computation (as explained in Section 3.2). Profile-guided 
+optimization could theoretically be used for padding and data-alignment of 
+arrays, provided that the compiler has sufficient machinery in place to perform 
+(we quote the revised paper, Section 6) "some sort of data-flow analysis (...) 
+to ensure that the extra loop iterations over the padded region do not affect 
+the numerical results.". We discuss on the generality of our code 
+transformation and on their integrability in a general-purpose compiler (and in 
+its profile-guided optimization system) in the new Section 6 of the paper, 
+which also represents novel contribution of our work.
+3) TODO
+4) Firedrake is *not* specifically designed for Intel architectures and 
+compilers. The decision of using Intel platforms and tools is twofold: from one 
+hand, we believe that Intel's is one of the most powerful vectorizing and 
+optimizing compilers, so for a research like ours it was important to compare 
+to the best available on the market; from the other hand, their wide 
+availability represents a strong incentive for studying the problems object 
+of the paper on these machines.
+It is also worth noting that all general-purpose compilers are, to different 
+extents, limited in optimizing for register locality and code motion (for 
+instance, this is true for the Intel and GNU compilers, the latter only used 
+for "local" experimentation), so our work is expected to be equally/similarly 
+effective on different "standard" CPU architectures.
+From the practical viewpoint, we observe that COFFEE introduces optimizations 
+aimed at improving cross-loop arithmetic intensity by performing source-level 
+transformations, so there are absolutely no technical issues for 
+straightforwardly using our domain-specific compiler on architectures different 
+than Intel. Actually, this fact is a strength of our work, because it allows 
+COFFEE to be almost completely platform-independent.  The only exception 
+regards intrinsics code: COFFEE is currently only capable of outputing AVX 
+intrinsics, so at the moment we cannot apply vector-register tiling (the also 
+called outer-product vectorization technique) to architectures different than 
+x86+AVX. However, COFFEE's internal algorithms use an intermediate 
+representation of intrinsics code, so extending our compiler to other 
+instruction sets would be just a matter of adding a new dictionary of 
+compiler-specific intrinsics.
+5) We agree that expression split has many issues involved. Our cost model 
+offers a simple alternative for driving expression splitting. Simplicity is the 
+key to effectiveness, portability, and robustness. Probably using a graph 
+partitioning approach as you rightly point out would allow us to obtain better 
+performance gains, but three points are worth to be highlighted:
+- The split factor is a parameter of the transformation. In our 
+  experiments we have tested several split factors, which means testing as many 
+code variants (i.e. as many ways of splitting an expression based on sum's 
+associativity) and, as shown by the various graphs in the paper, our cost model 
+seems to be capable of properly approximating such a parameter. This is of 
+course encouraging.
+- In the perspective of integrating expression splitting in a general-purpose 
+  compiler, or generalizing this technique to other problems (as elaborated in 
+the new Section 6), we feel that a simple model is preferable to keep the 
+implementation complexity as low as possible.
+- TODO
+
+******************************************************************************
+
+R4:
+
