@@ -90,10 +90,19 @@ answer is twofold:
   three problems (helmholtz, Diffusion, Burgers), explaining (in short) that 
 "(...) distinct problems, possibly arising in completely different fields, may 
 employ (subsets of) the same differential operators of our benchmarks, which 
-implies similarities and redundant patterns in the generated code. 
+implies similarities and redundant patterns in the generated code.  
 Consequently, the proposed code transformations have a domain of applicability 
 that goes far beyond that of the three analyzed equations. (...)". Then we 
-re-inforce this later on in the section and in the paper.
+re-inforce this later on in the section and in the paper. Other kernels arising 
+from completely different equations will still have the same high-level 
+structure of the kernels we examined (e.g. same memory access pattern, same 
+ranges of loop sizes, same problems concerning the presence of loop-invariant 
+code and register pressure) so there is no reason for which our code 
+optimizations would not be effective. The critical issue in our research was to 
+understand what transformations our local assembly kernels required, and how to 
+instantiate parametric transformations (vector-register tiling, loop 
+interchange, expression splitting) optimally in each possible problem (this led 
+to the development of the cost model).
 
 - In Section 5.3 we provide a full-application study in which we analyze a 
   different equation (Linear Elasticity), which brings the total number of 
@@ -104,12 +113,34 @@ cons of our code transformations. This is the reason for which we comment on
 the code transformations and their interplay in specific sub-sections, 
 referring to, describing, and carefully analyzing all of the provided plots. 
 
-Other kernels arising from completely different equations will still have the 
-same high-level structure of the kernels we examined (e.g. same memory access 
-pattern, same ranges of loop sizes, same problems concerning the presence of 
-loop-invariant code and register pressure) so there is no reason for which our 
-code optimizations would not be effective. The critical issue in our research 
-was to understand what transformations our local assembly kernels required, and 
-how to instantiate parametric transformations (vector-register tiling, loop 
-interchange, expression splitting) optimally in each possible problem (this led 
-to the development of the cost model).
+Other concerns:
+- It is actually not true that we do not consider other optimization 
+  strategies: 1) a comparison with using linear algebra libriries (the 
+comparison uses hand-crafted kernels) and 2) a comparison with the FEniCS Form 
+Compiler's built-in optimization system (which is the result of a cited paper) 
+are provided.
+- We agree it is useful to report speed ups and execution times for the whole finite element 
+  calculation. We have added a new section (Section 5.3) about a 
+full-application study, showing exactly these values.
+- At some points in the paper (introduction and related work) we cite studies 
+  concerning local assembly and GPUs. These works however deeply differ 
+from ours for a number of reasons, including the fact that they are outside of 
+the context of automated code generation, they are limited to only very 
+low-order methods (typically only polynomial order 1), and they do not try to 
+optimize for cross-loop arithmetic intensity as we do. The goal in these works 
+is rather to understand how to effectively parallelize the local assembly code (so as 
+to have multiple threads executing a single kernel, as opposed to our execution 
+model in which we assume a single thread per kernel) in specific equations (not 
+in a possibly infinite range as we do). A critical issue when executing local 
+assembly kernels on GPUs is represented by memory requirements. We give here 
+two examples, although more problems could be discussed. First, the transfer of 
+the mesh from host to GPU may be a notable obstacle: if too big, the mesh
+will not fit the available GPU memory, and distributed execution, which is 
+marginally supported in available finite element frameworks, would be required. 
+Secondly, optimizations like generalized loop-invariant code motion further increase 
+the memory requirements due to the introduction of temporary arrays. This may 
+actually lead to poor per-thread shared memory and registers allocation. These 
+aspects suggest that the problem of executing generic, automatically-generated local 
+assembly kernels on GPUs require a separate, in-depth study. However, in the 
+new Section 6, we provide some intuitions of how we could re-adapt COFFEE's 
+transformations for execution on GPUs.
