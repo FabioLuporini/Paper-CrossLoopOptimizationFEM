@@ -151,6 +151,7 @@ R3:
 We answer here the 5 points of the review.
 1) For what concerns execution on a GPGPU, we replicate here the same answer to 
 R2.
+
 2) We agree that profile-guided optimization could be used to improve the 
 performance of kernels, although this aspect is orthogonal to most of our code
 transformations, because in no way profile information could be used, for 
@@ -164,7 +165,9 @@ the numerical results.". We discuss on the generality of our code
 transformation and on their integrability in a general-purpose compiler (and in 
 its profile-guided optimization system) in the new Section 6 of the paper, 
 which also represents novel contribution of our work.
+
 3) TODO
+
 4) Firedrake is *not* specifically designed for Intel architectures and 
 compilers. The decision of using Intel platforms and tools is twofold: from one 
 hand, we believe that Intel's is one of the most powerful vectorizing and 
@@ -190,6 +193,7 @@ x86+AVX. However, COFFEE's internal algorithms use an intermediate
 representation of intrinsics code, so extending our compiler to other 
 instruction sets would be just a matter of adding a new dictionary of 
 compiler-specific intrinsics.
+
 5) We agree that expression split has many issues involved. Our cost model 
 offers a simple alternative for driving expression splitting. Simplicity is the 
 key to effectiveness, portability, and robustness. Probably using a graph 
@@ -212,8 +216,11 @@ a) We elaborate on the use of loop unwinding (or unrolling) in Section 4, in
 which we have added a new paragraph (named "Loop unrolling"). This paragraph 
 elaborates on "complete/partial loop unwinding" as well as other general 
 aspects concerning pros and cons of applying this transformation.
+
 b) It was copy-paste leftover, now fixed
+
 c) Right, fixed by making the statement less strong
+
 d) This is all clarified and explained in details in the new Section 6. The 
 short answer is that we hope COFFEE can be re-used in frameworks other than 
 Firedrake (e.g. the FEniCS framework that we compare to in the paper). 
@@ -223,6 +230,7 @@ Firedrake (e.g. the FEniCS framework that we compare to in the paper).
 R4:
 We addressed all of the observations in your review:
 1) Fixed, thanks
+
 2) The polyhedral model is well-known among compilers people. Basically, it is 
 a mathematical model for representing affine loop nests and determining in a 
 systemtic way all of its possible legal transformations. Cost models are often 
@@ -231,9 +239,31 @@ transformation. Polyhedral optimizations often aim at improving cache locality.
 In the Related Work section, we cite one of the most relevant researches on
 polyhedral compilers; note that one of the co-authors of our paper is also a 
 co-author of that paper (i.e. he is an expert of polyhedral compilers).
-3) The speed ups only refer to the computation of the local matrix. This is now 
-clarified in Section 5.1, and also re-iterated later on in the paper. 
-We used different meshes for the various experiments. There is a link to 
-the code of the experiments as well as the mesh sizes employed, for each 
-experiment. This is now explained in the paper, Section 5.2.1.
-4) 
+
+3 and 4) The speed ups only refer to the computation of the local element 
+matrix.  This is now clarified in Section 5.1, and also re-iterated later on in 
+the paper. We used different meshes for the various experiments. In Section 
+5.2.1 we provide a link to a repository in which the code of the experiments as 
+well as the mesh sizes employed can be found. We note that for these 
+experiments the mesh size was set such that the working set of the computation 
+could at least fit the last level cache (L3 on the Sandy Bridge architecture). 
+The goal of these experiments (Section 5.2 in the revised paper) was only to 
+measure speed ups achieved by optimizing local assembly kernels, so there was 
+no point in running over big meshes (i.e. meshes that would not fit the last 
+level cache), which would have only increased the completion time of our test 
+suite (which is already order of hours).
+We however completely agree that reporting execution times and speed ups of the 
+overall finite element calculation is of fundamental importance. Therefore, 
+following your suggestion, we have added a new section to the paper, Section 
+5.3, which is about a full-application study concerning a linear elasticity 
+equation.  This means that the performance evaluation section is now structured 
+in two parts: Section 5.2, about local assembly speed ups; Section 5.3, about a 
+real application study. We think this is the best structuring to let readers 
+understand the effectiveness of our transformations "at the level of loop 
+nests" as well as their impact on the whole application. In the new section, we 
+provide the numbers you suggested: we show execution times of assembly and 
+solve, we comment on the achieved speed ups, and we highlight the cases in 
+which matrix insertion is negligible because of the high computational cost of 
+local assembly. For this application, we use a realistic mesh composed of 
+196608 cells (as reported in the paper). We also provide a link to the code of 
+the application. 
