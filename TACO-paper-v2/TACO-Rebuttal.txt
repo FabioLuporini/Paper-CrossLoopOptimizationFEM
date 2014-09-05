@@ -154,7 +154,7 @@ R2.
 2) We agree that profile-guided optimization could be used to improve the 
 performance of kernels, although this aspect is orthogonal to most of our code
 transformations, because in no way profile information could be used, for 
-example, to trigger generalized loop-invariant code motion and the avoidance of 
+example, to trigger generalized loop-invariant code motion and avoidance of 
 redundant computation (as explained in Section 3.2). Profile-guided 
 optimization could theoretically be used for padding and data-alignment of 
 arrays, provided that the compiler has sufficient machinery in place to perform 
@@ -170,8 +170,8 @@ compilers. The decision of using Intel platforms and tools is twofold: from one
 hand, we believe that Intel's is one of the most powerful vectorizing and 
 optimizing compilers, so for a research like ours it was important to compare 
 to the best available on the market; from the other hand, their wide 
-availability represents a strong incentive for studying the problems object 
-of the paper on these machines.
+availability represents a strong incentive for studying the problems object of 
+the paper on these machines.
 It is also worth noting that all general-purpose compilers are, to different 
 extents, limited in optimizing for register locality and code motion (for 
 instance, this is true for the Intel and GNU compilers, the latter only used 
@@ -195,19 +195,45 @@ offers a simple alternative for driving expression splitting. Simplicity is the
 key to effectiveness, portability, and robustness. Probably using a graph 
 partitioning approach as you rightly point out would allow us to obtain better 
 performance gains, but three points are worth to be highlighted:
-- The split factor is a parameter of the transformation. In our 
-  experiments we have tested several split factors, which means testing as many 
-code variants (i.e. as many ways of splitting an expression based on sum's 
-associativity) and, as shown by the various graphs in the paper, our cost model 
-seems to be capable of properly approximating such a parameter. This is of 
-course encouraging.
+- The split factor is a parameter of the transformation. In our experiments we 
+  have tested several split factors, which means testing as many code variants 
+(i.e. as many ways of splitting an expression based on sum's associativity) 
+and, as shown by the various graphs in the paper, our cost model seems to be 
+capable of properly approximating such a parameter. This is of course 
+encouraging.
 - In the perspective of integrating expression splitting in a general-purpose 
   compiler, or generalizing this technique to other problems (as elaborated in 
 the new Section 6), we feel that a simple model is preferable to keep the 
 implementation complexity as low as possible.
 - TODO
 
+Other comments:
+a) We elaborate on the use of loop unwinding (or unrolling) in Section 4, in 
+which we have added a new paragraph (named "Loop unrolling"). This paragraph 
+elaborates on "complete/partial loop unwinding" as well as other general 
+aspects concerning pros and cons of applying this transformation.
+b) It was copy-paste leftover, now fixed
+c) Right, fixed by making the statement less strong
+d) This is all clarified and explained in details in the new Section 6. The 
+short answer is that we hope COFFEE can be re-used in frameworks other than 
+Firedrake (e.g. the FEniCS framework that we compare to in the paper). 
+
 ******************************************************************************
 
 R4:
-
+We addressed all of the observations in your review:
+1) Fixed, thanks
+2) The polyhedral model is well-known among compilers people. Basically, it is 
+a mathematical model for representing affine loop nests and determining in a 
+systemtic way all of its possible legal transformations. Cost models are often 
+used by polyhedral compilers to estimate the effectiveness of a certain 
+transformation. Polyhedral optimizations often aim at improving cache locality.  
+In the Related Work section, we cite one of the most relevant researches on
+polyhedral compilers; note that one of the co-authors of our paper is also a 
+co-author of that paper (i.e. he is an expert of polyhedral compilers).
+3) The speed ups only refer to the computation of the local matrix. This is now 
+clarified in Section 5.1, and also re-iterated later on in the paper. 
+We used different meshes for the various experiments. There is a link to 
+the code of the experiments as well as the mesh sizes employed, for each 
+experiment. This is now explained in the paper, Section 5.2.1.
+4) 
