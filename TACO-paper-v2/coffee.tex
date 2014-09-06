@@ -411,9 +411,10 @@ kernel objects.
 %the code generator.
 
 \begin{algorithm}[t]
-\footnotesize
+\scriptsize
 \SetAlgorithmName{LISTING}{}
-\KwSty{void} helmholtz(double A[3][3], double **coords) $\lbrace$\\
+
+\KwSty{void} helmholtz(\KwSty{double} A[3][3], \KwSty{double} **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~\\
 ~~\KwSty{static const double} W[3] = $\lbrace$...$\rbrace$\\
@@ -433,9 +434,10 @@ $\rbrace$
 \end{algorithm}
 
 \begin{algorithm}[t]
-\footnotesize
+\scriptsize
 \SetAlgorithmName{LISTING}{}
-\KwSty{void} burgers(double A[12][12], double **coords, double **w) $\lbrace$\\
+
+\KwSty{void} burgers(\KwSty{double} A[12][12], \KwSty{double} **coords, \KwSty{double} **w) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~\\
 ~~\KwSty{static const double} W[5] = $\lbrace$...$\rbrace$\\
@@ -594,9 +596,10 @@ after the application of loop-invariant code motion, padding, and data
 alignment.
 
 \begin{algorithm}[t]
-\footnotesize
+\scriptsize
 \SetAlgorithmName{LISTING}{}
-\KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
+
+\KwSty{void} helmholtz(\KwSty{double} A[3][4], \KwSty{double} **coords) $\lbrace$\\
 ~~\KwSty{$\#$define} ALIGN $\_\_$attribute$\_\_$((aligned(32))) \\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~\\
@@ -605,8 +608,8 @@ alignment.
 ~~\KwSty{static const double} X$\_$D01[3][4] ALIGN = $\lbrace\lbrace$...$\rbrace\rbrace$\\
 ~~\\
 ~~\KwSty{for} (\KwSty{int} i = 0; i$<$3; i++) $\lbrace$ \\
-~~~~double LI$\_$0[4] ALIGN;\\
-~~~~double LI$\_$1[4] ALIGN;\\
+~~~~\KwSty{double} LI$\_$0[4] ALIGN;\\
+~~~~\KwSty{double} LI$\_$1[4] ALIGN;\\
 ~~~~\KwSty{for} (\KwSty{int} r = 0; r$<$4; r++) $\lbrace$ \\
 ~~~~~~LI$\_$0[r] = ((K1*X$\_$D10[i][r])+(K3*X$\_$D01[i][r]));\\
 ~~~~~~LI$\_$1[r] = ((K0*X$\_$D10[i][r])+(K2*X$\_$D01[i][r]));\\
@@ -711,9 +714,10 @@ Figure~\ref{code:helmholtz-opvect}.
 %and the structure of the computation to optimize register management.
 
 \begin{algorithm}[t]
-\footnotesize
+\scriptsize
 \SetAlgorithmName{LISTING}{}
-\KwSty{void} helmholtz(double A[4][4], double **coords) $\lbrace$\\
+
+\KwSty{void} helmholtz(\KwSty{double} A[4][4], \KwSty{double} **coords) $\lbrace$\\
 ~~// K, det = Compute Jacobian (coords) \\
 ~~// Declaration of basis function matrices \\
 ~~\\
@@ -732,7 +736,7 @@ Figure~\ref{code:helmholtz-opvect}.
 ~~$\rbrace$\\
 ~~// Restore the storage layout:\\
 ~~\KwSty{for} (\KwSty{int} j = 0; j$<$4; j+=4) $\lbrace$\\
-~~~~$\_\_$m256d r0, r1, r2, r3, r4, r5, r6, r7;\\
+~~~~\KwSty{$\_\_$m256d} r0, r1, r2, r3, r4, r5, r6, r7;\\
 ~~~~\KwSty{for} (\KwSty{int} k = 0; k$<$4; k+=4) $\lbrace$\\
 ~~~~~~r0 = $\_$mm256$\_$load$\_$pd ($\&$A[j+0][k]);\\
 ~~~~~~// Load A[j+1][k], A[j+2][k], A[j+3][k]\\
@@ -763,9 +767,10 @@ $\rbrace$
 \label{sec:expr-split}
 
 \begin{algorithm}
-\footnotesize
+\scriptsize
 \SetAlgorithmName{LISTING}{}
-\KwSty{void} helmholtz(double A[3][4], double **coords) $\lbrace$\\
+
+\KwSty{void} helmholtz(\KwSty{double} A[3][4], \KwSty{double} **coords) $\lbrace$\\
 ~~~~// Same code as in Listing~\ref{code:helmholtz-licm} up to the j loop\\
 ~~~~\KwSty{for} (\KwSty{int} j = 0; j$<$3; j++) \\
 ~~~~~~\KwSty{$\#$pragma vector aligned}\\
