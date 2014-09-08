@@ -525,7 +525,7 @@ given the large number of arrays accessed, suffers from high register pressure,
 whereas the Helmholtz problem in Listing~\ref{code:helmholtz} does
 not; this intuitively suggests that the two problems require a
 different treatment, based on an in-depth analysis of both data and
-iteration spaces. Furthermore, domain-knowledge enables
+iteration spaces. Furthermore, domain knowledge enables
 transformations that a general-purpose compiler could not apply,
 making the optimization space even larger. In this context, our goal
 is to understand the relationship between distinct code
@@ -542,15 +542,20 @@ length of the innermost loop is not a multiple of the vector length
 $\mbox{\texttt{VL}}$, especially when the loops are small as in local assembly.
 
 Data alignment is enforced in two steps. Firstly, all arrays are
-allocated to addresses that are multiples of $\mbox{\texttt{VL}}$. Then, two
-dimensional arrays are padded by rounding the number of columns to the
-nearest multiple of $\mbox{\texttt{VL}}$. For instance, assume the original size of a
-basis function array is 3$\times$3 and $\mbox{\texttt{VL}}=4$ (e.g. AVX processor,
-with 256-bit long vector registers and 64-bit double-precision
-floats). In this case, a padded version of the array will have size
-3$\times$4. The compiler is explicitly told about data alignment
-using suitable pragmas; for example, in the case of the Intel compiler, the annotation \texttt{$\#$pragma vector aligned} is added over a loop
-(as shown in later figures) to inform that all of the memory accesses in the loop body will be properly aligned. This allows the compiler to issue aligned load and store instructions, which are notably faster than unaligned ones.
+allocated to addresses that are multiples of $\mbox{\texttt{VL}}$. Then,
+two dimensional arrays are padded by rounding the number of columns to
+the nearest multiple of $\mbox{\texttt{VL}}$. For instance, assume the
+original size of a basis function array is 3$\times$3 and
+$\mbox{\texttt{VL}}=4$ (e.g. AVX processor, with 256-bit long vector
+registers and 64-bit double-precision floats). In this case, a padded
+version of the array will have size 3$\times$4. The compiler is
+explicitly told about data alignment using suitable pragmas; for
+example, in the case of the Intel compiler, the annotation
+\texttt{$\#$pragma vector aligned} is added before the loop (as shown in
+later figures) to inform that all of the memory accesses in the loop
+body will be properly aligned. This allows the compiler to issue aligned
+load and store instructions, which are notably faster than unaligned
+ones.
 
 Padding of all two dimensional arrays involved in the evaluation of
 the element matrix also allows to safely round the loop trip count to
@@ -587,7 +592,7 @@ can be auto-vectorized as part of an inner loop. Given the short trip
 counts of our loops, it is important to achieve auto-vectorization of
 hoisted terms in order to minimize the percentage of scalar
 instructions, which could otherwise be significant. It is also worth
-noting that, in some problems (e.g. Helmholtz), invariant
+noting that, in some problems, for instance Helmholtz, invariant
 sub-expressions along \texttt{j} are identical to those along
 \texttt{k}, and both loops iterate over the same iteration space, as
 anticipated in Section~\ref{sec:background}. In these cases, we safely
@@ -727,11 +732,11 @@ Figure~\ref{code:helmholtz-opvect}.
 ~~~~// Do generalized loop-invariant code motion \\
 ~~~~\KwSty{for} (\KwSty{int} j = 0; j$<$4; j+=4) \\
 ~~~~~~\KwSty{for} (\KwSty{int} k = 0; k$<$4; k+=4) $\lbrace$\\
-~~~~~~~~// $load$ and $set$ intrinsics \\
+~~~~~~~~// \emph{load} and \emph{set} intrinsics \\
 ~~~~~~~~// Compute A[0,0], A[1,1], A[2,2], A[3,3] \\
-~~~~~~~~// One $permute\_pd$ intrinsic per \texttt{k}-loop $load$\\
+~~~~~~~~// One \emph{permute\_pd} intrinsic per \texttt{k}-loop \emph{load}\\
 ~~~~~~~~// Compute A[0,1], A[1,0], A[2,3], A[3,2] \\
-~~~~~~~~// One $permute2f128\_pd$ intrinsic per \texttt{k}-loop $load$\\
+~~~~~~~~// One \emph{permute2f128\_pd} intrinsic per \texttt{k}-loop \emph{load}\\
 ~~~~~~~~// ...\\
 ~~~~~~$\rbrace$\\
 ~~~~// Remainder loop (from $j=4$ to $j=6$)\\
@@ -1566,7 +1571,7 @@ the compiler viewpoint - like ours - is missing, and none of the
 optimizations presented in Section~\ref{sec:code-transf} are
 mentioned. Among these efforts, to the best of our knowledge, COFFEE
 is the first work targeting low-level optimizations through a real
-compiler approach. 
+compiler approach.
 
 Our compiler-based optimization approach is made possible by the
 top-level DSL, which enables automated code generation. DSLs have been
