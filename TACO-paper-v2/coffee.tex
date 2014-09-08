@@ -339,7 +339,7 @@ Object name & Type & Variable name(s) \\\hline
 Determinant of the Jacobian matrix & double & det  \\
 Inverse of the Jacobian matrix & double & K1, K2, ... \\
 Coordinates & double** & coords\\
-Fields & double** & w \\
+Fields (coefficients) & double** & w \\
 Numerical integration weights & double[] & W \\
 Basis functions (and derivatives) & double[][] & X, Y, X1, ... \\
 Element matrix & double[][] & A\\ \hline
@@ -354,17 +354,17 @@ solution. The process consists of numerically evaluating
 problem-specific integrals to produce a matrix and a vector
 \cite{quadrature1,fluidity_manual_v4}, whose sizes depend on the order
 of the method. This operation is applied to all cells in the discretized
-domain. In this work we focus on local matrices, or ``element
-matrices'', which are more costly to compute than element vectors.
+domain. In this work we focus on local matrices, or \emph{element
+matrices}, which are more costly to compute than element vectors.
 
 Given a finite element description of the input problem, expressed
 through the domain-specific Unified Form Language (UFL)~\cite{ufl},
 Firedrake employs the FEniCS form compiler (FFC)~\cite{FFC-Compiler} to
-generate a C-code kernel implementing assembly using a
+generate an abstract syntax tree of a kernel implementing assembly using
 numerical quadrature. This kernel can be applied to any
 element in the mesh, which follows from a mathematical property of the
 finite element method. The evaluation of a local matrix can be
-reduced to integration on a fixed ``reference'' element --- a special
+reduced to integration on a fixed \emph{reference} element --- a special
 element that does not belong to the domain --- after a suitable change
 of coordinates. Firedrake triggers the compilation of an assembly
 kernel using an available vendor compiler, and manages its (parallel)
