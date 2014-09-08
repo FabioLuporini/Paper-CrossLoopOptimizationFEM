@@ -23,7 +23,7 @@ throughout the paper). Therefore, a compiler-based approach, in which the input
 and some parameters are analyzed to decide how to optimally transform the code 
 is needed to maximize the performance. Another possibility would be a 
 library-based approach, although it would be quite pointless since we can 
-generate the most suitable code for each problem.
+already generate the most suitable code for each problem.
 2) The variation in loop trip counts impacts loops transformation. If the loop 
 is relatively large, for example, vector-register tiling is likely to be useful 
 to minimize register spilling; if it is small, then full or partial unrolling 
@@ -65,56 +65,56 @@ and/or engineering work. We therefore introduced a complete new section,
 Section 6, about the generality of our approach and the applicability of the 
 code transformations to other computational domains. We hope you can read this 
 section carefully, because it represents novel contribution of the paper and 
-aims to answer exactly the concern you pointed out.
+aims to answer exactly the concerns you pointed out.
 
 b) The results of the paper are *really* applicable to other kernels beyond 
 those analyzed and presented. First of all, we want to emphasize a number of 
 aspects. What is important to clarify is that kernels are not "mere small 
 pieces of code", but rather, in general, quite complex numerical routines 
-evaluating integrals in an
-element of the discretized equation domain, produced by means of real (used by 
-many scientists around the world) domain-specific language and compiler.  There 
-is an infinite variety of kernels that can be generated in Firedrake; the 
-generated code (e.g. loop sizes and mathematical expression) depends on the 
-partial differential equation being solved. This is explained and re-iterated 
-in the paper. Also, varying the polynomial order of the method or the element 
-shape (e.g. triangles, tetrahedrons, prisms), as we do and explain in the 
-performance evaluation section, changes the generated code by increasing loops 
-and arrays sizes and by making mathematical expressions more articulated (this 
-happens, for example, when moving from 2D to 3D domains). So we are already 
-testing many different code variants (three different kernels, and then for 
-each kernel we try multiple polynomial orders and element shapes). This is 
-carefully explained in Section 5.2.1. Now, premised this, back to your point, 
-which is "applicability and effectiveness of our transformations in other local 
-assembly kernels". Our answer is twofold:
+evaluating integrals in an element of the discretized equation domain, produced 
+by means of real (used by many scientists around the world) domain-specific 
+language and compiler.  There is an infinite variety of kernels that can be 
+generated in Firedrake; the generated code (e.g. loop sizes and mathematical 
+expression) depends on the partial differential equation being solved. This is 
+explained and re-iterated in the paper. Also, varying the polynomial order of 
+the method or the element shape (e.g. triangles, tetrahedrons, prisms), as we 
+do and explain in the performance evaluation section, changes the generated 
+code by increasing loops and arrays sizes and by making mathematical 
+expressions more articulated (this happens, for example, when moving from 2D to 
+3D domains). So we are already testing many different code variants (three 
+different kernels, and then for each kernel we try multiple polynomial orders 
+and element shapes). This is carefully explained in Section 5.2.1. Premised 
+this, we now go back to your point about "applicability and effectiveness of 
+our transformations in other local assembly kernels". Our answer is twofold:
 
 - Section 5.2.1 explains in-depth the motivations behind the choice of the 
-  three problems (Helmholtz, Diffusion, Burgers), explaining that "(...) 
+  three benchmarks (Helmholtz, Diffusion, Burgers), explaining that "(...) 
 distinct problems, possibly arising in completely different fields, may employ 
 (subsets of) the same differential operators of our benchmarks, which implies 
 similarities and redundant patterns in the generated code.  Consequently, the 
 proposed code transformations have a domain of applicability that goes far 
 beyond that of the three analyzed equations. (...)". Then we re-inforce this 
 later on in the section and in the paper. Other kernels arising from completely 
-different equations will still have the same structure of the kernels we 
-examined (e.g. same memory access pattern, same ranges of loop sizes, same 
-problems concerning the presence of loop-invariant code and register pressure) 
-as well as similar patterns in the mathematical expressions, so there is no 
-evident reason for which our code optimizations would not be effective. The 
-critical issue in our research was to understand what transformations our local 
-assembly kernels required, and how to instantiate parametric transformations 
+different equations will still have the same structure of the ones we examined 
+(e.g. same memory access pattern, same ranges of loop sizes, same problems 
+concerning the presence of loop-invariant code and register pressure) as well 
+as similar patterns in the mathematical expressions, so there is no evident 
+reason for which our code optimizations would not be effective. The critical 
+issue in our research was to understand what transformations our local assembly 
+kernels required, and how to instantiate parametric transformations 
 (vector-register tiling, loop interchange, expression splitting) optimally in 
 each possible problem (this led to the development of the cost model).
 
-- In Section 5.3 we provide a full-application study in which we analyze a 
-  different equation (Linear Elasticity), which brings the total number of 
-studied equations to 4 (Helmholtz, Diffusion, Burgers, Elasticity)
+- In Section 5.3 we provide a full-application study in which we analyze a new 
+  equation (Linear Elasticity), which brings the total number of studied 
+equations to 4 (Helmholtz, Diffusion, Burgers, Elasticity)
 Adding more kernels to the performance evaluation section would make the paper 
-only more chaotic: we selected these three problems to highlight all pros and 
-cons of our code transformations. This is the reason for which we comment on 
-the performance of the code transformations (and their interplay) in specific 
-sub-sections, referring to, describing, and carefully analyzing the provided 
-plots. 
+only more chaotic: we specifically selected these three problems because they 
+allow us to highlight all pros and cons of our code transformations. This is 
+also the reason we comment on the performance of the code transformations (and 
+their interplay) in specific sub-sections (referring to, describing, and 
+carefully analyzing the provided plots), rather than in a single, centralized 
+section. 
 
 Other concerns:
 - It is actually not true that we do not consider other optimization 
@@ -136,19 +136,19 @@ have multiple threads executing a single kernel, as opposed to our execution
 model in which we assume a single thread per kernel) in specific equations (not 
 in a possibly infinite range as we do). A critical issue when executing local 
 assembly kernels on GPUs is represented by memory requirements. We give here 
-two examples of this problem, although more issues could be found. First, the 
-transfer of the mesh from host to GPU may be a notable obstacle: if too big, 
-the mesh
-will not fit the available GPU memory, and distributed execution, which is 
-marginally supported in available finite element frameworks, would be required.  
-Secondly, optimizations such as generalized loop-invariant code motion increase 
-the memory requirements due to the introduction of temporary arrays.  This may 
-actually lead to poor per-thread shared memory and registers allocation. These 
-aspects suggest that the problem of executing generic, automatically-generated 
-local assembly kernels on GPUs require a separate, in-depth study. However, in 
-the new Section 6, we provide some intuitions of how we could re-adapt COFFEE's 
-transformations for execution on GPUs.  Therefore, we invite once more to go 
-through the new Section 6 carefully.
+two examples of this problem, although more issues could be found and 
+discussed. Firstly, the transfer of the mesh from host to device may be a great 
+obstacle: if too big, the mesh will not fit the available GPU memory, and 
+distributed execution, which is marginally supported in available finite 
+element frameworks, would be required. Secondly, optimizations such as 
+generalized loop-invariant code motion increase the memory requirements due to 
+the introduction of temporary arrays.  This may actually lead to poor 
+per-thread shared memory and registers allocation. These aspects suggest that 
+the problem of executing generic, automatically-generated local assembly 
+kernels on GPUs require a separate, in-depth study. However, in the new Section 
+6, we provide some intuitions of how we could re-adapt COFFEE's transformations 
+for execution on GPUs.  Therefore, we invite once more to go through the new 
+Section 6 carefully.
 
 ******************************************************************************
 
@@ -168,18 +168,18 @@ threads executing a single kernel, as opposed to our execution model in which
 we assume a single thread per kernel) in specific equations (not in a possibly 
 infinite range as we do). A critical issue when executing local assembly 
 kernels on GPUs is represented by memory requirements. We give here two 
-examples of this problem, although many more issues could be found. First, the 
+examples of this problem, although many more issues could be found. Firstly, the 
 transfer of the mesh from host to device may be a great obstacle: if too big, 
-the mesh
-will not fit the available GPU memory, and distributed execution, which is 
-marginally supported in available finite element frameworks, would be required.  
-Secondly, optimizations such as generalized loop-invariant code motion increase 
-the memory requirements due to the introduction of temporary arrays.  This may 
-actually lead to poor per-thread shared memory and registers allocation. These 
-aspects suggest that the problem of executing generic, automatically-generated 
-local assembly kernels on GPUs require a separate, in-depth study. However, in 
-the new Section 6 of the revised paper, we provide some intuitions of how we 
-could re-adapt COFFEE's transformations for execution on GPUs. 
+the mesh will not fit the available GPU memory, and distributed execution, 
+which is marginally supported in available finite element frameworks, would be 
+required.  Secondly, optimizations such as generalized loop-invariant code 
+motion increase the memory requirements due to the introduction of temporary 
+arrays.  This may actually lead to poor per-thread shared memory and registers 
+allocation. These aspects suggest that the problem of executing generic, 
+automatically-generated local assembly kernels on GPUs require a separate, 
+in-depth study. However, in the new Section 6 of the revised paper, we provide 
+some intuitions of how we could re-adapt COFFEE's transformations for execution 
+on GPUs. 
 
 2) We agree that profile-guided optimization could be used to improve the 
 performance of kernels, although this aspect is orthogonal to most of our code
@@ -217,7 +217,7 @@ fact is a strength of our work, because it allows COFFEE to be almost
 completely platform-independent.  The only exception regards intrinsics code: 
 COFFEE is currently only capable of outputing AVX intrinsics, so at the moment 
 we cannot apply vector-register tiling (the also called outer-product 
-vectorization technique) to architectures different than x86+AVX and x86+AVX2. 
+vectorization technique) to architectures different than x86+AVX and x86+AVX2.  
 However, COFFEE's internal algorithms use an intermediate representation of 
 intrinsics code, so extending our compiler to other instruction sets would be 
 just a matter of adding a new dictionary of intrinsics functions.
@@ -229,10 +229,10 @@ partitioning approach as you rightly point out would allow us to obtain better
 performance gains, but three points are worth to be highlighted:
 - The split factor is a parameter of the transformation. In our experiments we 
   have tested several split factors, which means testing as many code variants 
-(i.e. as many as the ways an expression can be split based on sum's associativity) 
-and, as shown by the various graphs in the paper, our cost model seems to be 
-capable of properly approximating such a parameter. This is of course 
-encouraging.
+(i.e. as many as the ways an expression can be split based on sum's 
+associativity) and, as shown by the various graphs in the paper, our cost model 
+seems to be capable of properly approximating such a parameter. This is of 
+course encouraging.
 - In the perspective of integrating expression splitting in a general-purpose 
   compiler, or generalizing this technique to other problems (as elaborated in 
 the new Section 6), we feel that a simple model is preferable to keep the 
@@ -241,11 +241,16 @@ implementation complexity as low as possible.
   research problem. On the other hand, this transformation is only one of the 
 many applicable by COFFEE, and we just do not want the focus of the paper being 
 on "how to optimally and rapidly split a mathematical expression". Rather, we 
-prefer to show that, for our problems, there is clearly a problem of register pressure 
-and that by rescheduling the computation in different loops (and 
+prefer to show that, for our problems, there is clearly a problem of register 
+pressure and that by rescheduling the computation in different loops (and 
 sub-expressions) we can actually obtain a performance gain. We have a strategy 
 for expression splitting; we are not claiming it is the best strategy, but at 
 least we demonstrate it is effective and easily predictable. 
+We spent some time thinking about the problem: two things that we may want to 
+try in the future are 1) a model based on graph partitioning and 2) a model 
+based on a set of rewrite rules that exploit arithmetic properties such as 
+commutativity, associativity, and distributivity/factorization to 
+systematically optimize the arithmetic intensity of the expression.
 
 Other comments:
 a) We elaborate on the use of loop unwinding (or unrolling) in Section 4, in 

@@ -1436,6 +1436,10 @@ matrix-matrix multiplies from static analysis of the kernel's code. A
 comprehensive study of these aspects will be addressed in further
 work.
 
+\subsubsection{On the compilation time}
+\label{sec:compile-time}
+Firedrake and its various software components (see Figure~\ref{fig:coffee-pipeline}) are implemented in Python and Cython, whereas the generated code is pure C. COFFEE has been written in Python to be naturally integrated within Firedrake. Among the various Firedrake modules, COFFEE is where, in general, the least amount of time is spent. The process of transforming the abstract syntax tree never exceeds ... For example, in X, it takes .., while FFC needed Y secs to translate UFL code into the abstract syntax tree. Being a domain-specific compiler, COFFEE expects C code with a certain structure (e.g. it know there is no control flow), so data-flow analysis for dependency tracking can be kept to a minimum. This is also a clear advantage over a general-purpose compiler.
+
 \subsection{Full-application Study}
 \label{sec:full-app}
 In this section, we investigate the performance gain for an entire finite element computation
@@ -1560,21 +1564,18 @@ The finite element method is extensively used to approximate solutions
 of PDEs. Well-known frameworks and applications include
 nek5000~\cite{nek5000-web-page}, the FEniCS project~\cite{Fenics},
 Fluidity~\cite{fluidity_manual_v4}, and of course Firedrake. Numerical
-integration is usually employed to implement the local assembly
+integration based on quadrature, as in Firedrake, is usually employed to implement the local assembly
 phase. The recent introduction of domain specific languages (DSLs) to
 decouple the finite element specification from its underlying
 implementation facilitated, however, the development of novel
 approaches. Methods based on tensor contraction~\cite{FFC-Compiler}
-and symbolic manipulation~\cite{Francis} have been implemented. We
-have designed COFFEE to specifically target numerical integration
-because it has been demonstrated that it remains the optimal choice
-for a wide class of problems~\cite{quadrature1}.
+and symbolic manipulation~\cite{Francis} have been implemented. Nevertheless, it has been demonstrated that quadrature-based integration remains the most efficient choice for a wide class of problems~\cite{quadrature1}, which motivates our work in COFFEE.
 
-Optimization of local assembly using numerical integration for CPU
-platforms has been addressed in FEniCS~\cite{quadrature1}. The
-comparison between COFFEE and this work is presented in
+Optimization of quadrature-based local assembly for CPU
+architectures has been addressed in FEniCS~\cite{quadrature1}. The
+comparison between COFFEE and this work has been presented in
 Section~\ref{sec:perf-results-fenics}. In~\cite{Markall20101815}, and
-more recently in~\cite{petsc-integration-gpu}, the problem has been
+more recently in~\cite{petsc-integration-gpu}, the same problem has been
 studied for GPU architectures. In~\cite{assembly-opencl}, variants of
 the standard numerical integration algorithm have been specialized and
 evaluated for the PowerXCell processor, but an exhaustive study from
@@ -1582,7 +1583,7 @@ the compiler viewpoint - like ours - is missing, and none of the
 optimizations presented in Section~\ref{sec:code-transf} are
 mentioned. Among these efforts, to the best of our knowledge, COFFEE
 is the first work targeting low-level optimizations through a real
-compiler approach.
+compiler approach. 
 
 Our compiler-based optimization approach is made possible by the
 top-level DSL, which enables automated code generation. DSLs have been
