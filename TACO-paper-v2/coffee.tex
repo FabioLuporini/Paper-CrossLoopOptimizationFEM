@@ -75,21 +75,21 @@ Paul H.J. Kelly
 %       currently affiliated with NASA.
 
 \begin{abstract}
-We study and systematically evaluate a class of composable code 
-transformations that improve arithmetic intensity in local assembly 
+We study and systematically evaluate a class of composable code
+transformations that improve arithmetic intensity in local assembly
 operations, which represent a significant fraction of the execution
-time in finite element methods. Their performance optimization is indeed a 
-challenging issue. Even though affine loop nests are generally present, 
-the short trip counts and the complexity of mathematical expressions, which 
-vary among different problems, make it hard to determine a single or unique 
-sequence of successful transformations. Our investigation has resulted in the 
+time in finite element methods. Their performance optimization is indeed a
+challenging issue. Even though affine loop nests are generally present,
+the short trip counts and the complexity of mathematical expressions, which
+vary among different problems, make it hard to determine a single or unique
+sequence of successful transformations. Our investigation has resulted in the
 implementation of a compiler for local assembly kernels, fully
-integrated with a framework for developing finite element methods. 
+integrated with a framework for developing finite element methods.
 The compiler manipulates abstract syntax trees generated from a domain-specific
 language by introducing domain-aware optimizations and, eventually,
-produces C code including vector SIMD intrinsics. Experiments using a range of finite-element 
-problems of increasing complexity show that significant performance improvement 
-is achieved. The generality of the approach and the applicability of the proposed 
+produces C code including vector SIMD intrinsics. Experiments using a range of finite-element
+problems of increasing complexity show that significant performance improvement
+is achieved. The generality of the approach and the applicability of the proposed
 code transformations to other domains is also discussed.
 
 \end{abstract}
@@ -151,24 +151,24 @@ Comp.~Sci., Louisiana State University.
 In many fields such as computational fluid dynamics, computational
 electromagnetics and structural mechanics, phenomena are modelled by
 partial differential equations (PDEs). Numerical techniques, like the
-finite volume method and the finite element method, are widely
-employed to approximate solutions of these PDEs. Unstructured meshes
-are often used to discretize the computational domain, since they
-allow an accurate representation of complex geometries. The
-solution is sought by applying suitable numerical operations, or
-kernels, to the entities of a mesh, such as edges, vertices, or
-cells. On standard clusters of multicores, typically, a kernel is
-executed sequentially by a thread, while parallelism is achieved by
-partitioning the mesh and assigning each partition to a different node
-or thread. Such an execution model, with minor variations, is adopted,
-for example, in \cite{pyop2isc}, \cite{Fenics},
-\cite{fluidity_manual_v4}, \cite{lizst}.
+finite volume method and the finite element method, are widely employed
+to approximate solutions of these PDEs. Unstructured meshes are often
+used to discretize the computational domain, since they allow an
+accurate representation of complex geometries. The solution is sought by
+applying suitable numerical operations, described by computational
+kernels, to all entities of a mesh, such as edges, vertices, or cells.
+On standard clusters of multicores, typically, a kernel is executed
+sequentially by a thread, while parallelism is achieved by partitioning
+the mesh and assigning each partition to a different node or thread.
+Such an execution model, with minor variations, is adopted, for example,
+by \citeN{pyop2isc}, \citeN{Fenics}, \citeN{fluidity_manual_v4},
+\citeN{lizst}.
 
 The time required to apply the numerical kernels is a major issue,
 since the equation domain needs to be discretized into an extremely
 large number of cells to obtain a satisfactory approximation
 of the PDE, possibly of the order of trillions, as in
-\cite{Rossinelli2013}. For example, it has been well established that mesh
+\citeN{Rossinelli2013}. For example, it has been well established that mesh
 resolution is critical in the accuracy of numerical weather
 forecasts. However, operational forecast centers have a strict time
 limit in which to produce a forecast - 60 minutes in the case of the
@@ -176,15 +176,17 @@ UK Met Office. Producing efficient kernels has a direct scientific
 payoff in higher resolution, and therefore more accurate,
 forecasts. Computational cost is a dominant problem in
 computational science simulations, especially for those based on
-finite elements, which are the subject of this paper. 
+finite elements, which are the subject of this paper.
+
+% FIXME: citation for the 30-60% figure
 
 We address, in particular, the well-known problem of optimizing the local assembly
-phase of the finite element method \cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, 
+phase of the finite element method \cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt},
 which can be responsible for a significant fraction of the overall computation
 run-time, often in the range 30-60$\%$. With respect to these studies,
 we propose a novel set of composable code transformations targeting, for
-the first time, cross-loop arithmetic intensity, with emphasis on instruction-level 
-parallelism, redundant computation, and register locality. How such transformations 
+the first time, cross-loop arithmetic intensity, with emphasis on instruction-level
+parallelism, redundant computation, and register locality. How such transformations
 generalize to domains other than finite element local assembly will also be discussed.
 
 During the assembly phase, the solution of the PDE is approximated by
@@ -196,7 +198,7 @@ are employed in a wide variety of fields, including climate and ocean
 modeling, computational fluid dynamics, and structural mechanics. The
 efficient assembly of high order methods such as the spectral element
 method \cite{SPENCER} requires a significantly different loop nest structure.
-High order methods  therefore are excluded from our study.
+High order methods are therefore excluded from our study.
 
 An assembly kernel is characterized by the presence of an affine,
 often non-perfect loop nest, in which individual loops are rather
@@ -205,24 +207,24 @@ low order methods. In the innermost loop, a problem-specific,
 compute intensive expression evaluates a two dimensional array,
 representing the result of local assembly in an element of the
 discretized domain. With such a kernel structure, we focus on aspects
-like minimization of floating-point operations, register allocation
+like the minimization of floating-point operations, register allocation
 and instruction-level parallelism, especially in the form of SIMD
 vectorization.
 
-Achieving high-performance is non-trivial. The complexity of the
+Achieving high performance is non-trivial. The complexity of the
 mathematical expressions, often characterized by a large number of
-operations on constants and small matrices, makes it hard to determine
-a single or specific sequence of transformations that is successfully
+operations on constants and small matrices, makes it hard to determine a
+single or specific sequence of transformations that is successfully
 applicable to all problems. Loop trip counts are typically small and can
 vary significantly, which further exacerbates the issue. A
 compiler-based approach is, therefore, the only reasonable option to
 obtain close-to-peak performance in a wide range of different local
-assembly kernels. Optimizations like padding, generalized
-loop-invariant code motion, vector-register tiling, and expression
-splitting, as well as their composition, are essential, but very limited is
-the support of state-of-the-art polyhedral and vendor compilers, if any. BLAS
-routines could theoretically be employed, although a fairly
-complicated control and data flow analysis would be required to
+assembly kernels. Optimizations like padding, generalized loop-invariant
+code motion, vector-register tiling, and expression splitting, as well
+as their composition, are essential, but their support in
+state-of-the-art polyhedral and vendor compilers, if any, is very
+limited. BLAS routines could theoretically be employed, although a
+fairly complicated control and data flow analysis would be required to
 automate identification and extraction of matrix-matrix multiplies. In
 addition, as detailed in Section~\ref{sec:perf-eval-blas}, the small
 dimension of the matrices involved and the potential loss in data
@@ -258,10 +260,10 @@ remains suboptimal in the context of modern multicore
 architectures. Our domain-aware cost-model-driven sequence of code
 transformations, aimed at improving SIMD vectorization and register
 data locality, can result in performance improvements up to
-4.4$\times$ over original kernels, and around 70$\%$ of the test cases
-obtain a speed up greater than 2$\times$. 
+4.4$\times$ over original kernels. Around 70$\%$ of the test cases
+obtain a speed up greater than 2$\times$.
 
-Summarizing, the contributions of this paper are
+Summarizing, the contributions of this paper are:
 \begin{enumerate}
 \item An optimization strategy for finite element local assembly that
   exploits domain knowledge and goes beyond the limits of both vendor
@@ -273,7 +275,7 @@ Summarizing, the contributions of this paper are
   importance that is evidence of significant performance improvements on
   two Intel architectures, a Sandy Bridge CPU and the Xeon Phi.
  \item A full-application evaluation to demonstrate that the optimization
- strategy greatly impacts the whole finite element method.
+ strategy greatly impacts the whole finite element problem.
  \newcounter{enumTemp}
  \setcounter{enumTemp}{\theenumi}
 \end{enumerate}
@@ -282,7 +284,7 @@ Our contributions also include a theoretical study involving
  \setcounter{enumi}{\theenumTemp}
  \item An analysis of the generality of the proposed code transformations
  and an investigation of their applicability to different computational
- domains.  
+ domains.
 \end{enumerate}
 The paper is organized as follows. In Section~\ref{sec:background} we
 provide some background on local assembly, show code generated by
@@ -292,9 +294,9 @@ transformations, highlighting when and how domain knowledge has been
 exploited. The design and implementation of our compiler is discussed
 in Section~\ref{sec:pyop2-compiler}. Section~\ref{sec:perf-results}
 shows performance results. The generality of our optimization strategy
-and the applicability to other domains is discussed in Section~\ref{sec:generality}. 
-Related work is described in Section~\ref{sec:related-work}. Finally, 
-Section~\ref{sec:conclusions} reviews our contributions in the light 
+and the applicability to other domains is discussed in Section~\ref{sec:generality}.
+Related work is described in Section~\ref{sec:related-work}. Finally,
+Section~\ref{sec:conclusions} reviews our contributions in the light
 of our results, and identifies priorities for future work.
 
 % systematic optimization strategy -> discuss the importance of domain
@@ -510,15 +512,15 @@ observations to define a set of systematic, composable optimizations.
 \section{Code Transformations}
 \label{sec:code-transf}
 The code transformations presented in this section are applicable to
-all finite element problems that can be formulated in Firedrake. 
+all finite element problems that can be formulated in Firedrake.
 Their generality and the potential for applicability in other domains is also discussed in
 Section~\ref{sec:generality}.
 
-As already emphasized, the variations in the structure of 
-mathematical expressions and in loop trip counts, although typically 
-limited to the order of tens of iterations, render the optimization process 
-challenging, requiring distinct sets of transformations to bring performance 
-closest to the machine peak in different problems. For example, the Burgers problem in Listing~\ref{code:burgers}, 
+As already emphasized, the variations in the structure of
+mathematical expressions and in loop trip counts, although typically
+limited to the order of tens of iterations, render the optimization process
+challenging, requiring distinct sets of transformations to bring performance
+closest to the machine peak in different problems. For example, the Burgers problem in Listing~\ref{code:burgers},
 given the large number of arrays accessed, suffers from high register pressure,
 whereas the Helmholtz problem in Listing~\ref{code:helmholtz} does
 not; this intuitively suggests that the two problems require a
@@ -529,7 +531,7 @@ making the optimization space even larger. In this context, our goal
 is to understand the relationship between distinct code
 transformations, their impact on cross-loop arithmetic intensity, and to what
 extent their composability is effective in a class of problems and
-architectures. 
+architectures.
 
 % Padding and Data Alignment
 \subsection{Padding and Data Alignment}
@@ -556,7 +558,7 @@ the nearest multiple of $\mbox{\texttt{VL}}$. This avoids the introduction of a
 remainder (scalar) loop from the compiler, which would render
 vectorization less efficient. These extra iterations only write to the
 padded region of the element matrix, and therefore have no side
-effects on the final result. 
+effects on the final result.
 
 % Autovectorizable LICM -> show code snippet?
 \subsection{Generalized Loop-invariant Code Motion}
@@ -857,22 +859,22 @@ code, is eventually provided to PyOP2~\cite{pyop2ws,pyop2isc}, where
 just-in-time compilation and execution over the discretized domain take
 place. The flow and the compiler structure are outlined in Figure~\ref{fig:coffee-pipeline}.
 
-COFFEE uses heuristics and a simple cost model to select the most suitable 
+COFFEE uses heuristics and a simple cost model to select the most suitable
 optimization strategy for a given problem. Auto-tuning might be used, although
-it would significantly increase the  run-time overhead, since the generation of 
-ASTs occurs at run-time as soon as problem-specific data are available. 
+it would significantly increase the  run-time overhead, since the generation of
+ASTs occurs at run-time as soon as problem-specific data are available.
 
-The compiler applies an ordered sequence of optimization steps to the 
-ASTs received from FFC. Application of \emph{licm} must precede padding 
+The compiler applies an ordered sequence of optimization steps to the
+ASTs received from FFC. Application of \emph{licm} must precede padding
 and data alignment, due to the introduction of temporary arrays. These
 transformations are always performed because they are likely to improve
 the run-time performance, as demonstrated by our results in Section~\ref{sec:analysis-code-transf}.
-Based on a cost model (described later), loop interchange, \emph{split}, 
-and \emph{op-vect} may be introduced. Their implementation is centered 
+Based on a cost model (described later), loop interchange, \emph{split},
+and \emph{op-vect} may be introduced. Their implementation is centered
 on analysis and manipulation of the kernel's AST. When \emph{op-vect}
-is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any 
-possible corner cases are handled: for example, if \emph{op-vect} is to 
-be applied, but the size of the iteration space is not a multiple of the vector 
+is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any
+possible corner cases are handled: for example, if \emph{op-vect} is to
+be applied, but the size of the iteration space is not a multiple of the vector
 length, then a remainder loop, amenable to auto-vectorization, is inserted.
 
 \paragraph{Loop interchange}
@@ -898,9 +900,9 @@ carry out the computation of the element matrix.
 \paragraph{Loop unrolling}
 Loop unroll (or unroll-and-jam of outer loops) is fundamental to the
 exposure of instruction-level parallelism, and tuning unroll
-factors is particularly important. 
+factors is particularly important.
 
-We first observe that manual full (or extensive) unrolling is unlikely to be effective for two reasons. Firstly, the \texttt{ijk} loop nest would need to be small enough such that the unrolled instructions do not exceed the instruction cache, which is rarely the case: it is true that in a local assembly kernel the minimum size of the \texttt{ijk} loop nest is 3$\times$3$\times$3 (triangular mesh and polynomial order 1), but this increases rapidly with the polynomial order of the method and the discretization employed (e.g. tetrahedral meshes imply larger loop nests than triangular ones), so sizes greater than 10$\times$10$\times$10, for which extensive unrolling would already be harmful, are in practice very common. Secondly, manual unrolling is dangerous because it may compromise compiler auto-vectorization by either removing loops (most compilers search for vectorizable loops) or losing spatial locality within a vector register. 
+We first observe that manual full (or extensive) unrolling is unlikely to be effective for two reasons. Firstly, the \texttt{ijk} loop nest would need to be small enough such that the unrolled instructions do not exceed the instruction cache, which is rarely the case: it is true that in a local assembly kernel the minimum size of the \texttt{ijk} loop nest is 3$\times$3$\times$3 (triangular mesh and polynomial order 1), but this increases rapidly with the polynomial order of the method and the discretization employed (e.g. tetrahedral meshes imply larger loop nests than triangular ones), so sizes greater than 10$\times$10$\times$10, for which extensive unrolling would already be harmful, are in practice very common. Secondly, manual unrolling is dangerous because it may compromise compiler auto-vectorization by either removing loops (most compilers search for vectorizable loops) or losing spatial locality within a vector register.
 
 By comparison with implementations characterized by manually-unrolled loops, we noticed that recent
 versions of compilers like GNU's and Intel's estimate close-to-optimal unroll
@@ -975,8 +977,8 @@ Sandy Bridge (I7-2600 CPU, running at 3.4GHz, 32KB L1 cache and 256KB
 L2 cache) and a Xeon Phi (5110P, running at 1.05Ghz in native mode,
 32KB L1 cache and 512KB L2 cache). We have chosen these two
 architectures because of the differences in the number of logical
-registers and SIMD lanes (16 256-bit registers in the Sandy Bridge, 
-and 32 512-bit registers in the Xeon Phi), which can impact the 
+registers and SIMD lanes (16 256-bit registers in the Sandy Bridge,
+and 32 512-bit registers in the Xeon Phi), which can impact the
 optimization strategy. The \texttt{icc 13.1} compiler was used. On the
 Sandy Bridge, the compilation flags used were \texttt{-O2} and
 \texttt{-xAVX} for auto-vectorization. On the Xeon Phi, optimization
@@ -988,9 +990,9 @@ analyze the impact of the proposed code transformations, and their interplay,
 in three real-world representative equations. We quantify the speed ups achievable at
 the level of the local assembly kernel, i.e. by excluding from the measurements
 the other sections of the computation. Then, in Section~\ref{sec:full-app}, we
-provide a full-application investigation. Here, we use another equation (so as to 
+provide a full-application investigation. Here, we use another equation (so as to
 bring the total number of examined problems to four) to demonstrate that COFFEE's
-optimizations actually allow a significant reduction in the overall computation run-time 
+optimizations actually allow a significant reduction in the overall computation run-time
 to be achieved, which practically motivates our research.
 
 \subsection{In-depth Performance Analysis of the Code Transformations and their Interplay}
@@ -1424,11 +1426,11 @@ Firedrake and its various software components (see Figure~\ref{fig:coffee-pipeli
 \subsection{Full-application Study}
 \label{sec:full-app}
 In this section, we investigate the performance gain for an entire finite element computation
-developed in Firedrake, a static linear elasticity problem. The source code is available at~\cite{elasticity-code}. The equation is used to simulate deformation of an object caused by pre-established loading conditions. 
+developed in Firedrake, a static linear elasticity problem. The source code is available at~\cite{elasticity-code}. The equation is used to simulate deformation of an object caused by pre-established loading conditions.
 
-The execution time of a (non-explicit) finite element method is dominated by two factors: assembly and solve. The evaluation of all local element matrices and vectors, and their insertion, respectively, in a ``global'' sparse matrix and a global vector, compose the ``assembly'' phase. The global matrix and vector form a linear system, usually solved by an iterative method; this is the ``solve'' phase. The percentage of time spent in assembly and solve varies from problem to problem. As reiterated in the available literature, for example in~\cite{quadrature1}, the computational cost of local assembly grows with the \textit{complexity} of the partial differential equation (e.g. because of larger loops and more articulated expressions), while the solve time increases with polynomial order and mesh discretization. The complexity of an equation depends on several factors, including the number of derivatives and coefficient functions (i.e. additional known functions that characterize the equation). 
+The execution time of a (non-explicit) finite element method is dominated by two factors: assembly and solve. The evaluation of all local element matrices and vectors, and their insertion, respectively, in a ``global'' sparse matrix and a global vector, compose the ``assembly'' phase. The global matrix and vector form a linear system, usually solved by an iterative method; this is the ``solve'' phase. The percentage of time spent in assembly and solve varies from problem to problem. As reiterated in the available literature, for example in~\cite{quadrature1}, the computational cost of local assembly grows with the \textit{complexity} of the partial differential equation (e.g. because of larger loops and more articulated expressions), while the solve time increases with polynomial order and mesh discretization. The complexity of an equation depends on several factors, including the number of derivatives and coefficient functions (i.e. additional known functions that characterize the equation).
 
-We study two versions of the static linear elasticity problem: 1) with one coefficient function, $f=1$, and 2) with two coefficient functions, $f=2$. More coefficient functions are also plausible; however, as we will see, the assembly process starts being particularly expensive already with $f=1$. For each of these two versions, we examine the cases of polynomial order $p=1$ and $p=2$. To run our experiments, we use a single core of the Sandy Bridge architecture described in Section~\ref{sec:perf-results}. The application runs on a tetrahedral mesh composed of 196608 elements. 
+We study two versions of the static linear elasticity problem: 1) with one coefficient function, $f=1$, and 2) with two coefficient functions, $f=2$. More coefficient functions are also plausible; however, as we will see, the assembly process starts being particularly expensive already with $f=1$. For each of these two versions, we examine the cases of polynomial order $p=1$ and $p=2$. To run our experiments, we use a single core of the Sandy Bridge architecture described in Section~\ref{sec:perf-results}. The application runs on a tetrahedral mesh composed of 196608 elements.
 
 \begin{figure}
 	\centering
@@ -1438,7 +1440,7 @@ We study two versions of the static linear elasticity problem: 1) with one coeff
 	\label{fig:full-app-res}
 \end{figure}
 
-In Figure~\ref{fig:full-app-res}, we show the execution times for the four test cases, split over two figures (one for each polynomial order), without and with optimizations enabled. A stacked bar captures the time spent in the assembly phase (\texttt{assembly}), in solving the linear system (\texttt{solve}), and in the other various parts of the program (\texttt{other} - for example, setup of the problem and initialization of the coefficient functions). The \emph{non-opt} and \emph{opt} bars correspond, respectively, to the cases in which no optimizations and a combination of optimizations have been applied. The optimizations applied are generalized loop-invariant code motion, alignment and padding, and expression splitting. We recall that the cost of the insertion of the computed local element matrices (and vectors) in the global matrix (vector) is incorporated in \texttt{assembly}. 
+In Figure~\ref{fig:full-app-res}, we show the execution times for the four test cases, split over two figures (one for each polynomial order), without and with optimizations enabled. A stacked bar captures the time spent in the assembly phase (\texttt{assembly}), in solving the linear system (\texttt{solve}), and in the other various parts of the program (\texttt{other} - for example, setup of the problem and initialization of the coefficient functions). The \emph{non-opt} and \emph{opt} bars correspond, respectively, to the cases in which no optimizations and a combination of optimizations have been applied. The optimizations applied are generalized loop-invariant code motion, alignment and padding, and expression splitting. We recall that the cost of the insertion of the computed local element matrices (and vectors) in the global matrix (vector) is incorporated in \texttt{assembly}.
 
 We first notice that, in the scenario ($f=1, p=1$), the assembly is
 dominated by matrix insertion: despite the application of several
@@ -1457,11 +1459,11 @@ In these experiments, we observe a maximum performance improvement of 1.47$\time
 
 \section{Generality of the Approach and Applicability to Other Domains}
 \label{sec:generality}
-We have demonstrated that our cross-loop optimizations for arithmetic intensity are effective in the context of automated code generation for finite element local assembly. In this section, we discuss about their applicability in other computational domains and, more in general, their integrability within a general-purpose compiler. 
+We have demonstrated that our cross-loop optimizations for arithmetic intensity are effective in the context of automated code generation for finite element local assembly. In this section, we discuss about their applicability in other computational domains and, more in general, their integrability within a general-purpose compiler.
 
 We observe that our choice was to develop COFFEE as a separate, self-contained software module, with clear input/output interfaces, rather then incorporating it within PyOP2. This was motivated by two critical aspects that characterize the generality of our research.
 
-\paragraph{Separation of concerns} We believe that in domain-specific frameworks there must be a clear, logical separation of roles reflecting the various levels of abstractions, with domain-specialists that can completely abstract from performance optimization. In Firedrake, for instance, COFFEE decouples the mathematical specification of a finite element method, captured by the Unified Form Language and the FEniCS Form Compiler, from code optimization. This is of fundamental importance to maximize productivity by allowing scientists to focus only on their area of expertise. Practically speaking, from the perspective of the domain-specific language and compiler designers, our optimization strategy represents an incentive to produce extremely simple representations of the code (e.g. fully-inlined mathematical expressions in the form of an abstract syntax tree, in the case of Firedrake) so as to make the architecture-aware code optimizer completely responsible for choosing and applying the most suitable set of transformations. 
+\paragraph{Separation of concerns} We believe that in domain-specific frameworks there must be a clear, logical separation of roles reflecting the various levels of abstractions, with domain-specialists that can completely abstract from performance optimization. In Firedrake, for instance, COFFEE decouples the mathematical specification of a finite element method, captured by the Unified Form Language and the FEniCS Form Compiler, from code optimization. This is of fundamental importance to maximize productivity by allowing scientists to focus only on their area of expertise. Practically speaking, from the perspective of the domain-specific language and compiler designers, our optimization strategy represents an incentive to produce extremely simple representations of the code (e.g. fully-inlined mathematical expressions in the form of an abstract syntax tree, in the case of Firedrake) so as to make the architecture-aware code optimizer completely responsible for choosing and applying the most suitable set of transformations.
 
 \paragraph{Generalizability to other domains} There are neither conceptual
 nor technical reasons which prevent our compiler being used in applications
@@ -1473,8 +1475,8 @@ assess the generality of the optimization strategy: the extent to which COFFEE a
 \begin{equation}
 \label{eq:assembly-model}
 \scriptsize
-\forall_{i, j} ~~~ A_{ij}^K = \sum_{q=1}^{n_1} \sum_{k=1}^{n_2} \alpha_{k, q}(a', b', c', ...) \beta_{q, i, j}(a, b, c, d, ...) \gamma_{q}(w_K, z_K) 
-\end{equation} 
+\forall_{i, j} ~~~ A_{ij}^K = \sum_{q=1}^{n_1} \sum_{k=1}^{n_2} \alpha_{k, q}(a', b', c', ...) \beta_{q, i, j}(a, b, c, d, ...) \gamma_{q}(w_K, z_K)
+\end{equation}
 
 The expression represents the numerical evaluation of an integral at $n_1$ points in the mesh element $K$ computing the local element matrix $A$. Functions $\alpha$, $\beta$ and $\gamma$ are problem-specific and can be intricately complex, involving for example the evaluation of derivatives. We can however abstract from the inherent structure of $\alpha$, $\beta$ and $\gamma$ to highlight a number of aspects
 
@@ -1486,8 +1488,8 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   locality. The basic idea is to exploit properties of arithmetic operators,
   such as associativity and commutativity, to re-schedule the computation suitably for the underlying architecture. Loop-invariant code motion and expression splitting follow this principle, so they can be re-adapted or extended to any domains involving numerical evaluation of complex mathematical expressions (e.g. electronic structure calculations in physics and quantum chemistry relying on tensor contractions~\cite{TCE}). In this context, we highlight three notable points.
 \begin{enumerate}
-\item In Equation~\ref{eq:assembly-model}, the summations correspond to reduction loops, whereas loops over indices $i$ and $j$ are fully parallel. Throughout the paper we assumed a kernel be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability. 
-\item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slow downs (e.g. whenever the available per-core memory is small). 
+\item In Equation~\ref{eq:assembly-model}, the summations correspond to reduction loops, whereas loops over indices $i$ and $j$ are fully parallel. Throughout the paper we assumed a kernel be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
+\item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slow downs (e.g. whenever the available per-core memory is small).
 \item Associative arithmetic operators are the prerequisite for expression
   splitting. In essence, this transformation concerns resource-aware
   execution. In the context of COFFEE, expression splitting has been
@@ -1515,7 +1517,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   correct code when applying vector-register tiling (see
   Section~\ref{sec:op-vect}) and discovering redundant computation
   opportunities (see Section~\ref{sec:code-transf-licm}). Padding and data
-  alignment are special cases, since they could be performed at run-time if some values were not known at code generation time. Theoretically, they could also be automated by a general-purpose compiler though profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.  
+  alignment are special cases, since they could be performed at run-time if some values were not known at code generation time. Theoretically, they could also be automated by a general-purpose compiler though profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.
 \item \textbf{Multi-loop vectorization.} Compiler auto-vectorization has
   become increasingly effective in a variety of codes. However, to the best
   of our knowledge, multi-loop vectorization involving the loading and
@@ -1527,9 +1529,9 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   expect the performance gain to scale with the number of vectorized loops
   and the vector length (as demonstrated in  the Xeon Phi
   experiments). Although the automation of multi-loop vectorization in a
-  general-purpose compiler is far from straightforward, especially if stencils are present, we believe that this could be more easily achieved in specific domains. The intuition is to map the memory access pattern on vector registers, and then exploit in-register shuffling to minimize the traffic between memory and processor. By demonstrating the effectiveness of multi-loop vectorization in a real scenario, our research represents an incentive for studying this technique in a broader and systematic way. 
+  general-purpose compiler is far from straightforward, especially if stencils are present, we believe that this could be more easily achieved in specific domains. The intuition is to map the memory access pattern on vector registers, and then exploit in-register shuffling to minimize the traffic between memory and processor. By demonstrating the effectiveness of multi-loop vectorization in a real scenario, our research represents an incentive for studying this technique in a broader and systematic way.
 \end{itemize}
-%We conclude noting that despite experiments were performed on Intel platforms only, performance gains are expected even on completely different CPU architectures, since the techniques proposed in this paper involves re-scheduling 
+%We conclude noting that despite experiments were performed on Intel platforms only, performance gains are expected even on completely different CPU architectures, since the techniques proposed in this paper involves re-scheduling
 
 %In this paper, we have shown how to optimize cross-loop arithmetic intensity for standard CPUs, although different optimization strategies are probably needed for other architectures (e.g. GPUs may benefit from distribution of fully-parallel loops among different threads to optimize shared memory usage).
 
@@ -1596,16 +1598,16 @@ steer the optimization process.
 \section{Conclusions}
 \label{sec:conclusions}
 
-In this paper, we have presented the study and systematic performance 
-evaluation of a class of composable cross-loop optimizations for improving 
-arithmetic intensity in finite element local assembly kernels, and their 
-integration in a novel compiler, COFFEE. In the context of automated code 
-generation for finite element local assembly, COFFEE is the first compiler 
-capable of introducing low-level optimizations to maximize instruction-level 
-parallelism, register locality and SIMD vectorization. Assembly kernels have 
-particular characteristics. Their iteration space is usually very small, with 
-the size depending on aspects like the degree of accuracy one wants to 
-reach (polynomial order of the method) and the mesh discretization employed. 
+In this paper, we have presented the study and systematic performance
+evaluation of a class of composable cross-loop optimizations for improving
+arithmetic intensity in finite element local assembly kernels, and their
+integration in a novel compiler, COFFEE. In the context of automated code
+generation for finite element local assembly, COFFEE is the first compiler
+capable of introducing low-level optimizations to maximize instruction-level
+parallelism, register locality and SIMD vectorization. Assembly kernels have
+particular characteristics. Their iteration space is usually very small, with
+the size depending on aspects like the degree of accuracy one wants to
+reach (polynomial order of the method) and the mesh discretization employed.
 The data space, in terms of number of arrays and scalars required to evaluate
 the element matrix, grows proportionally with the complexity of the
 finite element problem. COFFEE has been developed taking into account
@@ -1620,7 +1622,7 @@ platforms. Further work includes a comprehensive study about
 feasibility and constraints on transforming kernels into a sequence of
 calls to external linear algebra libraries. COFFEE supports all of the
 problems expressible in Firedrake, and is already integrated with
-this framework. The generality and the applicability of the proposed 
+this framework. The generality and the applicability of the proposed
 code transformations to other domains has also been discussed.
 
 
