@@ -876,7 +876,7 @@ transformations are always performed because they are likely to improve
 the run-time performance, as demonstrated by our results in Section~\ref{sec:analysis-code-transf}.
 Based on a cost model (described later), loop interchange, \emph{split},
 and \emph{op-vect} may be introduced. Their implementation is centered
-on analysis and manipulation of the kernel's AST. When \emph{op-vect}
+on analysis and manipulation of the kernel AST. When \emph{op-vect}
 is selected, the compiler outputs AVX or AVX-512 intrinsics code. Any
 possible corner cases are handled: for example, if \emph{op-vect} is to
 be applied, but the size of the iteration space is not a multiple of the vector
@@ -914,7 +914,7 @@ versions of compilers like GNU's and Intel's estimate close-to-optimal unroll
 factors when the loops are affine and their bounds are relatively small and known
 at compile-time, which is the case of our kernels. Our choice, therefore, is to leave
 the backend compiler in charge of selecting unroll factors. This
-also simplifies the COFFEE's cost model, described next. The only situation in
+also simplifies COFFEE's cost model, described next. The only situation in
 which we explicitly unroll-and-jam a loop is when \emph{op-vect} is
 used, since the transformed code prevents the Intel compiler from
 applying this optimization, even if specific pragmas are added.
