@@ -1604,9 +1604,9 @@ and symbolic manipulation~\cite{Francis} have been implemented. Nevertheless, it
 Optimization of quadrature-based local assembly for CPU
 architectures has been addressed in FEniCS~\cite{quadrature1}. The
 comparison between COFFEE and this work has been presented in
-Section~\ref{sec:perf-results-fenics}. In~\cite{Markall20101815}, and
-more recently in~\cite{petsc-integration-gpu}, the same problem has been
-studied for GPU architectures. In~\cite{assembly-opencl}, variants of
+Section~\ref{sec:perf-results-fenics}. In~\citeN{Markall20101815}, and
+more recently in~\citeN{petsc-integration-gpu}, the same problem has been
+studied for GPU architectures. In~\citeN{assembly-opencl}, variants of
 the standard numerical integration algorithm have been specialized and
 evaluated for the PowerXCell processor, but an exhaustive study from
 the compiler viewpoint - like ours - is missing, and none of the
@@ -1619,7 +1619,7 @@ Our compiler-based optimization approach is made possible by the
 top-level DSL, which enables automated code generation. DSLs have been
 proven successful in auto-generating optimized code for other domains:
 Spiral~\cite{Pueschel:05} for digital signal processing numerical
-algorithms, ~\cite{Spampinato:14} for dense linear algebra, or
+algorithms, ~\citeN{Spampinato:14} for dense linear algebra, or
 Pochoir~\cite{pochoir} and SDSL~\cite{stencil-compiler} for image
 processing and finite difference stencils. Similarly, PyOP2 is used by
 Firedrake to express iteration over unstructured meshes in scientific
