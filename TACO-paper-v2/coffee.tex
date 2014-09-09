@@ -195,7 +195,7 @@ During the assembly phase, the solution of the PDE is approximated by
 executing a problem-specific kernel over all cells, or elements, in the
 discretized domain. In this work, we focus on relatively low order finite
 element methods, in which an assembly kernel's working set is usually small
-enough to fit the L1 cache. Low order methods are by no means exotic: they
+enough to fit the L1 cache of traditional CPU architectures. Low order methods are by no means exotic: they
 are employed in a wide variety of fields, including climate and ocean
 modeling, computational fluid dynamics, and structural mechanics. The
 efficient assembly of high order methods such as the spectral element
