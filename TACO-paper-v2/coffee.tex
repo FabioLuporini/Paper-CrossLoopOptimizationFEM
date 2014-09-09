@@ -683,7 +683,7 @@ being the unroll-and-jam factor.
 %registers.
 
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.8]{Pictures/vect-by-vect-inline.pdf}}
+\centerline{\includegraphics[scale=0.6]{Pictures/vect-by-vect-inline.pdf}}
 \caption{Outer-product vectorization by permuting values in a vector
   register.}
 \label{fig:vect-by-vect}
@@ -699,7 +699,7 @@ Helmholtz problem when using \emph{op-vect} is shown in
 Figure~\ref{code:helmholtz-opvect}.
 
 \begin{figure}[h]
-\centerline{\includegraphics[scale=0.8]{Pictures/vect-restore-inline.pdf}}
+\centerline{\includegraphics[scale=0.6]{Pictures/vect-restore-inline.pdf}}
 \caption{Restoring the storage layout after \emph{op-vect}. The figure
   shows how 4$\times$4 elements in the top-left block of the element
   matrix $A$ can be moved to their correct positions. Each rotation,
@@ -823,28 +823,9 @@ as shown in Section~\ref{sec:perf-results}, the performance gain from
 improved register reuse along inner dimensions can still be greater,
 especially if the split factor and the splitting itself use heuristics
 to minimize the aforementioned issues.
+~\\
 
-\begin{table}[h]
-\tbl{Overview of code transformations for Firedrake-generated assembly kernels.}{
-\begin{tabulary}{1.0\columnwidth}{C|C}
-\hline
-Name (Abbreviation) & Parameter \\\hline
-Generalized loop-invariant code motion (\emph{licm}) &   \\
-Padding &  \\
-Data Alignment & \\
-Loop interchange      & loops  \\
-Loop unrolling  & unroll factor \\
-Outer-product vectorization (\emph{op-vect}) & tile size \\
-Expression splitting (\emph{split}) & split point, split factor \\ \hline
-\end{tabulary}
-}
-\label{table:code-transformations}
-\end{table}
-
-Table~\ref{table:code-transformations} summarizes the code
-transformations described so far. Given that many of these
-transformations depend on some parameters, we need a
-mechanism to prune such a large optimization space, which can be as large as order of thousands variants for medium-size loops and moderately complex mathematical expressions (all parametric transformations can indeed be combined). This aspect is treated in Section~\ref{sec:pyop2-compiler}.
+Some of the transformations presented in this section, as well as other typical compiler optimizations applicable by COFFEE, like loop interchange and unrolling, are parametric; for instance, expression splitting and loop unrolling depend on the split and the unroll factors, respectively. Since all transformations are composable, the optimization space can be as large as order of thousands variants for local assembly kernels in which mathematical expressions are moderately complex and the iteration space is not particularly small, so a strategy to prune it is required. This problem is treated in the following section.
 
 \section{Overview of COFFEE}
 \label{sec:pyop2-compiler}
