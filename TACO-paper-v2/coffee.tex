@@ -991,15 +991,17 @@ Sandy Bridge, the compilation flags used were \texttt{-O2} and
 level \texttt{-O3} was used. Other optimization levels performed, in
 general, slightly worse.
 
-We present two studies. Firstly, in Section~\ref{sec:analysis-code-transf}, we
-analyze the impact of the proposed code transformations, and their interplay,
-in three real-world representative equations. We quantify the speed ups achievable at
-the level of the local assembly kernel, i.e. by excluding from the measurements
-the other sections of the computation. Then, in Section~\ref{sec:full-app}, we
-provide a full-application investigation. Here, we use another equation (so as to
-bring the total number of examined problems to four) to demonstrate that COFFEE's
-optimizations actually allow a significant reduction in the overall computation run-time
-to be achieved, which practically motivates our research.
+We present two studies. Firstly, in
+Section~\ref{sec:analysis-code-transf}, we analyze the impact of the
+proposed code transformations, and their interplay, in three real-world
+representative equations. We quantify the speedups achievable at the
+level of the local assembly kernel, by excluding the other stages of the
+computation from the measurements. Then, in Section~\ref{sec:full-app},
+we provide a full-application investigation. Here, we use another
+equation, bringing the total number of examined problems to four,
+to demonstrate that COFFEE's optimizations actually allow a significant
+reduction in the overall computation run-time to be achieved, which
+practically motivates our research.
 
 \subsection{In-depth Performance Analysis of the Code Transformations and their Interplay}
 \label{sec:analysis-code-transf}
@@ -1007,7 +1009,7 @@ to be achieved, which practically motivates our research.
 \subsubsection{Choice and Properties of the Benchmarks}
 \label{sec:real-examples}
 Our code transformations were evaluated in three real-world problems
-based on the following PDEs
+based on the following PDEs:
 \begin{enumerate}
 \item Helmholtz
 \item Advection-Diffusion
@@ -1025,7 +1027,7 @@ that of the three analyzed equations.
 
 The Helmholtz and Diffusion kernels are archetypal second order elliptic
 operators. They are complete and unsimplified examples of the
-operators occurring for diffusion and viscosity in fluids, and for
+operators used to model diffusion and viscosity in fluids, and for
 imposing pressure in compressible fluids. As such, they are both
 extensively used in climate and ocean modeling. Very similar
 operators, for which the same optimisations are expected to be equally
@@ -1036,10 +1038,10 @@ real applications whenever a quantity is transported by a fluid (the
 momentum itself, in our case). We chose this particular kernel since
 it applies to a vector-valued quantity, while the elliptic operators
 apply to scalar quantities; this impacts the generated code, as
-explained next. In this way, the operators we have selected are
-characteristic of both the second and first order operators that
-dominate in fluids and solids simulations, and a wide variety on local
-assembly codes can be tested.
+explained next. The operators we have selected are characteristic of
+both the second and first order operators that dominate fluids and
+solids simulations.
+%and a wide variety on local assembly codes can be tested.
 
 The benchmarks were written in UFL (code available at~\cite{ufl-code})
 and executed over real unstructured meshes through Firedrake. The
@@ -1048,7 +1050,7 @@ Listing~\ref{code:helmholtz}. For Advection-Diffusion, the Diffusion
 equation, which uses the same differential operators as Helmholtz, is
 considered. In the Diffusion kernel code, the main differences with
 respect to Helmholtz are the absence of the $Y$ array and the presence
-of a few more constants for computing the element matrix. Burgers is a
+of additional constants for computing the element matrix. Burgers is a
 non-linear problem employing differential operators different from
 those of Helmholtz and relying on vector-valued quantities, which has
 a major impact on the generated assembly code (see
@@ -1060,12 +1062,12 @@ These problems were studied varying both the shape of mesh elements
 and the polynomial order $p$ of the method, whereas the element
 family, Lagrange, is fixed. As might be expected, the larger the
 element shape and $p$, the larger the iteration space. Triangles,
-tetrahedron, and prisms were tested as element shape. For instance, in
+tetrahedra, and prisms were tested as element shape. For instance, in
 the case of Helmholtz with $p=1$, the size of the \texttt{j} and
 \texttt{k} loops for the three element shapes is, respectively, $3$,
 $4$, and $6$. Moving to bigger shapes has the effect of increasing the
 number of basis function arrays, since, intuitively, the behaviour of
-the equation has now to be approximated also along a third axis. On
+the equation has to be approximated also along a third axis. On
 the other hand, the polynomial order affects only the problem size
 (the three loops \texttt{i}, \texttt{j}, and \texttt{k}, and, as a
 consequence, the size of $X$ and $Y$ arrays). A range of polynomial
@@ -1079,7 +1081,7 @@ $p=4$.
 In the following, only results for the loop order \texttt{ijk} are
 shown. For the considerations exposed in
 Section~\ref{sec:pyop2-compiler}, loop interchanges having an inner
-loop along \texttt{i} caused slow downs; also, interchanging
+loop along \texttt{i} caused slowdowns; also, interchanging
 \texttt{j} and \texttt{k} loops while keeping \texttt{i} as outermost
 loop did not provide any benefits.
 
@@ -1117,7 +1119,7 @@ loop did not provide any benefits.
 \end{table*}
 Table~\ref{table:perf-results-licm} illustrates the performance
 improvement obtained when \emph{licm} is applied. In general, the
-speed ups are notable. The main reasons were anticipated in
+speedups are notable. The main reasons were anticipated in
 Section~\ref{sec:code-transf-licm}: in the original code, 1)
 sub-expressions invariant to outer loops are not automatically
 hoisted, while 2) sub-expressions invariant to the innermost loop are
@@ -1133,11 +1135,11 @@ discrepancies to this trend are due to a less effective
 auto-vectorization. For instance, on the Sandy Bridge, the improvement
 at $p=3$ is larger than that at $p=4$ because, in the latter case, the
 size of the innermost loop is not a multiple of the vector length, and
-a reminder scalar loop is introduced at compile time. Since the loop
+a remainder scalar loop is introduced at compile time. Since the loop
 nest is small, the cost of executing the extra scalar iterations can
-have a significant impact. The reminder loop overhead is more
-pronounced on the Xeon Phi, where the vector length is twice as big,
-which leads to proportionally larger scalar reminder loops.
+have a significant impact. The remainder loop overhead is more
+pronounced on the Xeon Phi, where the vector length is twice as long,
+which leads to proportionally larger scalar remainder loops.
 
 
 \subsubsection{Impact of Padding and Data Alignment}
@@ -1175,7 +1177,7 @@ which leads to proportionally larger scalar reminder loops.
 Table~\ref{table:perf-results-licmap} shows the cumulative impact of
 \emph{licm}, data alignment, and padding over the original code. In
 the following, this version of the code is referred to as
-\emph{licm-ap}. Padding, which avoids the introduction of a reminder
+\emph{licm-ap}. Padding, which avoids the introduction of a remainder
 loop as described in Section~\ref{licm-impact}, as well as data
 alignment, enhance the quality of auto-vectorization. Occasionally the
 run-time of \emph{licm-ap} is close to that of \emph{licm}, since the
@@ -1251,7 +1253,7 @@ the computation, 73$\%$ of instructions are actually floating-point
 operations.
 
 Application of \emph{op-vect} to the Burgers problem induces
-significant slow downs due to the large number of temporary arrays
+significant slowdowns due to the large number of temporary arrays
 that need to be tiled, which exceeds the available logical registers
 on the underlying architecture. Expression splitting can be used in
 combination with \emph{op-vect} to alleviate this issue; this is
@@ -1282,16 +1284,15 @@ discussed in the next section.
 %for which efficient register allocation can be already guaranteed
 
 \subsubsection{Impact of Expression Splitting}
-\label{sec:perf-results-split}
-Expression splitting relieves the register pressure when the element
-matrix evaluation needs to read from a large number of basis function
-arrays. As detailed in Section~\ref{sec:expr-split}, in the price to
-pay for this optimazion, there are an increased number of accesses to
-the element matrix and, potentially, redundant computation. Similarly
-to the analysis of vector-register tiling, we compare two versions:
-the baseline, \emph{licm-ap}; and expression splitting on top of
-\emph{licm-ap}, which, for simplicity, in the following is referred to
-as \emph{split}.
+\label{sec:perf-results-split} Expression splitting relieves the
+register pressure when the element matrix evaluation needs to read from
+a large number of basis function arrays. As detailed in
+Section~\ref{sec:expr-split}, the price to pay for this optimazion is an
+increased number of accesses to the element matrix and, potentially,
+redundant computation. Similarly to the analysis of vector-register
+tiling, we compare two versions: the baseline, \emph{licm-ap}, and
+expression splitting on top of \emph{licm-ap}, which, for simplicity, in
+the following is referred to as \emph{split}.
 
 For the Helmholtz and Diffusion kernels, in which only between 4 and 8
 temporaries are read at every loop iteration, \texttt{split} tends to
@@ -1299,8 +1300,8 @@ slow down the computation, because of the aforementioned
 drawbacks. Slow downs up to 1.4$\times$ and up to 1.6$\times$ were
 observed, respectively, on the Sandy Bridge and the Xeon Phi. Note
 that the cost model prevents the adoption of the transformation: the
-\texttt{while} statement in Figure~\ref{algo:applyCostModel} is indeed
-never entered.
+\texttt{while} statement in Figure~\ref{algo:applyCostModel} is never
+entered.
 
 In the Burgers kernels, between 12 and 24 temporaries are accessed at
 every loop iteration, so \emph{split} plays a key role on the Sandy
@@ -1373,6 +1374,8 @@ optimization is currently under development in COFFEE, although it
 will differ from FEniCS' by avoiding non-contiguous memory accesses,
 which would otherwise affect vectorization, at the price of removing
 fewer zero-valued contributions.
+
+% FIXME: fastest quadrature or does that include tensor representation?
 
 Table~\ref{table:comparison-to-FFC-opt} summarizes the performance
 achieved by COFFEE over the \emph{fastest} FEniCS (FFC) implementation
@@ -1461,7 +1464,17 @@ generalized loop-invariant code motion was particularly invasive in this
 case, with 23 temporaries generated and several redundancies discovered (see
 Section~\ref{sec:code-transf-licm}).
 
-In these experiments, we observe a maximum performance improvement of 1.47$\times$ over the non-optimized local assembly code, obtained in the case ($f=2, p=2$). However, we reiterate the fact that full-application speed ups rise proportionally with the amount of time spent in assembly and, therefore, with the complexity of the equation. By increasing polynomial order and number of coefficient functions, or by simply studying a different, more complex equation, it is our experience that performance gains become increasingly more relevant. The choice of studying the static linear elasticity equation was to show that even relatively simple problems can be characterized by a large proportion of execution time spent in assembly.
+In these experiments, we observe a maximum performance improvement of
+1.47$\times$ over the non-optimized local assembly code, obtained in the
+case ($f=2, p=2$). However, we reiterate the fact that full-application
+speed ups increase proportionally with the amount of time spent in
+assembly and, therefore, with the complexity of the equation. By
+increasing polynomial order and number of coefficient functions, or by
+simply studying a different, more complex equation, it is our experience
+that performance gains become increasingly more relevant. The choice of
+studying the static linear elasticity equation was to show that even
+relatively simple problems can be characterized by a large proportion of
+execution time spent in assembly.
 
 \section{Generality of the Approach and Applicability to Other Domains}
 \label{sec:generality}
