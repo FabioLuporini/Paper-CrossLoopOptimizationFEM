@@ -1480,16 +1480,40 @@ execution time spent in assembly.
 \label{sec:generality}
 We have demonstrated that our cross-loop optimizations for arithmetic intensity are effective in the context of automated code generation for finite element local assembly. In this section, we discuss about their applicability in other computational domains and, more in general, their integrability within a general-purpose compiler.
 
-We observe that our choice was to develop COFFEE as a separate, self-contained software module, with clear input/output interfaces, rather then incorporating it within PyOP2. This was motivated by two critical aspects that characterize the generality of our research.
+COFFEE was developed as a separate, self-contained software module, with
+clear input/output interfaces, rather then incorporating it within
+PyOP2. This choice was motivated by two critical aspects that
+characterize the generality of our research.
 
-\paragraph{Separation of concerns} We believe that in domain-specific frameworks there must be a clear, logical separation of roles reflecting the various levels of abstractions, with domain-specialists that can completely abstract from performance optimization. In Firedrake, for instance, COFFEE decouples the mathematical specification of a finite element method, captured by the Unified Form Language and the FEniCS Form Compiler, from code optimization. This is of fundamental importance to maximize productivity by allowing scientists to focus only on their area of expertise. Practically speaking, from the perspective of the domain-specific language and compiler designers, our optimization strategy represents an incentive to produce extremely simple representations of the code (e.g. fully-inlined mathematical expressions in the form of an abstract syntax tree, in the case of Firedrake) so as to make the architecture-aware code optimizer completely responsible for choosing and applying the most suitable set of transformations.
+\paragraph{Separation of concerns} We believe that in domain-specific
+frameworks there must be a clear, logical separation of roles reflecting
+the various levels of abstraction, where domain specialists are
+completely separated from performance optimization. In Firedrake, for
+instance, COFFEE decouples the mathematical specification of a finite
+element method, captured by the Unified Form Language and the FEniCS
+Form Compiler, from code optimization. This is of fundamental importance
+to maximize productivity by allowing scientists to focus only on their
+area of expertise. Practically speaking, from the perspective of the
+domain-specific language and compiler designers, our optimization
+strategy represents an incentive to produce extremely simple
+representations of the code (e.g. fully-inlined mathematical expressions
+in the form of an abstract syntax tree, in the case of Firedrake) so as
+to make the architecture-aware code optimizer completely responsible for
+choosing and applying the most suitable set of transformations.
 
-\paragraph{Generalizability to other domains} There are neither conceptual
-nor technical reasons which prevent our compiler being used in applications
-other than Firedrake. For example, integration with the popular FEniCS
-framework, the pioneer of automated code generation for finite element local
-assembly, would be relatively easy to achieve. It is more challenging to
-assess the generality of the optimization strategy: the extent to which COFFEE and its transformations are transferable to other computational domains, perhaps other DSLs, and to what extent this would be helpful for improving full-application performance. To answer these questions, we first need to go back to the origins of our compiler. The starting point of our work was the mathematical formulation of a local assembly operation, expressible as follows
+\paragraph{Generalizability to other domains} There are neither
+conceptual nor technical reasons which prevent our compiler from being
+used in applications other than Firedrake. For example, integration with
+the popular FEniCS framework, the pioneer of automated code generation
+for finite element local assembly, would be relatively easy to achieve.
+It is more challenging to assess the generality of the optimization
+strategy: the extent to which COFFEE and its transformations are
+transferable to other computational domains, perhaps other DSLs, and to
+what extent this would be helpful for improving full-application
+performance. To answer these questions, we first need to go back to the
+origins of our compiler. The starting point of our work was the
+mathematical formulation of a local assembly operation, expressible as
+follows
 
 \begin{equation}
 \label{eq:assembly-model}
@@ -1507,19 +1531,21 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   locality. The basic idea is to exploit properties of arithmetic operators,
   such as associativity and commutativity, to re-schedule the computation suitably for the underlying architecture. Loop-invariant code motion and expression splitting follow this principle, so they can be re-adapted or extended to any domains involving numerical evaluation of complex mathematical expressions (e.g. electronic structure calculations in physics and quantum chemistry relying on tensor contractions~\cite{TCE}). In this context, we highlight three notable points.
 \begin{enumerate}
-\item In Equation~\ref{eq:assembly-model}, the summations correspond to reduction loops, whereas loops over indices $i$ and $j$ are fully parallel. Throughout the paper we assumed a kernel be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
+\item In Equation~\eqref{eq:assembly-model}, the summations correspond
+  to reduction loops, whereas loops over indices $i$ and $j$ are fully
+  parallel. Throughout the paper we assumed a kernel to be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
 \item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slow downs (e.g. whenever the available per-core memory is small).
 \item Associative arithmetic operators are the prerequisite for expression
   splitting. In essence, this transformation concerns resource-aware
   execution. In the context of COFFEE, expression splitting has been
-  successfully applied to improve register pressure. However, underlying
+  successfully applied to improve register pressure. However, the underlying
   idea of re-scheduling (re-associating) operations to optimize for some
   generic parameters is far more general. It could be used, for example, as
   a starting point to perform kernel fission; that is, splitting a kernel
   into multiple parts, each part characterized by less stringent memory
   requirements (a variant of this idea for non-affine loops in unstructured
-  mesh applications has been adopted in~\cite{carlolcpc}). In
-  Equation~\ref{eq:assembly-model}, for instance, not only can  any of the
+  mesh applications has been adopted in~\citeN{carlolcpc}). In
+  Equation~\eqref{eq:assembly-model}, for instance, not only can  any of the
   functions $\alpha$, $\beta$ and $\gamma$ be split (assuming they include
   associative operators), but $\alpha$ could be completely extracted and
   evaluated in a separate kernel. This would reduce the working set size of
@@ -1536,7 +1562,9 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   correct code when applying vector-register tiling (see
   Section~\ref{sec:op-vect}) and discovering redundant computation
   opportunities (see Section~\ref{sec:code-transf-licm}). Padding and data
-  alignment are special cases, since they could be performed at run-time if some values were not known at code generation time. Theoretically, they could also be automated by a general-purpose compiler though profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.
+  alignment are special cases, since they could be performed at run-time
+  if some values were not known at code generation time. Theoretically,
+  they could also be automated by a general-purpose compiler through profile-guided optimization, provided that some sort of data-flow analysis is performed to ensure that the extra loop iterations over the padded region do not affect the numerical results.
 \item \textbf{Multi-loop vectorization.} Compiler auto-vectorization has
   become increasingly effective in a variety of codes. However, to the best
   of our knowledge, multi-loop vectorization involving the loading and
