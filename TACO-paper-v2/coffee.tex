@@ -334,6 +334,7 @@ of our results, and identifies priorities for future work.
 
 \begin{table}[b]
 \tbl{Type and variable names used in the various listings to identify local assembly objects.}{
+\scriptsize
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Object name & Type & Variable name(s) \\\hline
@@ -1614,6 +1615,8 @@ optimizations presented in Section~\ref{sec:code-transf} are
 mentioned. Among these efforts, to the best of our knowledge, COFFEE
 is the first work targeting low-level optimizations through a real
 compiler approach.
+
+The code transformations presented are inspired by standard compilers optimizations and exploit domain properties. Our loop-invariant code motion technique individuates invariant sub-expressions and redundant computation by analyzing all loops in an iteration space, which is a generalization of the algorithms often implemented by general-purpose compilers. Expression splitting is an abstract variant of loop fission based on properties of arithmetic operators. The outer-product vectorization is an implementation of tiling at the level of vector registers; tiling, or ``loop blocking'', is commonly used to improve data locality (especially for caches). Padding has been used to achieve data alignment and to improve the effectiveness of vectorization. A standard reference for the compilation techniques re-adapted in this work is~\citeN{dragonbook}.
 
 Our compiler-based optimization approach is made possible by the
 top-level DSL, which enables automated code generation. DSLs have been
