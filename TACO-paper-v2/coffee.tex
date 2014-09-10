@@ -152,7 +152,7 @@ Comp.~Sci., Louisiana State University.
 
 In many fields such as computational fluid dynamics, computational
 electromagnetics and structural mechanics, phenomena are modelled by
-partial differential equations (PDEs). Numerical techniques, like the
+partial differential equations (PDEs). Numerical techniques, such as the
 finite volume method and the finite element method, are widely employed
 to approximate solutions of these PDEs. Unstructured meshes are often
 used to discretize the computational domain, since they allow an
@@ -203,10 +203,11 @@ method \cite{SPENCER} requires a significantly different loop nest structure.
 High order methods are therefore excluded from our study.
 
 We aim to maximize our impact on the platforms that are realistically used
-for finite element applications, so we target conventional CPU architectures. 
+for finite element applications, so we target conventional CPU architectures
+rather than GPUs. 
 The key limiting factor to the execution on GPUs is the stringent memory requirements. 
-Only relatively small meshes can fit a GPU memory, and distributed execution is minimally
-supported by available frameworks (if any). There has been some research on
+Only relatively small problems fit in a GPU memory, and support for
+distributed GPU execution in general purpose finite element frameworks is minimal. There has been some research on
 adapting local assembly to GPUs (which we mention in Section~\ref{sec:related-work}),
 although it differs from ours in several ways, including: (i) not relying on
 automated code generation from a domain-specific language (explained next),
@@ -1546,7 +1547,10 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
 \begin{enumerate}
 \item In Equation~\eqref{eq:assembly-model}, the summations correspond
   to reduction loops, whereas loops over indices $i$ and $j$ are fully
-  parallel. Throughout the paper we assumed a kernel to be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
+  parallel. Throughout the paper we assumed that a kernel will be executed
+  by a single thread, which is likely to be the best strategy for standard
+  multi-core CPUs. On the other hand, we note that for certain architectures
+  (for example GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
 \item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slowdowns (e.g. whenever the available per-core memory is small).
 \item Associative arithmetic operators are the prerequisite for expression
   splitting. In essence, this transformation concerns resource-aware
@@ -1565,7 +1569,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   each of the kernel functions, an option which is particularly attractive for many-core architectures in which the available per-core memory is much smaller than that in traditional CPUs.
 \end{enumerate}
 \item \textbf{Code generation and applicability of the transformations.} All
-  array sizes and loop bounds, like $n1$ and $n2$ in
+  array sizes and loop bounds, for example $n1$ and $n2$ in
   Equation~\ref{eq:assembly-model}, are known at code generation time. This
   means that ``good'' code can be generated. For example, loop bounds can be
   made explicit, arrays can be statically initialized, and pointer aliasing
