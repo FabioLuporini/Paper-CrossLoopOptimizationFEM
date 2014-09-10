@@ -89,7 +89,7 @@ implementation of a compiler for local assembly kernels, fully
 integrated with a framework for developing finite element methods.
 The compiler manipulates abstract syntax trees generated from a domain-specific
 language by introducing domain-aware optimizations and, eventually,
-produces C code including vector SIMD intrinsics. Experiments using a range of finite-element
+produces C code including vector SIMD intrinsics. Experiments using a range of real-world finite-element
 problems of increasing complexity show that significant performance improvement
 is achieved. The generality of the approach and the applicability of the proposed
 code transformations to other domains is also discussed.
@@ -202,6 +202,22 @@ efficient assembly of high order methods such as the spectral element
 method \cite{SPENCER} requires a significantly different loop nest structure.
 High order methods are therefore excluded from our study.
 
+We aim to maximize our impact on the platforms that are realistically used
+for finite element applications, so we target conventional CPU architectures. 
+The key limiting factor to the execution on GPUs is the stringent memory requirements. 
+Only relatively small meshes can fit a GPU memory, and distributed execution is minimally
+supported by available frameworks (if any). There has been some research on
+adapting local assembly to GPUs (which we mention in Section~\ref{sec:related-work}),
+although it differs from ours in several ways, including: (i) not relying on
+automated code generation from a domain-specific language (explained next),
+(ii) testing only very low order methods, (iii) not optimizing for
+cross-loop arithmetic intensity (the goal is rather effective multi-thread
+parallelization). In addition, our code transformations would drastically impact the 
+GPU parallelization strategy, for example by increasing a thread's working set. 
+For all these reasons, a study on extending our work to GPU architectures is 
+beyond the scope of this paper. In Section~\ref{sec:generality}, however, we provide 
+some intuitions about this research direction.
+
 An assembly kernel is characterized by the presence of an affine,
 often non-perfect loop nest, in which individual loops are rather
 small: their trip count rarely exceeds 30, and may be as low as 3 for
@@ -213,11 +229,11 @@ like the minimization of floating-point operations, register allocation
 and instruction-level parallelism, especially in the form of SIMD
 vectorization.
 
-Achieving high performance is non-trivial. The complexity of the
+Achieving high performance on CPUs is non-trivial. The complexity of the
 mathematical expressions, often characterized by a large number of
 operations on constants and small matrices, makes it hard to determine a
 single or specific sequence of transformations that is successfully
-applicable to all problems. Loop trip counts are typically small and can
+applicable to different problems (equations). Loop trip counts are typically small and can
 vary significantly, which further exacerbates the issue. A
 compiler-based approach is, therefore, the only reasonable option to
 obtain close-to-peak performance in a wide range of different local
@@ -320,7 +336,7 @@ of our results, and identifies priorities for future work.
 %\NoCaptionOfAlgo
 %\RestoreCaptionOfAlgo
 
-\begin{figure}
+\begin{figure}[b]
 \begin{alltt}
 \scriptsize
 \textbf{Input:} element matrix (2D array, initialized to 0), coordinates (array), coefficients (array, e.g. velocity)
@@ -661,6 +677,7 @@ Listing~\ref{code:helmholtz-licm} and we ignore the presence of the
 operation \texttt{det*W3[i]}, the computation of the element matrix is
 abstractly expressible as
 \begin{equation}
+\scriptsize
 \label{outer-product}
 A_{jk} = \sum_{\substack{
   x \in B' \subseteq B \\
@@ -850,7 +867,7 @@ Some of the transformations presented in this section, as well as other typical 
 %\rule[0.2ex]{16cm}{0.5pt}
 \begin{figure}[b]
 \begin{center}
-\includegraphics[scale=0.75]{Pictures/coffee-pipeline.pdf}
+\includegraphics[scale=0.70]{Pictures/coffee-pipeline.pdf}
 \caption{High-level view of Firedrake. COFFEE is at the core,
   receiving ASTs from a modified version of the FEniCS Form Compiler
   and producing optimized C code kernels.}
@@ -1013,12 +1030,9 @@ practically motivates our research.
 \subsubsection{Choice and Properties of the Benchmarks}
 \label{sec:real-examples}
 Our code transformations were evaluated in three real-world problems
-based on the following PDEs:
-\begin{enumerate}
-\item Helmholtz
-\item Advection-Diffusion
-\item Burgers
-\end{enumerate}
+based on the following PDEs: (i) Helmholtz, (ii) Advection-Diffusion, 
+and (iii) Burgers.
+
 The three chosen benchmarks are \emph{real-life kernels} and comprise
 the core differential operators in some of the most frequently
 encountered finite element problems in scientific computing. This is
@@ -1115,10 +1129,7 @@ loop did not provide any benefits.
 
 \begin{table*}[t]
 \tbl{Performance improvement due to generalized loop-invariant code
-  motion, for different element shapes (triangle, tetrahedron, prism)
-  and polynomial orders ($p \in [1, 4]$), over the original
-  non-optimized code, for the Helmholtz, Diffusion and Burgers
-  problems.}{ \scriptsize \licmresultsnorms }
+  motion over the original non-optimized code.}{ \scriptsize \licmresultsnorms }
 \label{table:perf-results-licm}
 \end{table*}
 Table~\ref{table:perf-results-licm} illustrates the performance
@@ -1171,10 +1182,7 @@ which leads to proportionally larger scalar remainder loops.
 
 \begin{table*}[t]
 \tbl{Performance improvement due to generalized loop-invariant code
-  motion, data alignment, and padding, for different element shapes
-  (triangle, tetrahedron, prism) and polynomial orders ($p \in [1,
-    4]$), over the original non-optimized code, for the Helmholtz,
-  Diffusion and Burgers problems.}{ \scriptsize \licmapresultsnorms }
+  motion, data alignment, and padding over the original non-optimized code.}{ \scriptsize \licmapresultsnorms }
 \label{table:perf-results-licmap}
 \end{table*}
 
@@ -1265,8 +1273,8 @@ discussed in the next section.
 
 \begin{figure}[t]
 	\centering
-	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/helmholtz-normalized-opvect.pdf}}
-	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/helmholtz-normalized-opvect-phi.pdf}}
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.48]{Pictures/helmholtz-normalized-opvect.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.48]{Pictures/helmholtz-normalized-opvect-phi.pdf}}
 	\caption{Performance improvement over \emph{licm-ap} obtained
           by \emph{op-vect} in the Helmholtz kernel. Bars suffixed
           with ``CM'' indicate that the cost model was used to
@@ -1276,8 +1284,8 @@ discussed in the next section.
 
 \begin{figure}
 	\centering
-	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/diffusion-normalized-opvect.pdf}}
-	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/diffusion-normalized-opvect-phi.pdf}}
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.48]{Pictures/diffusion-normalized-opvect.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.48]{Pictures/diffusion-normalized-opvect-phi.pdf}}
 	\caption{Performance improvement over \emph{licm-ap} obtained
           by \emph{op-vect} in the Diffusion kernel. Bars suffixed
           with ``CM'' indicate that the cost model was used to
@@ -1343,8 +1351,8 @@ to achieve a certain degree of register re-use.
 
 \begin{figure}
 	\centering
-	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.52]{Pictures/burgers-normalized-split.pdf}}
-	\subfloat[Xeon Phi]{	\includegraphics[scale=0.52]{Pictures/burgers-normalized-split-phi.pdf}}
+	\subfloat[Sandy Bridge]{	\includegraphics[scale=0.48]{Pictures/burgers-normalized-split.pdf}}
+	\subfloat[Xeon Phi]{	\includegraphics[scale=0.48]{Pictures/burgers-normalized-split-phi.pdf}}
 	\caption{Performance improvement over \emph{licm-ap} obtained
           by \emph{split} in the Burgers kernel. Bars suffixed with
           ``CM'' indicate that the cost model was used to transform
@@ -1400,7 +1408,8 @@ polynomial order and element shape up to the values illustrated in the
 table.
 
 \begin{table}[h]
-\tbl{Performance comparison between FEniCS and COFFEE on the Sandy Bridge.}{
+\tbl{Performance comparison between FEniCS and COFFEE on Sandy Bridge.}{
+\scriptsize
 \begin{tabulary}{1.0\columnwidth}{C|C|C}
 \hline
 Problem & Max slow down & Max speed up \\\hline
@@ -1447,9 +1456,9 @@ We study two versions of the static linear elasticity problem: 1) with one coeff
 
 \begin{figure}
 	\centering
-	\subfloat[]{\includegraphics[scale=0.52]{Pictures/elasticity-p1.pdf}}
-	\subfloat[]{\includegraphics[scale=0.52]{Pictures/elasticity-p2.pdf}}
-	\caption{Performance improvement over non-optimized code for the static linear elasticity equation. The tetrahedral mesh is composed of 196608 elements. Experiments were executed on a single core of a Sandy Bridge architecture.}
+	\subfloat[]{\includegraphics[scale=0.48]{Pictures/elasticity-p1.pdf}}
+	\subfloat[]{\includegraphics[scale=0.48]{Pictures/elasticity-p2.pdf}}
+	\caption{Performance improvement over non-optimized code for the static linear elasticity equation on a single core of the Sandy Bridge architecture.}
 	\label{fig:full-app-res}
 \end{figure}
 
@@ -1482,12 +1491,12 @@ execution time spent in assembly.
 
 \section{Generality of the Approach and Applicability to Other Domains}
 \label{sec:generality}
-We have demonstrated that our cross-loop optimizations for arithmetic intensity are effective in the context of automated code generation for finite element local assembly. In this section, we discuss about their applicability in other computational domains and, more in general, their integrability within a general-purpose compiler.
+We have demonstrated that our cross-loop optimizations for arithmetic intensity are effective in the context of automated code generation for finite element local assembly. In this section, we discuss their applicability in other computational domains and, in general, their integrability within a general-purpose compiler.
 
 COFFEE was developed as a separate, self-contained software module, with
 clear input/output interfaces, rather then incorporating it within
 PyOP2. This choice was motivated by two critical aspects that
-characterize the generality of our research.
+characterize the generality of our research:
 
 \paragraph{Separation of concerns} We believe that in domain-specific
 frameworks there must be a clear, logical separation of roles reflecting
@@ -1538,7 +1547,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
 \item In Equation~\eqref{eq:assembly-model}, the summations correspond
   to reduction loops, whereas loops over indices $i$ and $j$ are fully
   parallel. Throughout the paper we assumed a kernel to be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
-\item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slow downs (e.g. whenever the available per-core memory is small).
+\item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slowdowns (e.g. whenever the available per-core memory is small).
 \item Associative arithmetic operators are the prerequisite for expression
   splitting. In essence, this transformation concerns resource-aware
   execution. In the context of COFFEE, expression splitting has been
@@ -1549,7 +1558,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   into multiple parts, each part characterized by less stringent memory
   requirements (a variant of this idea for non-affine loops in unstructured
   mesh applications has been adopted in~\citeN{carlolcpc}). In
-  Equation~\eqref{eq:assembly-model}, for instance, not only can  any of the
+  Equation~\eqref{eq:assembly-model}, for instance, not only can any of the
   functions $\alpha$, $\beta$ and $\gamma$ be split (assuming they include
   associative operators), but $\alpha$ could be completely extracted and
   evaluated in a separate kernel. This would reduce the working set size of
@@ -1562,9 +1571,9 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   made explicit, arrays can be statically initialized, and pointer aliasing
   is easily avoidable. Further, all of these factors contribute to the
   applicability and the effectiveness of some of our code
-  transformations. For instance, knowing loop bounds allows both generating
+  transformations. For instance, knowing loop bounds allows both generation of
   correct code when applying vector-register tiling (see
-  Section~\ref{sec:op-vect}) and discovering redundant computation
+  Section~\ref{sec:op-vect}) and discovery of redundant computation
   opportunities (see Section~\ref{sec:code-transf-licm}). Padding and data
   alignment are special cases, since they could be performed at run-time
   if some values were not known at code generation time. Theoretically,
@@ -1580,7 +1589,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   expect the performance gain to scale with the number of vectorized loops
   and the vector length (as demonstrated in  the Xeon Phi
   experiments). Although the automation of multi-loop vectorization in a
-  general-purpose compiler is far from straightforward, especially if stencils are present, we believe that this could be more easily achieved in specific domains. The intuition is to map the memory access pattern on vector registers, and then exploit in-register shuffling to minimize the traffic between memory and processor. By demonstrating the effectiveness of multi-loop vectorization in a real scenario, our research represents an incentive for studying this technique in a broader and systematic way.
+  general-purpose compiler is far from straightforward, especially if stencils are present, we believe that this could be more easily achieved in specific domains. The intuition is to map the memory access pattern onto vector registers, and then to exploit in-register shuffling to minimize the traffic between memory and processor. By demonstrating the effectiveness of multi-loop vectorization in a real scenario, our research represents an incentive for studying this technique in a broader and systematic way.
 \end{itemize}
 %We conclude noting that despite experiments were performed on Intel platforms only, performance gains are expected even on completely different CPU architectures, since the techniques proposed in this paper involves re-scheduling
 
