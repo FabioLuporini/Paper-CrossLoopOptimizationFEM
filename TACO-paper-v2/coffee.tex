@@ -152,7 +152,7 @@ Comp.~Sci., Louisiana State University.
 
 In many fields such as computational fluid dynamics, computational
 electromagnetics and structural mechanics, phenomena are modelled by
-partial differential equations (PDEs). Numerical techniques, like the
+partial differential equations (PDEs). Numerical techniques, such as the
 finite volume method and the finite element method, are widely employed
 to approximate solutions of these PDEs. Unstructured meshes are often
 used to discretize the computational domain, since they allow an
@@ -203,10 +203,11 @@ method \cite{SPENCER} requires a significantly different loop nest structure.
 High order methods are therefore excluded from our study.
 
 We aim to maximize our impact on the platforms that are realistically used
-for finite element applications, so we target conventional CPU architectures. 
+for finite element applications, so we target conventional CPU architectures
+rather than GPUs. 
 The key limiting factor to the execution on GPUs is the stringent memory requirements. 
-Only relatively small meshes can fit a GPU memory, and distributed execution is minimally
-supported by available frameworks (if any). There has been some research on
+Only relatively small problems fit in a GPU memory, and support for
+distributed GPU execution in general purpose finite element frameworks is minimal. There has been some research on
 adapting local assembly to GPUs (which we mention in Section~\ref{sec:related-work}),
 although it differs from ours in several ways, including: (i) not relying on
 automated code generation from a domain-specific language (explained next),
@@ -292,7 +293,7 @@ Summarizing, the contributions of this paper are:
 \item A systematic analysis using a suite of examples of real-world
   importance that is evidence of significant performance improvements on
   two Intel architectures, a Sandy Bridge CPU and the Xeon Phi.
- \item A full-application evaluation to demonstrate that the optimization
+ \item A full application evaluation to demonstrate that the optimization
  strategy greatly impacts the whole finite element problem.
  \newcounter{enumTemp}
  \setcounter{enumTemp}{\theenumi}
@@ -1018,7 +1019,7 @@ proposed code transformations, and their interplay, in three real-world
 representative equations. We quantify the speedups achievable at the
 level of the local assembly kernel, by excluding the other stages of the
 computation from the measurements. Then, in Section~\ref{sec:full-app},
-we provide a full-application investigation. Here, we use another
+we provide a full application investigation. Here, we use another
 equation, bringing the total number of examined problems to four,
 to demonstrate that COFFEE's optimizations actually allow a significant
 reduction in the overall computation run-time to be achieved, which
@@ -1445,12 +1446,12 @@ work.
 \label{sec:compile-time}
 Firedrake and its various software components (see Figure~\ref{fig:coffee-pipeline}) are implemented in Python and Cython, whereas the generated code is pure C. COFFEE has been written in Python to be naturally integrated within Firedrake. Among the various Firedrake modules, COFFEE is where, in general, the least amount of time is spent. The process of transforming the abstract syntax tree usually takes order of milliseconds. For instance, for the Helmholtz equation with $p=4$ on a tiny tetrahedral mesh, it took 0.0009s to transform the abstract syntax tree, while the whole assembly process needed 0.384s. Being a domain-specific compiler, COFFEE expects C code with the structure outlined in Figure~\ref{code:general-structure}, so typical compilers functionalities such as dependency tracking are simplified with respect to a general-purpose compiler, which implies a clear advantage in compilation time and implementation complexity.
 
-\subsection{Full-application Study}
+\subsection{Full application study}
 \label{sec:full-app}
 In this section, we investigate the performance gain for an entire finite element computation
 developed in Firedrake, a static linear elasticity problem. The source code is available at~\cite{elasticity-code}. The equation is used to simulate deformation of an object caused by pre-established loading conditions.
 
-The execution time of a (non-explicit) finite element method is dominated by two factors: assembly and solve. The evaluation of all local element matrices and vectors, and their insertion, respectively, in a ``global'' sparse matrix and a global vector, compose the ``assembly'' phase. The global matrix and vector form a linear system, usually solved by an iterative method; this is the ``solve'' phase. The percentage of time spent in assembly and solve varies from problem to problem. As reiterated in the available literature, for example in~\cite{quadrature1}, the computational cost of local assembly grows with the \textit{complexity} of the partial differential equation (e.g. because of larger loops and more articulated expressions), while the solve time increases with polynomial order and mesh discretization. The complexity of an equation depends on several factors, including the number of derivatives and coefficient functions (i.e. additional known functions that characterize the equation).
+The execution time of a steady finite element problem is dominated by two factors: assembly and solve. The evaluation of all local element matrices and vectors, and their insertion, respectively, in a ``global'' sparse matrix and a global vector, compose the ``assembly'' phase. The global matrix and vector form a linear system, usually solved by an iterative method; this is the ``solve'' phase. The percentage of time spent in assembly and solve varies from problem to problem. As reiterated in the available literature, for example in~\cite{quadrature1}, the computational cost of local assembly grows with the \textit{complexity} of the partial differential equation (e.g. because of larger loops and more articulated expressions), while the solve time increases with polynomial order and mesh discretization. The complexity of an equation depends on several factors, including the number of derivatives and coefficient functions (i.e. additional known functions that characterize the equation).
 
 We study two versions of the static linear elasticity problem: 1) with one coefficient function, $f=1$, and 2) with two coefficient functions, $f=2$. More coefficient functions are also plausible; however, as we will see, the assembly process starts being particularly expensive already with $f=1$. For each of these two versions, we examine the cases of polynomial order $p=1$ and $p=2$. To run our experiments, we use a single core of the Sandy Bridge architecture described in Section~\ref{sec:perf-results}. The application runs on a tetrahedral mesh composed of 196608 elements.
 
@@ -1479,7 +1480,7 @@ Section~\ref{sec:code-transf-licm}).
 
 In these experiments, we observe a maximum performance improvement of
 1.47$\times$ over the non-optimized local assembly code, obtained in the
-case ($f=2, p=2$). However, we reiterate the fact that full-application
+case ($f=2, p=2$). However, we reiterate the fact that full application
 speed ups increase proportionally with the amount of time spent in
 assembly and, therefore, with the complexity of the equation. By
 increasing polynomial order and number of coefficient functions, or by
@@ -1522,7 +1523,7 @@ for finite element local assembly, would be relatively easy to achieve.
 It is more challenging to assess the generality of the optimization
 strategy: the extent to which COFFEE and its transformations are
 transferable to other computational domains, perhaps other DSLs, and to
-what extent this would be helpful for improving full-application
+what extent this would be helpful for improving full application
 performance. To answer these questions, we first need to go back to the
 origins of our compiler. The starting point of our work was the
 mathematical formulation of a local assembly operation, expressible as
@@ -1546,7 +1547,10 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
 \begin{enumerate}
 \item In Equation~\eqref{eq:assembly-model}, the summations correspond
   to reduction loops, whereas loops over indices $i$ and $j$ are fully
-  parallel. Throughout the paper we assumed a kernel to be executed by a single thread, which is likely to be the best strategy for standard multi-core CPUs. On the other hand, we note that for certain architectures (e.g. GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
+  parallel. Throughout the paper we assumed that a kernel will be executed
+  by a single thread, which is likely to be the best strategy for standard
+  multi-core CPUs. On the other hand, we note that for certain architectures
+  (for example GPUs) this could be prohibitive due to memory requirements. Intra-kernel parallelization is one possible solution: a domain-specific compiler such as COFFEE could map mathematical quantifiers and operators to different parallelization schemes and generate distinct variants of multi-threaded kernel code. Based on our experience, we believe this is the right approach to achieve performance portability.
 \item The various sub-expressions in $\beta$ only depend on (i.e. iterate along) a subset of the enclosing loops. In addition, some of these sub-expressions might reduce to the same values as iterating along certain iteration spaces. This code structure motivated the generalized loop-invariant code motion technique. The intuition is that whenever sub-expressions invariant with respect to different sets of affine loops can be identified, the question of whether, where and how to hoist them, while minimizing redundant computation, arises. Pre-computation of invariant terms also increases memory requirements due to the need for temporary arrays, so it is possible that for certain architectures the transformation could actually cause slowdowns (e.g. whenever the available per-core memory is small).
 \item Associative arithmetic operators are the prerequisite for expression
   splitting. In essence, this transformation concerns resource-aware
@@ -1565,7 +1569,7 @@ The expression represents the numerical evaluation of an integral at $n_1$ point
   each of the kernel functions, an option which is particularly attractive for many-core architectures in which the available per-core memory is much smaller than that in traditional CPUs.
 \end{enumerate}
 \item \textbf{Code generation and applicability of the transformations.} All
-  array sizes and loop bounds, like $n1$ and $n2$ in
+  array sizes and loop bounds, for example $n1$ and $n2$ in
   Equation~\ref{eq:assembly-model}, are known at code generation time. This
   means that ``good'' code can be generated. For example, loop bounds can be
   made explicit, arrays can be statically initialized, and pointer aliasing
