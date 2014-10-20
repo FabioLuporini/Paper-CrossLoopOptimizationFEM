@@ -207,19 +207,23 @@ High order methods are therefore excluded from our study.
 We aim to maximize our impact on the platforms that are realistically used
 for finite element applications, so we target conventional CPU architectures
 rather than GPUs. 
-The key limiting factor to the execution on GPUs is the stringent memory requirements. 
-Only relatively small problems fit in a GPU memory, and support for
-distributed GPU execution in general purpose finite element frameworks is minimal. There has been some research on
-adapting local assembly to GPUs, which we mention in Section~\ref{sec:related-work},
-although it differs from ours in several ways, including: (i) not relying on
-automated code generation from a domain-specific language (explained next),
-(ii) testing only order 1 methods (while we focus on the range 1-4), (iii) not optimizing for
-cross-loop arithmetic intensity (the goal is rather effective multi-thread
-parallelization). In addition, our code transformations would drastically impact the 
-GPU parallelization strategy, for example by increasing a thread's working set. 
-For all these reasons, a study on extending our work to GPU architectures is 
-beyond the scope of this paper. In Section~\ref{sec:generality}, however, we provide 
-some intuitions about this research direction.
+The key limiting factor to the execution on GPUs is the stringent
+memory requirements.  Only relatively small problems fit in a GPU
+memory, and support for distributed GPU execution in general purpose
+finite element frameworks is minimal. There has been some research on
+adapting local assembly to GPUs, which we mention in
+Section~\ref{sec:related-work}, although it differs from ours in
+several ways, including: (i) not optimizing for cross-loop arithmetic
+intensity (the goal is rather effective multi-thread parallelization),
+and (ii) not relying on automated code generation from a
+domain-specific language (explained next); moreover, they have done
+testing only on order 1 methods, while we focus on the order range
+1--4. In addition, our code transformations would drastically impact
+the GPU parallelization strategy, for example by increasing a thread's
+working set.  For all these reasons, a study on extending our work to
+GPU architectures is beyond the scope of this paper. In
+Section~\ref{sec:generality}, however, we provide some intuitions
+about this research direction.
 
 An assembly kernel is characterized by the presence of an affine,
 often non-perfect loop nest, in which individual loops are rather
@@ -842,7 +846,7 @@ available compilers.
 
 Splitting an expression (henceforth \emph{split}) has, however, several drawbacks. Firstly, it
 increases the number of accesses to $A$ proportionally to the ``split
-factor'', which is the number of sub-expressions produced. Also,
+factor,'' which is the number of sub-expressions produced. Also,
 depending on how the split is executed, it can lead to redundant
 computation. For example, the number of times the product $det*W3[i]$ is
 performed is proportional to the number of sub-expressions, as shown in
