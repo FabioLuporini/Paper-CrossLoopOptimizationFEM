@@ -134,6 +134,8 @@ through contract W911NF-10-1-000, and by a HiPEAC collaboration
 grant. The authors would like to thank Dr. Carlo Bertolli,
 Dr. Lawrence Mitchell, and Dr. Francis Russell for their invaluable
 suggestions and their contribution to the Firedrake project.
+We thank the ACM TACO reviewers for their suggestions that led
+to a significantly improved version.
 
 Author's addresses: Fabio Luporini $\&$ Florian Rathgeber $\&$
 Gheorghe-Teodor Bercea $\&$ Paul H. J. Kelly, Department of Computing,
@@ -1007,7 +1009,11 @@ L2 cache) and a Xeon Phi (5110P, running at 1.05Ghz in native mode,
 architectures because of the differences in the number of logical
 registers and SIMD lanes (16 256-bit registers in the Sandy Bridge,
 and 32 512-bit registers in the Xeon Phi), which can impact the
-optimization strategy. The \texttt{icc 13.1} compiler was used. For what concerns the compilation flags, we selected the best optimization levels on each platform: \texttt{-O2}, and \texttt{-xAVX} for auto-vectorization, were used on the Sandy Bridge; \texttt{-O3} was adopted on the Xeon Phi. 
+optimization strategy. The \texttt{icc 13.1} compiler was used.  We
+selected the best optimization levels for each platform using the
+following compilation flags: \texttt{-xAVX} for auto-vectorization and
+\texttt{-O2} were used on the Sandy Bridge; \texttt{-O3} was adopted
+on the Xeon Phi.
 
 We present two studies. Firstly, in
 Section~\ref{sec:analysis-code-transf}, we analyze the impact of the
@@ -1686,7 +1692,6 @@ calls to external linear algebra libraries. COFFEE supports all of the
 problems expressible in Firedrake, and is already integrated with
 this framework. The generality and the applicability of the proposed
 code transformations to other domains has also been discussed.
-
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}
