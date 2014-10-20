@@ -1,0 +1,158 @@
+We thank our reviewers (R1-R4). We appreciate the feedback and the critical
+comments on our paper obtained in the revision process, which really led
+to a significantly improved version. Below we detail how we answered the minor
+points raised by R1 and R4.
+
+R1:
+1) "I'm not hung up over tables II and III, but putting them in small graphs
+would, I think, still be good for the final version, space permitting."
+
+We agree that it would probably be easier to read plots than tables; however,
+we also feel that the best way of representing a table such as Tables II and III
+is by means of 6 plots (3 plots per architecture, each plot corresponding to a
+specific partial differential equation). Due to lack of space, we prefer to stick
+to the tables rather than adding a total of 12 tiny plots, which would really
+hinder readability.
+
+2) "Also, your comment about different compilation flags (page 13, line 18) is
+still not clear, in my opinion.  It reads like other optimization levels were
+worse only for the Xeon Phi. If you could just clarify that you picked the best
+optimization levels for each platform, that make your methodology more clear."
+
+By re-thinking about this, we actually agree with you: the sentence was not that
+clear. So we rephrased it this way, which hopefully avoid any ambiguity:
+
+<< (...). The icc 13.1 compiler was used. We selected the best optimization levels
+for each platform; we used -xAVX for auto-vectorization and -O2 on the Sandy Bridge,
+and -O3 on the Xeon Phi. >>
+
+
+R4:
+1) "Ideally, we would like COFFEE to be platform independent. However, in this work,
+COFFEE is tightly coupled with the target platform. It generates vector intrinsic and
+works closely with the PyOP2 runtime. It would be better if the authors could show
+that the approach would also work well on a different platform, such as ARM, SPARC,
+PowerPC or MIPS. Nevertheless, this is merely a suggestion, not a requirement,
+since we understand how much work is involved in tuning for a different platform."
+
+We emphasize that the only way in which COFFEE is tied with the architecture is by means
+of vector intrinsics, which are related to the x86 instruction set, while all of the other
+transformations occur at the source code level. Using some abstractions on top of vector
+intrinsics would probably fix this; this is something we planned for the near future,
+since Firedrake is going to be ported to BLUE GENE architectures. COFFEE is
+not tied with the PyOP2 runtime either: it is true that a suitable interface is used in
+PyOP2 to interact with COFFEE; however, COFFEE can be used in scenarios other than Firedrake/PyOP2,
+as demonstrated by the fact that the code lives in a completely different (public)
+repository.
+
+2) "The new title of the paper is now changed to focus on cross-loop optimization.
+However, for modern microprocessors, cross-loop optimization usually includes locality
+improvement transformations to increase the performance of cache hierarchies. COFFEE
+may not need to do that since it focuses on lower order methods where the working set
+is already fit in the L1 cache. However, the paper should point out why locality
+improvement is not in their scope."
+
+We note that locality improvement really is in the scope of the paper: we optimize for
+data locality at the level of registers, which is the level of the memory hierarchy
+immediately below the L1 cache. In particular, the outer-product vectorization and
+expression splitting aim to optimize for register data locality. However, we agree with
+you that it is useful to remark this aspect. Therefore, following your adivse, we have
+rewritten a few key sentences. Firstly, in the abstract, we changed the following sentence:
+
+<< The compiler manipulates abstract syntax trees generated from a domain-specific language
+by introducing domain-aware optimizations and, eventually, produces C code including vector
+SIMD intrinsics. >>
+
+into:
+
+<< The compiler manipulates abstract syntax trees generated from a domain-specific
+language by introducing domain-aware optimizations for instruction-level parallelism
+and register locality. Eventually, it produces C code including vector SIMD
+intrinsics. >>
+
+This should aware the reader from the very beginning that locality at the level of
+registers is the target of our optimization strategy. Note that the term "(register)
+locality" is also reiterated throughout the paper. 
+Secondly, we have modified another key sentence in the Introduction (page 3):
+
+<< (...). With such a kernel structure, we focus on aspects like the minimization of
+floating-point operations, register allocation and instruction-level parallelism,
+especially in the form of SIMD vectorization.>>
+
+into:
+
+<< (...). With such kernel and working set structures, traditional transformations for
+cache locality (e.g. blocking) are not helpful; instead we focus on aspects like the
+minimization of floating-point operations, register locality and instruction-level
+parallelism, especially vectorization.>>
+
+which we think explicitly targets your concern.
+
+3) "The current trend for GPGPU is to have the GPU sharing the memory with the CPU
+(so called SVM – Shared Virtual Memory). This SVM feature has already shown up in
+OpenCL 2.0 and Cuda 6.0 standards. With this trend, such claims about the stringent
+memory requirements of GPU will no longer to be true."
+
+Even though SVM is going to be part of the new GPU programming models (OpenCL, CUDA),
+that does not mean that "the stringent memory requirements will no longer be true". SVM
+is just an abstraction that allows programmers to avoid explictly handling memory management;
+however, behind the scenes, the continuous transfers between host and device will
+still impair the performance. We therefore prefer to be really coutious about this matter.
+
+4) "<<There has been some research on adapting local assembly to GPUs (which we mention
+in Section 7), although it differs from ours in several ways, including: (i) not relying
+on automated code generation from a domain-specific language (explained next),
+(ii) testing only very low order methods, (iii) not optimizing for cross-loop arithmetic
+intensity (the goal is rather effective multi-thread parallelization). >>
+
+Your work focuses on low order methods, yet you claim that similar work on GPU is different
+from yours since they work on “very low” order methods. What are the differences between “low”
+and “very low”? From the description of this paper, it seems that they are very close. Some
+of the low order methods have trip count s as low as 3, so how much lower can “very low” go?"
+
+We definitely agree our description was unclear. Therefore, we rewrote that part of
+the paper as follows:
+
+<<There has been some research on adapting local assembly to GPUs, which we men-
+tion in Section 7, although it differs from ours in several ways, including: (i) not op-
+timizing for cross-loop arithmetic intensity (the goal is rather effective multi-thread
+parallelization), and (ii) not relying on automated code generation from a domain-specific
+language (explained next); moreover, they have done testing only on order 1 methods,
+while we focus on the order range 1–4. >>
+
+This way not only we clarify the previous ambiguity (by explicitly stating they only test
+order 1 methods), also do we emphasize the importance of points (i) and (ii).
+
+5) "Section 6, page 20, line 41
+rather then -->  rather than"
+
+Fixed
+
+6) "The treatment of expression split is still too simple. Although real implementations
+favor simplicity, a technical paper does not."
+
+For this aspect, we have added a few sentences to Section 3.4, where expression
+splitting is described:
+
+<< (...) Nevertheless the performance gain from improved register reuse can still be greater
+if suitable heuristics are used. Our approach consists of traversing the expression tree
+and recursively splitting it into multiple sub-expressions if the number of innermost-
+loop independent variables is larger than a certain threshold. This is elaborated in the
+next section, and validated against empirical search in Section 5.2.6. >>
+
+This does not make the treatment less simplistic, but helps understanding the heuristics
+we have used (by also adding a forward pointer to the upcoming section, in which COFFEE's
+cost model is detailed) and by stating that this heuristics was "validated against empirical
+search". The performance evaluation shows that this is indeed a good heuristics, but as
+you correctly point out, there is space for further and systematic improvement. That is why
+we also added a sentence to the Conclusion section, in which we mention planned further work:
+
+<< (...). As suggested by the performance evaluation, an analysis of more sophisticated
+approaches for expression splitting also looks promising.>>
+
+With the expression splitting transformation, our intention was to show that by generalizing
+the well-known loop fission transformation, and by using simple intuitions, register locality
+can notably be improved. Probably, a formal study would require a complete new paper, because
+the complexity of the problem grows considerably if we consider generic expressions embedded
+in generic loop nests. We believe that the ideas provided in this paper represent a starting
+point for an in-depth, sufficiently abstract analysis of the topic.

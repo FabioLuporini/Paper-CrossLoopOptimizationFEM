@@ -88,8 +88,8 @@ sequence of successful transformations. Our investigation has resulted in the
 implementation of a compiler for local assembly kernels, fully
 integrated with a framework for developing finite element methods.
 The compiler manipulates abstract syntax trees generated from a domain-specific
-language by introducing domain-aware optimizations and, eventually,
-produces C code including vector SIMD intrinsics. Experiments using a range of real-world finite-element
+language by introducing domain-aware optimizations for instruction-level parallelism and register locality. Eventually,
+it produces C code including vector SIMD intrinsics. Experiments using a range of real-world finite-element
 problems of increasing complexity show that significant performance improvement
 is achieved. The generality of the approach and the applicability of the proposed
 code transformations to other domains is also discussed.
@@ -231,10 +231,8 @@ small: their trip count rarely exceeds 30, and may be as low as 3 for
 low order methods. In the innermost loop, a problem-specific,
 compute intensive expression evaluates a two dimensional array,
 representing the result of local assembly in an element of the
-discretized domain. With such a kernel structure, we focus on aspects
-like the minimization of floating-point operations, register allocation
-and instruction-level parallelism, especially in the form of SIMD
-vectorization.
+discretized domain. With such kernel and working set structures, traditional transformations for cache locality (e.g. blocking) are not helpful; instead we focus on aspects like the minimization of floating-point operations, register locality
+and instruction-level parallelism, especially vectorization.
 
 Achieving high performance on CPUs is non-trivial. The complexity of the
 mathematical expressions, often characterized by a large number of
