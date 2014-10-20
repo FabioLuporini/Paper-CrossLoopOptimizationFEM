@@ -855,12 +855,18 @@ loop overhead, for example through additional branch
 instructions. Finally, it might affect register locality: for
 instance, the same array could be accessed in different
 sub-expressions, requiring a proportional number of loads be
-performed. This is not the case for the Helmholtz
-example. Nevertheless, as shown in Section~\ref{sec:perf-results}, the
-performance gain from improved register reuse along inner dimensions
-can still be greater, especially if the split factor and the splitting
-itself use heuristics to minimize the aforementioned issues.
+performed; this is not the case for the Helmholtz
+example, though. Nevertheless the performance gain from improved register reuse 
+can still be greater if suitable heuristics are used. Our approach 
+consists of traversing the expression tree and recursively splitting it into 
+multiple sub-expressions if the number of innermost-loop independent 
+variables is larger than a certain threshold. This is elaborated in the next section, 
+and validated against empirical search in Section~\ref{sec:perf-results-split}.
 
+% Nevertheless, as shown in Section~\ref{sec:perf-results}, the
+%performance gain from improved register reuse along inner dimensions
+%can still be greater, especially if the split factor and the splitting
+%itself use heuristics to minimize the aforementioned issues.
 
 \section{Overview of COFFEE}
 \label{sec:pyop2-compiler}
@@ -1311,9 +1317,9 @@ discussed in the next section.
 %for which efficient register allocation can be already guaranteed
 
 \subsubsection{Impact of Expression Splitting}
-\label{sec:perf-results-split} Expression splitting relieves the
-register pressure when the element matrix evaluation needs to read from
-a large number of basis function arrays. As detailed in
+\label{sec:perf-results-split} 
+Expression splitting relieves the register pressure when the element matrix 
+evaluation needs to read from a large number of basis function arrays. As detailed in
 Section~\ref{sec:expr-split}, the price to pay for this optimazion is an
 increased number of accesses to the element matrix and, potentially,
 redundant computation. Similarly to the analysis of vector-register
@@ -1700,7 +1706,7 @@ knowledge allows some of them to be particularly effective, as
 demonstrated by our experiments on two state-of-the-art Intel
 platforms. Further work includes a comprehensive study about
 feasibility and constraints on transforming kernels into a sequence of
-calls to external linear algebra libraries. COFFEE supports all of the
+calls to external linear algebra libraries. As suggested by the performance evaluation, an analysis of more sophisticated approaches for expression splitting also looks promising. COFFEE supports all of the
 problems expressible in Firedrake, and is already integrated with
 this framework. The generality and the applicability of the proposed
 code transformations to other domains has also been discussed.
