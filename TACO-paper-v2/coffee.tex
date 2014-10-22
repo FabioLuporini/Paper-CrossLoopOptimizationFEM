@@ -228,11 +228,14 @@ about this research direction.
 An assembly kernel is characterized by the presence of an affine,
 often non-perfect loop nest, in which individual loops are rather
 small: their trip count rarely exceeds 30, and may be as low as 3 for
-low order methods. In the innermost loop, a problem-specific,
-compute intensive expression evaluates a two dimensional array,
-representing the result of local assembly in an element of the
-discretized domain. With such kernel and working set structures, traditional transformations for cache locality (e.g. blocking) are not helpful; instead we focus on aspects like the minimization of floating-point operations, register locality
-and instruction-level parallelism, especially vectorization.
+low order methods. In the innermost loop, a problem-specific, compute
+intensive expression evaluates a two dimensional array, representing
+the result of local assembly in an element of the discretized
+domain. With such kernel and working set structures, traditional
+transformations for cache locality (e.g., blocking) are not helpful;
+instead we focus on aspects like the minimization of floating-point
+operations, register locality and instruction-level parallelism,
+especially vectorization.
 
 Achieving high performance on CPUs is non-trivial. The complexity of the
 mathematical expressions, often characterized by a large number of
@@ -853,13 +856,14 @@ loop overhead, for example through additional branch
 instructions. Finally, it might affect register locality: for
 instance, the same array could be accessed in different
 sub-expressions, requiring a proportional number of loads be
-performed; this is not the case for the Helmholtz
-example, though. Nevertheless the performance gain from improved register reuse 
-can still be greater if suitable heuristics are used. Our approach 
-consists of traversing the expression tree and recursively splitting it into 
-multiple sub-expressions if the number of innermost-loop independent 
-variables is larger than a certain threshold. This is elaborated in the next section, 
-and validated against empirical search in Section~\ref{sec:perf-results-split}.
+performed; this is not the case for the Helmholtz example,
+though. Nevertheless the performance gain from improved register reuse
+can still be greater if suitable heuristics are used. Our approach
+consists of traversing the expression tree and recursively splitting
+it into multiple sub-expressions as long as the number of variables
+independent of the innermost loop exceeds a certain threshold. This is
+elaborated in the next section, and validated against empirical search
+in Section~\ref{sec:perf-results-split}.
 
 % Nevertheless, as shown in Section~\ref{sec:perf-results}, the
 %performance gain from improved register reuse along inner dimensions
@@ -1683,31 +1687,35 @@ steer the optimization process.
 \label{sec:conclusions}
 
 In this paper, we have presented the study and systematic performance
-evaluation of a class of composable cross-loop optimizations for improving
-arithmetic intensity in finite element local assembly kernels, and their
-integration in a novel compiler, COFFEE. In the context of automated code
-generation for finite element local assembly, COFFEE is the first compiler
-capable of introducing low-level optimizations to maximize instruction-level
-parallelism, register locality and SIMD vectorization. Assembly kernels have
-particular characteristics. Their iteration space is usually very small, with
-the size depending on aspects like the degree of accuracy one wants to
-reach (polynomial order of the method) and the mesh discretization employed.
-The data space, in terms of number of arrays and scalars required to evaluate
-the element matrix, grows proportionately with the complexity of the
-finite element problem. COFFEE has been developed taking into account
-all of these degrees of freedom, based on the idea that reducing the
-problem of local assembly optimization to a fixed sequence of
-transformations is far too superficial if close-to-peak performance
-needs to be reached. The various optimizations overcome limitations of
-current vendor and research compilers. The exploitation of domain
-knowledge allows some of them to be particularly effective, as
-demonstrated by our experiments on two state-of-the-art Intel
-platforms. Further work includes a comprehensive study about
-feasibility and constraints on transforming kernels into a sequence of
-calls to external linear algebra libraries. As suggested by the performance evaluation, an analysis of more sophisticated approaches for expression splitting also looks promising. COFFEE supports all of the
-problems expressible in Firedrake, and is already integrated with
-this framework. The generality and the applicability of the proposed
-code transformations to other domains has also been discussed.
+evaluation of a class of composable cross-loop optimizations for
+improving arithmetic intensity in finite element local assembly
+kernels, and their integration in a novel compiler, COFFEE. In the
+context of automated code generation for finite element local
+assembly, COFFEE is the first compiler capable of introducing
+low-level optimizations to maximize instruction-level parallelism,
+register locality and SIMD vectorization. Assembly kernels have
+particular characteristics. Their iteration space is usually very
+small, with the size depending on aspects like the degree of accuracy
+one wants to reach (polynomial order of the method) and the mesh
+discretization employed.  The data space, in terms of number of arrays
+and scalars required to evaluate the element matrix, grows
+proportionately with the complexity of the finite element
+problem. COFFEE has been developed taking into account all of these
+degrees of freedom, based on the idea that reducing the problem of
+local assembly optimization to a fixed sequence of transformations is
+far too superficial if close-to-peak performance needs to be
+reached. The various optimizations overcome limitations of current
+vendor and research compilers. The exploitation of domain knowledge
+allows some of them to be particularly effective, as demonstrated by
+our experiments on two state-of-the-art Intel platforms. Further work
+includes a comprehensive study about feasibility and constraints on
+transforming kernels into a sequence of calls to external linear
+algebra libraries. As suggested by the performance evaluation, an
+exploration of more sophisticated approaches for expression splitting
+also looks promising. COFFEE supports all of the problems expressible
+in Firedrake, and is already integrated with this framework. The
+generality and the applicability of the proposed code transformations
+to other domains has also been discussed.
 
 
 % Bibliography
