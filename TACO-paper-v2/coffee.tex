@@ -80,19 +80,22 @@ Paul H.J. Kelly
 We study and systematically evaluate a class of composable code
 transformations that improve arithmetic intensity in local assembly
 operations, which represent a significant fraction of the execution
-time in finite element methods. Their performance optimization is indeed a
-challenging issue. Even though affine loop nests are generally present,
-the short trip counts and the complexity of mathematical expressions, which
-vary among different problems, make it hard to determine a single or unique
-sequence of successful transformations. Our investigation has resulted in the
-implementation of a compiler for local assembly kernels, fully
-integrated with a framework for developing finite element methods.
-The compiler manipulates abstract syntax trees generated from a domain-specific
-language by introducing domain-aware optimizations for instruction-level parallelism and register locality. Eventually,
-it produces C code including vector SIMD intrinsics. Experiments using a range of real-world finite-element
-problems of increasing complexity show that significant performance improvement
-is achieved. The generality of the approach and the applicability of the proposed
-code transformations to other domains is also discussed.
+time in finite element methods. Their performance optimization is
+indeed a challenging issue. Even though affine loop nests are
+generally present, the short trip counts and the complexity of
+mathematical expressions, which vary among different problems, make it
+hard to determine an optimal sequence of successful
+transformations. Our investigation has resulted in the implementation
+of a compiler for local assembly kernels, fully integrated with a
+framework for developing finite element methods.  The compiler
+manipulates abstract syntax trees generated from a domain-specific
+language by introducing domain-aware optimizations for
+instruction-level parallelism and register locality. Eventually, it
+produces C code including vector SIMD intrinsics. Experiments using a
+range of real-world finite-element problems of increasing complexity
+show that significant performance improvement is achieved. The
+generality of the approach and the applicability of the proposed code
+transformations to other domains is also discussed.
 
 \end{abstract}
 
@@ -237,24 +240,25 @@ instead we focus on aspects like the minimization of floating-point
 operations, register locality and instruction-level parallelism,
 especially vectorization.
 
-Achieving high performance on CPUs is non-trivial. The complexity of the
-mathematical expressions, often characterized by a large number of
-operations on constants and small matrices, makes it hard to determine a
-single or specific sequence of transformations that is successfully
-applicable to different problems (equations). Loop trip counts are typically small and can
-vary significantly, which further exacerbates the issue. A
-compiler-based approach is, therefore, the only reasonable option to
-obtain close-to-peak performance in a wide range of different local
-assembly kernels. Optimizations like padding, generalized loop-invariant
-code motion, vector-register tiling, and expression splitting, as well
-as their composition, are essential, but their support in
-state-of-the-art polyhedral and vendor compilers, if any, is very
-limited. BLAS routines could theoretically be employed, although a
-fairly complicated control and data flow analysis would be required to
-automate identification and extraction of matrix-matrix multiplies. In
-addition, as detailed in Section~\ref{sec:perf-eval-blas}, the small
-dimension of the matrices involved and the potential loss in data
-locality can limit or eliminate the performance gain of this approach.
+Achieving high performance on CPUs is non-trivial. The complexity of
+the mathematical expressions, often characterized by a large number of
+operations on constants and small matrices, makes it hard to determine
+an optimal sequence of transformations that is successfully applicable
+to different problems (equations). Loop trip counts are typically
+small and can vary significantly, which further exacerbates the
+issue. A compiler-based approach is, therefore, the only reasonable
+option to obtain close-to-peak performance in a wide range of
+different local assembly kernels. Optimizations like padding,
+generalized loop-invariant code motion, vector-register tiling, and
+expression splitting, as well as their composition, are essential, but
+their support in state-of-the-art polyhedral and vendor compilers, if
+any, is very limited. BLAS routines could theoretically be employed,
+although a fairly complicated control and data flow analysis would be
+required to automate identification and extraction of matrix-matrix
+multiplies. In addition, as detailed in
+Section~\ref{sec:perf-eval-blas}, the small dimension of the matrices
+involved and the potential loss in data locality can limit or
+eliminate the performance gain of this approach.
 
 In order to overcome the constraints of the available compilers and
 specialized linear algebra libraries, we have automated a set of generic
@@ -507,7 +511,7 @@ on 2D elements with polynomial order $p=1$. In other scenarios, for
 instance when solving the Burgers equation, the number of arrays
 involved in the computation of the element matrix can be much larger.
 The assembly code is given in Listing~\ref{code:burgers} and contains 14
-unique arrays that are accessed, where the same array can be referenced
+different arrays that are accessed, where the same array can be referenced
 multiple times within the same expression. This may also require the
 evaluation of constants in outer loops (called $F$ in the code) to act
 as scaling factors of arrays. Trip counts grow proportionately to the
@@ -1703,7 +1707,7 @@ proportionately with the complexity of the finite element
 problem. COFFEE has been developed taking into account all of these
 degrees of freedom, based on the idea that reducing the problem of
 local assembly optimization to a fixed sequence of transformations is
-far too superficial if close-to-peak performance needs to be
+far too simple-minded if close-to-peak performance needs to be
 reached. The various optimizations overcome limitations of current
 vendor and research compilers. The exploitation of domain knowledge
 allows some of them to be particularly effective, as demonstrated by
