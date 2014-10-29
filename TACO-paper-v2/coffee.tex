@@ -187,14 +187,17 @@ finite elements, which are the subject of this paper.
 
 % FIXME: citation for the 30-60% figure
 
-We address, in particular, the well-known problem of optimizing the local assembly
-phase of the finite element method \cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt},
-which can be responsible for a significant fraction of the overall computation
-run-time, often in the range 30-60$\%$. With respect to these studies,
-we propose a novel set of composable code transformations targeting, for
-the first time, cross-loop arithmetic intensity, with emphasis on instruction-level
-parallelism, redundant computation, and register locality. How such transformations
-generalize to domains other than finite element local assembly will also be discussed.
+In particular, we address the well-known problem of optimizing the
+local assembly phase of the finite element method
+\cite{Francis,quadrature1,petsc-integration-gpu,Kirby-FEM-opt}, which
+can be responsible for a significant fraction of the overall
+computation run-time, often in the range 30-60$\%$. With respect to
+these studies, we propose a novel set of composable code
+transformations targeting, for the first time, cross-loop arithmetic
+intensity, with emphasis on instruction-level parallelism, redundant
+computation and register locality. How such transformations generalize
+to domains other than finite element local assembly will also be
+discussed.
 
 During the assembly phase, the solution of the PDE is approximated by
 executing a problem-specific kernel over all cells, or elements, in the
