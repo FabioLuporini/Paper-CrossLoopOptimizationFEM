@@ -133,19 +133,19 @@ Department of Computing at Imperial College London, by EPSRC through
 grants EP/I00677X/1, EP/I006761/1, and EP/L000407/1, by NERC grants
 NE/K008951/1 and NE/K006789/1, by the U.S.  National Science
 Foundation through grants 0811457 and 0926687, by the U.S. Army
-through contract W911NF-10-1-000, and by a HiPEAC collaboration
-grant. The authors would like to thank Dr. Carlo Bertolli,
-Dr. Lawrence Mitchell, and Dr. Francis Russell for their invaluable
-suggestions and their contribution to the Firedrake project.
-We thank the ACM TACO reviewers for their suggestions that led
-to a significantly improved version.
+through contract W911NF-10-1-000, by Louisiana State University and by
+a HiPEAC collaboration grant. The authors would like to thank Carlo
+Bertolli, Lawrence Mitchell and Francis Russell for their invaluable
+suggestions and their contribution to the Firedrake project.  We thank
+the ACM TACO reviewers for their suggestions that led to a
+significantly improved version.
 
 Author's addresses: Fabio Luporini $\&$ Florian Rathgeber $\&$
 Gheorghe-Teodor Bercea $\&$ Paul H. J. Kelly, Department of Computing,
 Imperial College London; Ana Lucia Varbanescu, Informatics Institute,
 University of Amsterdam; David A. Ham, Department of Computing and
 Department of Mathematics, Imperial College London; J. Ramanujam,
-iCenter for Computation and Technology and the School of Elec.~Engr.\&
+Center for Computation and Technology and the School of Elec.~Engr.\&
 Comp.~Sci., Louisiana State University.
 \end{bottomstuff}
 
@@ -171,14 +171,14 @@ Such an execution model, with minor variations, is adopted, for example,
 by \citeN{pyop2isc}, \citeN{Fenics}, \citeN{fluidity_manual_v4},
 \citeN{lizst}.
 
-The time required to apply the numerical kernels is a major issue,
+The time required to execute the numerical kernels is a major issue,
 since the equation domain needs to be discretized into an extremely
 large number of cells to obtain a satisfactory approximation
 of the PDE, possibly of the order of trillions, as in
 \citeN{Rossinelli2013}. For example, it has been well established that mesh
 resolution is critical in the accuracy of numerical weather
 forecasts. However, operational forecast centers have a strict time
-limit in which to produce a forecast - 60 minutes in the case of the
+limit in which to produce a forecast---60 minutes in the case of the
 UK Met Office. Producing efficient kernels has a direct scientific
 payoff in higher resolution, and therefore more accurate,
 forecasts. Computational cost is a dominant problem in
